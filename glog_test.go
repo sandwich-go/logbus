@@ -6,9 +6,9 @@ import (
 	"testing"
 	"time"
 
-	"bitbucket.org/funplus/sandwich/pkg/logbus/glog"
+	"github.com/sandwich-go/logbus/glog"
 
-	"bitbucket.org/funplus/sandwich/pkg/logbus/thinkingdata"
+	"github.com/sandwich-go/logbus/thinkingdata"
 )
 
 func TestGlogLogger(t *testing.T) {

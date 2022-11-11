@@ -1,7 +1,7 @@
 package fieldqueue
 
 import (
-	"bitbucket.org/funplus/sandwich/pkg/logbus"
+	"github.com/sandwich-go/logbus"
 	"testing"
 
 	"go.uber.org/zap"

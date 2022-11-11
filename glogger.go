@@ -1,9 +1,9 @@
 package logbus
 
 import (
-	"bitbucket.org/funplus/sandwich/pkg/logbus/glog"
-	"bitbucket.org/funplus/sandwich/pkg/logbus/stdl"
 	"fmt"
+	"github.com/sandwich-go/logbus/glog"
+	"github.com/sandwich-go/logbus/stdl"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"sync"

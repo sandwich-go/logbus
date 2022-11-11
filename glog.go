@@ -1,9 +1,9 @@
 package logbus
 
 import (
-	"bitbucket.org/funplus/sandwich/pkg/logbus/basics"
-	"bitbucket.org/funplus/sandwich/pkg/logbus/glog"
-	"bitbucket.org/funplus/sandwich/pkg/logbus/stdl"
+	"github.com/sandwich-go/logbus/basics"
+	"github.com/sandwich-go/logbus/glog"
+	"github.com/sandwich-go/logbus/stdl"
 	"go.uber.org/zap"
 )
 

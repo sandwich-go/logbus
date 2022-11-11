@@ -1,12 +1,12 @@
 package logbus
 
 import (
-	"bitbucket.org/funplus/sandwich/pkg/logbus/basics"
-	"bitbucket.org/funplus/sandwich/pkg/logbus/config"
-	"bitbucket.org/funplus/sandwich/pkg/logbus/fluentd"
-	"bitbucket.org/funplus/sandwich/pkg/logbus/global"
-	"bitbucket.org/funplus/sandwich/pkg/logbus/monitor"
-	"bitbucket.org/funplus/sandwich/pkg/logbus/stdl"
+	"github.com/sandwich-go/logbus/basics"
+	"github.com/sandwich-go/logbus/config"
+	"github.com/sandwich-go/logbus/fluentd"
+	"github.com/sandwich-go/logbus/global"
+	"github.com/sandwich-go/logbus/monitor"
+	"github.com/sandwich-go/logbus/stdl"
 	"go.uber.org/zap"
 )
 

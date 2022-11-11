@@ -1,9 +1,9 @@
 package basics
 
 import (
-	"bitbucket.org/funplus/sandwich/pkg/logbus/config"
-	"bitbucket.org/funplus/sandwich/pkg/logbus/globalfields"
 	"github.com/rs/xid"
+	"github.com/sandwich-go/logbus/config"
+	"github.com/sandwich-go/logbus/globalfields"
 	"go.uber.org/zap"
 	"go.uber.org/zap/buffer"
 	"go.uber.org/zap/zapcore"

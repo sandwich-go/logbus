@@ -7,8 +7,8 @@ import (
 	"sync"
 	"time"
 
-	"bitbucket.org/funplus/sandwich/base/slog"
-	"bitbucket.org/funplus/sandwich/pkg/logbus/monitor/prometheus/node"
+	"github.com/sandwich-go/boost"
+	"github.com/sandwich-go/logbus/monitor/prometheus/node"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -31,8 +31,8 @@ type Reporter struct {
 }
 
 func init() {
-	slog.LogErrorAndEatError(DefaultPrometheusRegistry.Register(prometheus.NewGoCollector()))
-	slog.LogErrorAndEatError(DefaultPrometheusRegistry.Register(prometheus.NewProcessCollector(prometheus.ProcessCollectorOpts{Namespace: "goruntime"})))
+	boost.LogErrorAndEatError(DefaultPrometheusRegistry.Register(prometheus.NewGoCollector()))
+	boost.LogErrorAndEatError(DefaultPrometheusRegistry.Register(prometheus.NewProcessCollector(prometheus.ProcessCollectorOpts{Namespace: "goruntime"})))
 }
 
 // New returns a configured prometheus reporter:
@@ -42,7 +42,7 @@ func New(
 	defaultPercentiles []float64,
 	defaultLabel prometheus.Labels,
 	timingMaxAge time.Duration) (*Reporter, error) {
-	slog.LogErrorAndEatError(DefaultPrometheusRegistry.Register(node.NewNodeCollector(defaultLabel)))
+	boost.LogErrorAndEatError(DefaultPrometheusRegistry.Register(node.NewNodeCollector(defaultLabel)))
 	// Make a prometheus registry (this keeps track of any metrics we generate):
 	DefaultPrometheusRegistry.MustRegister(Collectors...)
 	Collectors = nil

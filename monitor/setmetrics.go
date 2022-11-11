@@ -1,11 +1,11 @@
 package monitor
 
 import (
-	"bitbucket.org/funplus/sandwich/pkg/logbus/config"
-	"bitbucket.org/funplus/sandwich/pkg/logbus/logreporter"
-	"bitbucket.org/funplus/sandwich/pkg/logbus/monitor/noop"
-	"bitbucket.org/funplus/sandwich/pkg/logbus/monitor/prometheus"
 	prometheusClient "github.com/prometheus/client_golang/prometheus"
+	"github.com/sandwich-go/logbus/config"
+	"github.com/sandwich-go/logbus/logreporter"
+	"github.com/sandwich-go/logbus/monitor/noop"
+	"github.com/sandwich-go/logbus/monitor/prometheus"
 	"time"
 )
 

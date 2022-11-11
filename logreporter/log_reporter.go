@@ -2,8 +2,8 @@
 package logreporter
 
 import (
-	"bitbucket.org/funplus/sandwich/pkg/logbus/config"
-	"bitbucket.org/funplus/sandwich/pkg/logbus/stdl"
+	"github.com/sandwich-go/logbus/config"
+	"github.com/sandwich-go/logbus/stdl"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"

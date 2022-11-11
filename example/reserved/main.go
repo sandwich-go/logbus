@@ -1,8 +1,8 @@
 package main
 
 import (
-	"bitbucket.org/funplus/sandwich/pkg/logbus"
-	"bitbucket.org/funplus/sandwich/pkg/logbus/config"
+	"github.com/sandwich-go/logbus"
+	"github.com/sandwich-go/logbus/config"
 	"go.uber.org/zap"
 )
 

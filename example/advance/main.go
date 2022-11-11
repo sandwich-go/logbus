@@ -1,15 +1,15 @@
 package main
 
 import (
-	"bitbucket.org/funplus/sandwich/pkg/logbus/config"
-	"bitbucket.org/funplus/sandwich/pkg/logbus/globalfields"
+	"github.com/sandwich-go/logbus/config"
+	"github.com/sandwich-go/logbus/globalfields"
 	"time"
 
 	"go.uber.org/zap"
 
-	"bitbucket.org/funplus/sandwich/pkg/logbus"
-	"bitbucket.org/funplus/sandwich/pkg/logbus/bigquery"
-	"bitbucket.org/funplus/sandwich/pkg/logbus/thinkingdata"
+	"github.com/sandwich-go/logbus"
+	"github.com/sandwich-go/logbus/bigquery"
+	"github.com/sandwich-go/logbus/thinkingdata"
 )
 
 func main() {

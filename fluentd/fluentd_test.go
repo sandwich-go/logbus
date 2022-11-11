@@ -1,11 +1,10 @@
 package fluentd
 
 import (
+	"github.com/sandwich-go/boost/xcmd"
 	"log"
 	"testing"
 	"time"
-
-	"bitbucket.org/funplus/sandwich/base/scmd"
 
 	"github.com/fluent/fluent-logger-golang/fluent"
 )
@@ -15,7 +14,7 @@ import (
 // /etc/td-agent/td-agent.conf
 // https://docs.fluentd.org/input/unix#example-configuration
 func TestSocketConnect(t *testing.T) {
-	if scmd.IsFalse(scmd.GetOptWithEnv("sandwich_test_enable_fluentd")) {
+	if xcmd.IsFalse(xcmd.GetOptWithEnv("sandwich_test_enable_fluentd")) {
 		return
 	}
 	Init(&fluent.Config{
@@ -41,7 +40,7 @@ func TestSocketConnect(t *testing.T) {
 }
 
 func TestTcpConnect(t *testing.T) {
-	if scmd.IsFalse(scmd.GetOptWithEnv("sandwich_test_enable_fluentd")) {
+	if xcmd.IsFalse(xcmd.GetOptWithEnv("sandwich_test_enable_fluentd")) {
 		return
 	}
 	Init(&fluent.Config{

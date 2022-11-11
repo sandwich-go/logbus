@@ -3,9 +3,9 @@ package monitor
 import (
 	"reflect"
 
-	"bitbucket.org/funplus/sandwich/base/slog"
+	"github.com/sandwich-go/boost"
 
-	pros "bitbucket.org/funplus/sandwich/pkg/logbus/monitor/prometheus"
+	pros "github.com/sandwich-go/logbus/monitor/prometheus"
 
 	"github.com/prometheus/client_golang/prometheus"
 )
@@ -15,7 +15,7 @@ func RegisterCollector(c prometheus.Collector) {
 		panic("can not register nil prometheus collector")
 	}
 	if isPrometheusInited() {
-		slog.LogErrorAndEatError(pros.DefaultPrometheusRegistry.Register(c))
+		boost.LogErrorAndEatError(pros.DefaultPrometheusRegistry.Register(c))
 	} else {
 		pros.Collectors = append(pros.Collectors, c)
 	}

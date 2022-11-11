@@ -1,7 +1,7 @@
 package logbus
 
 import (
-	"bitbucket.org/funplus/sandwich/pkg/logbus/config"
+	"github.com/sandwich-go/logbus/config"
 )
 
 const (

@@ -2,8 +2,6 @@ package fluentd
 
 import (
 	"github.com/fluent/fluent-logger-golang/fluent"
-
-	"bitbucket.org/funplus/sandwich/base/slog"
 )
 
 var client *Client
@@ -16,7 +14,7 @@ func Close() {
 	if client == nil {
 		return
 	}
-	slog.LogErrorAndEatError(client.Close(), "fluent_client_close")
+	_ = client.Close()
 }
 
 func Init(c *fluent.Config) {

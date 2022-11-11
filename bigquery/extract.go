@@ -5,7 +5,7 @@ import (
 	"regexp"
 	"strings"
 
-	"bitbucket.org/funplus/sandwich/pkg/logbus/utils"
+	"github.com/sandwich-go/logbus/utils"
 
 	"go.uber.org/zap"
 )

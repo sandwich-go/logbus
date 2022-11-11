@@ -3,7 +3,7 @@ package basics
 import (
 	"go.uber.org/zap/zapcore"
 
-	"bitbucket.org/funplus/sandwich/pkg/logbus/fluentd"
+	"github.com/sandwich-go/logbus/fluentd"
 )
 
 // NewFluentdCore creates a Core that writes logs to a WriteSyncer.

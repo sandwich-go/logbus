@@ -1,11 +1,11 @@
 package stdl
 
 import (
-	"bitbucket.org/funplus/sandwich/pkg/logbus/basics"
+	"github.com/sandwich-go/logbus/basics"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 
-	"bitbucket.org/funplus/sandwich/pkg/logbus/utils"
+	"github.com/sandwich-go/logbus/utils"
 )
 
 func toFields(msg string, uid uint64, fields []zap.Field) []zap.Field {

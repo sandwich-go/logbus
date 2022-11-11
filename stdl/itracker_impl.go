@@ -1,14 +1,14 @@
 package stdl
 
 import (
-	"bitbucket.org/funplus/sandwich/pkg/logbus/basics"
-	"bitbucket.org/funplus/sandwich/pkg/logbus/config"
 	"fmt"
+	"github.com/sandwich-go/logbus/basics"
+	"github.com/sandwich-go/logbus/config"
 
-	"bitbucket.org/funplus/sandwich/pkg/logbus/utils"
+	"github.com/sandwich-go/logbus/utils"
 
-	"bitbucket.org/funplus/sandwich/pkg/logbus/bigquery"
-	"bitbucket.org/funplus/sandwich/pkg/logbus/thinkingdata"
+	"github.com/sandwich-go/logbus/bigquery"
+	"github.com/sandwich-go/logbus/thinkingdata"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"

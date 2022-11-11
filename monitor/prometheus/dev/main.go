@@ -4,7 +4,7 @@ import (
 	"math/rand"
 	"time"
 
-	"bitbucket.org/funplus/sandwich/pkg/logbus/monitor/prometheus"
+	"github.com/sandwich-go/logbus/monitor/prometheus"
 )
 
 func main() {

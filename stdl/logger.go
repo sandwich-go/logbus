@@ -1,9 +1,9 @@
 package stdl
 
 import (
-	"bitbucket.org/funplus/sandwich/pkg/logbus/basics"
-	"bitbucket.org/funplus/sandwich/pkg/logbus/config"
-	"bitbucket.org/funplus/sandwich/pkg/logbus/global"
+	"github.com/sandwich-go/logbus/basics"
+	"github.com/sandwich-go/logbus/config"
+	"github.com/sandwich-go/logbus/global"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"os"

@@ -1,15 +1,15 @@
 package logbus
 
 import (
-	"bitbucket.org/funplus/sandwich/pkg/logbus/config"
-	"bitbucket.org/funplus/sandwich/pkg/logbus/logreporter"
+	"github.com/sandwich-go/logbus/config"
+	"github.com/sandwich-go/logbus/logreporter"
 	"io/ioutil"
 	"net/http"
 	"testing"
 	"time"
 
-	"bitbucket.org/funplus/sandwich/pkg/logbus/monitor"
-	"bitbucket.org/funplus/sandwich/pkg/logbus/monitor/noop"
+	"github.com/sandwich-go/logbus/monitor"
+	"github.com/sandwich-go/logbus/monitor/noop"
 
 	. "github.com/smartystreets/goconvey/convey"
 )

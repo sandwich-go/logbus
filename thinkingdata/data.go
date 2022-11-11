@@ -1,7 +1,7 @@
 package thinkingdata
 
 import (
-	"bitbucket.org/funplus/sandwich/pkg/logbus/utils"
+	"github.com/sandwich-go/logbus/utils"
 	"github.com/sandwich-go/zapgen/zapencoder"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"

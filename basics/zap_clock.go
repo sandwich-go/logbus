@@ -5,7 +5,7 @@ import (
 
 	"go.uber.org/zap/zapcore"
 
-	"bitbucket.org/funplus/sandwich/pkg/z"
+	"github.com/sandwich-go/boost/z"
 )
 
 type localClock struct{}

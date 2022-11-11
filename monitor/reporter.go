@@ -5,7 +5,7 @@ package monitor
 import (
 	"time"
 
-	"bitbucket.org/funplus/sandwich/pkg/logbus/monitor/noop"
+	"github.com/sandwich-go/logbus/monitor/noop"
 
 	"github.com/prometheus/client_golang/prometheus"
 )

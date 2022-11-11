@@ -1,22 +1,19 @@
 package logbus
 
 import (
-	"bitbucket.org/funplus/sandwich/pkg/logbus/basics"
-	"bitbucket.org/funplus/sandwich/pkg/logbus/config"
 	"errors"
+	"github.com/sandwich-go/boost/xcmd"
+	"github.com/sandwich-go/boost/xos"
+	"github.com/sandwich-go/logbus/basics"
+	"github.com/sandwich-go/logbus/config"
 	"os"
 	"testing"
 	"time"
 
-	"bitbucket.org/funplus/sandwich/base/scmd"
-
-	"bitbucket.org/funplus/sandwich/base/fileutil"
-	"bitbucket.org/funplus/sandwich/pkg/logbus/bigquery"
-	"bitbucket.org/funplus/sandwich/pkg/logbus/thinkingdata"
-
-	"go.uber.org/zap"
-
+	"github.com/sandwich-go/logbus/bigquery"
+	"github.com/sandwich-go/logbus/thinkingdata"
 	. "github.com/smartystreets/goconvey/convey"
+	"go.uber.org/zap"
 )
 
 func TestMain(m *testing.M) {
@@ -80,7 +77,7 @@ func fileExists(path string) bool {
 	return false
 }
 func TestTagLoggerConf(t *testing.T) {
-	if fileutil.Exist("/tmp/fun-collector.sock") {
+	if xos.Exists("/tmp/fun-collector.sock") {
 		Convey("test tag logger conf to stdout file and fluentd\n", t, func() {
 			Init(config.NewConf(config.WithLogLevel(zap.DebugLevel), config.WithOutputFluentd(true), config.WithOutputStdout(true), config.WithOutputLocalFile(true)))
 			defer basics.ResetLogBus()
@@ -110,7 +107,7 @@ func TestTagLoggerThinkingData(t *testing.T) {
 			So(err, ShouldBeNil)
 			Logger("debug").Info(zap.Object("tga", data))
 		})
-		if scmd.IsTrue(scmd.GetOptWithEnv("sandwich_test_enable_fluentd")) {
+		if xcmd.IsTrue(xcmd.GetOptWithEnv("sandwich_test_enable_fluentd")) {
 			Convey("test thinkingdata User to fluentd\n", func() {
 				Init(config.NewConf(config.WithLogLevel(zap.DebugLevel), config.WithOutputStdout(false), config.WithOutputLocalFile(false), config.WithOutputFluentd(true)))
 				properties := map[string]interface{}{"#ip": "10.0.0.3", "player_name": "zhang wu", "level": 9}
@@ -125,7 +122,7 @@ func TestTagLoggerThinkingData(t *testing.T) {
 func TestFluentdAndPrometheus(t *testing.T) {
 	Convey("test log with fluentd and prometheus open\n", t, func() {
 		Close()
-		withFluentd := scmd.IsTrue(scmd.GetOptWithEnv("sandwich_test_enable_fluentd"))
+		withFluentd := xcmd.IsTrue(xcmd.GetOptWithEnv("sandwich_test_enable_fluentd"))
 		Init(config.NewConf(config.WithLogLevel(zap.DebugLevel), config.WithOutputFluentd(withFluentd), config.WithOutputStdout(false), config.WithOutputLocalFile(false), config.WithMonitorOutput(Prometheus), config.WithDefaultPrometheusListenAddress(":8991")))
 		Logger("debug").Info(zap.Bool("prometheus", true))
 	})

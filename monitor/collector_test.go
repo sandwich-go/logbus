@@ -7,7 +7,7 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 
-	pros "bitbucket.org/funplus/sandwich/pkg/logbus/monitor/prometheus"
+	pros "github.com/sandwich-go/logbus/monitor/prometheus"
 
 	. "github.com/smartystreets/goconvey/convey"
 )

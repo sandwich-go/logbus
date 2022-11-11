@@ -6,8 +6,8 @@ import (
 	"github.com/rs/xid"
 	"go.uber.org/zap"
 
-	"bitbucket.org/funplus/sandwich/base/sip"
-	"bitbucket.org/funplus/sandwich/base/stime"
+	"github.com/sandwich-go/boost/xip"
+	"github.com/sandwich-go/boost/xtime"
 )
 
 var globalFields []zap.Field
@@ -15,8 +15,8 @@ var cacheUserDefineFields []zap.Field
 
 func init() {
 	ReservedGlobalFields = append(ReservedGlobalFields, zap.String("server_id", xid.New().String()))
-	ReservedGlobalFields = append(ReservedGlobalFields, zap.String("server_ip", sip.GetLocalIP()))
-	ReservedGlobalFields = append(ReservedGlobalFields, zap.Int64("server_birth", stime.Unix()))
+	ReservedGlobalFields = append(ReservedGlobalFields, zap.String("server_ip", xip.GetLocalIP()))
+	ReservedGlobalFields = append(ReservedGlobalFields, zap.Int64("server_birth", xtime.Unix()))
 	if hostName, err := os.Hostname(); err == nil {
 		ReservedGlobalFields = append(ReservedGlobalFields, zap.String("host_name", hostName))
 	} else {

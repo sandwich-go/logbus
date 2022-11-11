@@ -1,12 +1,12 @@
 package basics
 
 import (
-	"bitbucket.org/funplus/sandwich/pkg/logbus/config"
-	"bitbucket.org/funplus/sandwich/pkg/logbus/globalfields"
 	"errors"
+	"github.com/sandwich-go/logbus/config"
+	"github.com/sandwich-go/logbus/globalfields"
 	"time"
 
-	"bitbucket.org/funplus/sandwich/pkg/logbus/thinkingdata"
+	"github.com/sandwich-go/logbus/thinkingdata"
 
 	"github.com/rs/xid"
 	"go.uber.org/zap"
