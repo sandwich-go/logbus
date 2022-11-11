@@ -1,0 +1,7 @@
+[
+  {
+    "targets": [
+      "host.docker.internal:8990"
+    ]
+  }
+]

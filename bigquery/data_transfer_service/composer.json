@@ -1,0 +1,23 @@
+{
+  "name": "bigquery-transfer",
+  "description": "Transfer S3 to BigQuery",
+  "keywords": [
+    "S3",
+    "BigQuery",
+    "Transfer"
+  ],
+  "type": "project",
+  "license": "BSD-3-Clause",
+  "minimum-stability": "stable",
+  "require": {
+    "php": "~7.2",
+    "google/cloud-bigquery": "^1.16",
+    "google/cloud-bigquerydatatransfer": "^1.2"
+  },
+  "repositories": [
+    {
+      "type": "composer",
+      "url": "https://asset-packagist.org"
+    }
+  ]
+}
