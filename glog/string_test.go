@@ -122,6 +122,6 @@ func BenchmarkBufferStringBuilder(b *testing.B) {
 
 func BenchmarkDebug(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		Debug("", String("a", "b"), String("C", "D"))
+		//Debug("", String("a", "b"), String("C", "D"))
 	}
 }

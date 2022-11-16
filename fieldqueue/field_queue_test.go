@@ -24,6 +24,6 @@ func TestFieldQueue(t *testing.T) {
 		data = q.Retrieve()
 		So(len(data), ShouldEqual, 1)
 		So(data[0].Integer, ShouldEqual, 11)
-		logbus.Debug(q.Retrieve()...)
+		logbus.Debug("test fieldQueue ", q.Retrieve()...)
 	})
 }

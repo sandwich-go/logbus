@@ -2,7 +2,8 @@ package logbus
 
 import "go.uber.org/zap"
 
-type ILogger interface {
+// ILogger 日志输出
+/*type ILogger interface {
 	Debug(fields ...zap.Field)
 	DebugWithChannel(c string, fields ...zap.Field)
 	Info(fields ...zap.Field)
@@ -17,8 +18,9 @@ type ILogger interface {
 	PanicWithChannel(c string, fields ...zap.Field)
 	Fatal(fields ...zap.Field)
 	FatalWithChannel(c string, fields ...zap.Field)
-}
+}*/
 
+// ITracker thinkingData和bigQuery日志输出
 type ITracker interface {
 	Track(...zap.Field) error
 }

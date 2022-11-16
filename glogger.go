@@ -1,9 +1,6 @@
 package logbus
 
 import (
-	"fmt"
-	"github.com/sandwich-go/logbus/glog"
-	"github.com/sandwich-go/logbus/stdl"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"sync"
@@ -13,11 +10,11 @@ import (
 type GLogger struct {
 	channelKey   string
 	printAsError bool
-	stdLogger    *stdl.StdLogger // 对外隐藏StdLogger
+	stdLogger    *StdLogger // 对外隐藏StdLogger
 	depthLogger  sync.Map
 }
 
-type stringerArray struct {
+/*type stringerArray struct {
 	se glog.StringerEach
 }
 
@@ -26,14 +23,6 @@ func (ss stringerArray) MarshalLogArray(arr zapcore.ArrayEncoder) error {
 		arr.AppendString(fs.String())
 	})
 	return nil
-}
-
-func NewGLogger(ck string, sl *stdl.StdLogger, ae bool) *GLogger {
-	return &GLogger{
-		channelKey:   ck,
-		printAsError: ae,
-		stdLogger:    sl,
-	}
 }
 
 func (s *GLogger) convertField(msg string, fields ...glog.Field) (ret []zap.Field) {
@@ -76,12 +65,12 @@ func (s *GLogger) convertField(msg string, fields ...glog.Field) (ret []zap.Fiel
 		})
 	}
 	return ret
-}
+}*/
 
-func (s *GLogger) printAsErr(fields ...glog.Field) bool {
+func (s *GLogger) printAsErr(fields ...zap.Field) bool {
 	hasErr := false
 	for _, v := range fields {
-		if v.Type == glog.ErrorType {
+		if v.Type == zapcore.ErrorType {
 			hasErr = true
 			break
 		}
@@ -89,39 +78,44 @@ func (s *GLogger) printAsErr(fields ...glog.Field) bool {
 	return hasErr
 }
 
-func (s *GLogger) GDebug(msg string, fields ...glog.Field) {
+func (s *GLogger) Debug(msg string, fields ...zap.Field) {
+	fields = append(fields, zap.String("glog-msg", msg))
 	if s.printAsError && s.printAsErr(fields...) {
-		s.stdLogger.ErrorWithChannel(s.channelKey, s.convertField(msg, fields...)...)
+		s.stdLogger.ErrorWithChannel(s.channelKey, fields...)
 		return
 	}
-	s.stdLogger.DebugWithChannel(s.channelKey, s.convertField(msg, fields...)...)
+	s.stdLogger.DebugWithChannel(s.channelKey, fields...)
 }
 
-func (s *GLogger) GInfo(msg string, fields ...glog.Field) {
+func (s *GLogger) Info(msg string, fields ...zap.Field) {
 	if s.printAsError && s.printAsErr(fields...) {
-		s.stdLogger.ErrorWithChannel(s.channelKey, s.convertField(msg, fields...)...)
+		s.stdLogger.ErrorWithChannel(s.channelKey, fields...)
 		return
 	}
-	s.stdLogger.InfoWithChannel(s.channelKey, s.convertField(msg, fields...)...)
+	s.stdLogger.InfoWithChannel(s.channelKey, fields...)
 }
 
-func (s *GLogger) GWarn(msg string, fields ...glog.Field) {
+func (s *GLogger) Warn(msg string, fields ...zap.Field) {
 	if s.printAsError && s.printAsErr(fields...) {
-		s.stdLogger.ErrorWithChannel(s.channelKey, s.convertField(msg, fields...)...)
+		s.stdLogger.ErrorWithChannel(s.channelKey, fields...)
 		return
 	}
-	s.stdLogger.WarnWithChannel(s.channelKey, s.convertField(msg, fields...)...)
+	s.stdLogger.WarnWithChannel(s.channelKey, fields...)
 }
-func (s *GLogger) GError(msg string, fields ...glog.Field) {
-	s.stdLogger.ErrorWithChannel(s.channelKey, s.convertField(msg, fields...)...)
-}
-
-func (s *GLogger) GPanic(msg string, fields ...glog.Field) {
-	s.stdLogger.PanicWithChannel(s.channelKey, s.convertField(msg, fields...)...)
+func (s *GLogger) Error(msg string, fields ...zap.Field) {
+	s.stdLogger.ErrorWithChannel(s.channelKey, fields...)
 }
 
-func (s *GLogger) GFatal(msg string, fields ...glog.Field) {
-	s.stdLogger.FatalWithChannel(s.channelKey, s.convertField(msg, fields...)...)
+func (s *GLogger) DPanic(msg string, fields ...zap.Field) {
+	s.stdLogger.DPanicWithChannel(s.channelKey, fields...)
+}
+
+func (s *GLogger) Panic(msg string, fields ...zap.Field) {
+	s.stdLogger.PanicWithChannel(s.channelKey, fields...)
+}
+
+func (s *GLogger) Fatal(msg string, fields ...zap.Field) {
+	s.stdLogger.FatalWithChannel(s.channelKey, fields...)
 }
 
 func (s *GLogger) getDepthLogger(depth int) *zap.Logger {
@@ -133,40 +127,69 @@ func (s *GLogger) getDepthLogger(depth int) *zap.Logger {
 	return cloneLogger
 }
 
-func (s *GLogger) GDebugDepth(depth int, msg string, fields ...glog.Field) {
+func (s *GLogger) GDebugDepth(depth int, msg string, fields ...zap.Field) {
 	lg := s.getDepthLogger(depth)
 	if s.printAsError && s.printAsErr(fields...) {
-		lg.Error(s.channelKey, s.convertField(msg, fields...)...)
+		lg.Error(s.channelKey, fields...)
 		return
 	}
-	lg.Debug(s.channelKey, s.convertField(msg, fields...)...)
+	lg.Debug(s.channelKey, fields...)
 }
 
-func (s *GLogger) GInfoDepth(depth int, msg string, fields ...glog.Field) {
+func (s *GLogger) GInfoDepth(depth int, msg string, fields ...zap.Field) {
 	lg := s.getDepthLogger(depth)
 	if s.printAsError && s.printAsErr(fields...) {
-		lg.Error(s.channelKey, s.convertField(msg, fields...)...)
+		lg.Error(s.channelKey, fields...)
 		return
 	}
-	lg.Info(s.channelKey, s.convertField(msg, fields...)...)
+	lg.Info(s.channelKey, fields...)
 }
-func (s *GLogger) GWarnDepth(depth int, msg string, fields ...glog.Field) {
+func (s *GLogger) GWarnDepth(depth int, msg string, fields ...zap.Field) {
 	lg := s.getDepthLogger(depth)
 	if s.printAsError && s.printAsErr(fields...) {
-		lg.Error(s.channelKey, s.convertField(msg, fields...)...)
+		lg.Error(s.channelKey, fields...)
 		return
 	}
-	lg.Warn(s.channelKey, s.convertField(msg, fields...)...)
+	lg.Warn(s.channelKey, fields...)
 }
-func (s *GLogger) GErrorDepth(depth int, msg string, fields ...glog.Field) {
+func (s *GLogger) GErrorDepth(depth int, msg string, fields ...zap.Field) {
 	lg := s.getDepthLogger(depth)
 	if s.printAsError && s.printAsErr(fields...) {
-		lg.Error(s.channelKey, s.convertField(msg, fields...)...)
+		lg.Error(s.channelKey, fields...)
 		return
 	}
-	lg.Error(s.channelKey, s.convertField(msg, fields...)...)
+	lg.Error(s.channelKey, fields...)
 }
-func (s *GLogger) GFatalDepth(depth int, msg string, fields ...glog.Field) {
+func (s *GLogger) GFatalDepth(depth int, msg string, fields ...zap.Field) {
 	lg := s.getDepthLogger(depth)
-	lg.Fatal(s.channelKey, s.convertField(msg, fields...)...)
+	lg.Fatal(s.channelKey, fields...)
+}
+
+// WithChannel
+func (s *GLogger) DebugWithChannel(c string, msg string, fields ...zap.Field) {
+	gStdLogger.DebugWithChannel(c, fields...)
+}
+
+func (s *GLogger) InfoWithChannel(c string, msg string, fields ...zap.Field) {
+	s.stdLogger.InfoWithChannel(c, fields...)
+}
+
+func (s *GLogger) WarnWithChannel(c string, msg string, fields ...zap.Field) {
+	s.stdLogger.WarnWithChannel(c, fields...)
+}
+
+func (s *GLogger) ErrorWithChannel(c string, msg string, fields ...zap.Field) {
+	s.stdLogger.ErrorWithChannel(c, fields...)
+}
+
+func (s *GLogger) DPanicWithChannel(c string, msg string, fields ...zap.Field) {
+	s.stdLogger.DPanicWithChannel(c, fields...)
+}
+
+func (s *GLogger) PanicWithChannel(c string, msg string, fields ...zap.Field) {
+	s.stdLogger.PanicWithChannel(c, fields...)
+}
+
+func (s *GLogger) FatalWithChannel(c string, msg string, fields ...zap.Field) {
+	s.stdLogger.FatalWithChannel(c, fields...)
 }

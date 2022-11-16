@@ -1,13 +1,6 @@
 package glog
 
-import (
-	"bytes"
-	"fmt"
-	"os"
-	"sync"
-)
-
-const (
+/*const (
 	CallDepth = 3
 )
 
@@ -162,4 +155,4 @@ func (d *DefaultLogger) GErrorDepth(depth int, msg string, v ...Field) {
 func (d *DefaultLogger) GFatalDepth(depth int, msg string, v ...Field) {
 	_ = d.o.Output(CallDepth+depth, d.transferField("FATAL", msg, v...))
 	os.Exit(1)
-}
+}*/

@@ -1,18 +1,13 @@
 package glog
 
-import (
-	"log"
-	"os"
-)
-
 // default logger provided
-var globalLogger IGLogger = NewDefaultLogger(log.New(os.Stdout, "", log.LstdFlags|log.Llongfile))
+/*var GlobalGLogger IGLogger = NewDefaultLogger(log.New(os.Stdout, "", log.LstdFlags|log.Llongfile))
 
 func SetGlobalGLogger(l IGLogger) {
-	globalLogger = l
+	GlobalGLogger = l
 }
-
-type Logger IGLogger // alias for generated code
+*/
+/*type Logger IGLogger // alias for generated code
 
 type IGLogger interface {
 	IGDepthLogger
@@ -26,25 +21,25 @@ type IGLogger interface {
 }
 
 func Debug(msg string, v ...Field) {
-	globalLogger.GDebug(msg, v...)
+	GlobalGLogger.GDebug(msg, v...)
 }
 
 func Info(msg string, v ...Field) {
-	globalLogger.GInfo(msg, v...)
+	GlobalGLogger.GInfo(msg, v...)
 }
 
 func Warn(msg string, v ...Field) {
-	globalLogger.GWarn(msg, v...)
+	GlobalGLogger.GWarn(msg, v...)
 }
 
 func Error(msg string, v ...Field) {
-	globalLogger.GError(msg, v...)
+	GlobalGLogger.GError(msg, v...)
 }
 
 func Panic(msg string, v ...Field) {
-	globalLogger.GPanic(msg, v...)
+	GlobalGLogger.GPanic(msg, v...)
 }
 
 func Fatal(msg string, v ...Field) {
-	globalLogger.GFatal(msg, v...)
-}
+	GlobalGLogger.GFatal(msg, v...)
+}*/

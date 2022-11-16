@@ -1,8 +1,6 @@
 package logbus
 
 import (
-	"github.com/sandwich-go/logbus/config"
-	"github.com/sandwich-go/logbus/logreporter"
 	"io/ioutil"
 	"net/http"
 	"testing"
@@ -21,18 +19,18 @@ func TestImplementReporter(t *testing.T) {
 		So(reporter, ShouldImplement, (*monitor.Reporter)(nil))
 	})
 	Convey("test log reporter\n", t, func() {
-		reporter := logreporter.NewLogReporter()
+		reporter := newLogReporter()
 		So(reporter, ShouldNotBeNil)
 		So(reporter, ShouldImplement, (*monitor.Reporter)(nil))
 		Convey("test log monitor\n", func() {
-			Init(config.NewConf(config.WithMonitorOutput(Logbus)))
+			Init(NewConf(WithMonitorOutput(Logbus)))
 			So(monitor.Count("id1", 1, map[string]string{"p": "r"}), ShouldBeNil)
 			So(monitor.Gauge("id2", 2, map[string]string{"p": "q"}), ShouldBeNil)
 			So(monitor.Timing("id3", time.Minute, map[string]string{"p": "s"}), ShouldBeNil)
 		})
 	})
 	Convey("test prometheus reporter\n", t, func() {
-		Init(config.NewConf(config.WithMonitorOutput(Prometheus), config.WithDefaultLabel(map[string]string{"service": "prometheus-test"})))
+		Init(NewConf(WithMonitorOutput(Prometheus), WithDefaultLabel(map[string]string{"service": "prometheus-test"})))
 		labels := map[string]string{
 			"tag1": "false",
 			"tag2": "true",

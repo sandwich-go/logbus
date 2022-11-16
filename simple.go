@@ -1,68 +1,71 @@
 package logbus
 
-import (
-	"go.uber.org/zap"
-)
-
-// Debug log
+/*// Debug log
 func Debug(fields ...zap.Field) {
-	Logger().Debug(fields...)
+	logger().Debug(fields...)
 }
 
+// DebugWithChannel 使用指定channel打印Debug日志
 func DebugWithChannel(c string, fields ...zap.Field) {
-	Logger().DebugWithChannel(c, fields...)
+	logger().DebugWithChannel(c, fields...)
 }
 
 // Info log
 func Info(fields ...zap.Field) {
-	Logger().Info(fields...)
+	logger().Info(fields...)
 }
 
+// InfoWithChannel 使用指定channel打印Info日志
 func InfoWithChannel(c string, fields ...zap.Field) {
-	Logger().InfoWithChannel(c, fields...)
+	logger().InfoWithChannel(c, fields...)
 }
 
 // Warn log
 func Warn(fields ...zap.Field) {
-	Logger().Warn(fields...)
+	logger().Warn(fields...)
 }
 
+// WarnWithChannel 使用指定channel打印Warn日志
 func WarnWithChannel(c string, fields ...zap.Field) {
-	Logger().WarnWithChannel(c, fields...)
+	logger().WarnWithChannel(c, fields...)
 }
 
 // Error log
 func Error(fields ...zap.Field) {
-	Logger().Error(fields...)
+	logger().Error(fields...)
 }
 
+// ErrorWithChannel 使用指定channel打印Error日志
 func ErrorWithChannel(c string, fields ...zap.Field) {
-	Logger().ErrorWithChannel(c, fields...)
+	logger().ErrorWithChannel(c, fields...)
 }
 
 // DPanic log
 func DPanic(fields ...zap.Field) {
-	Logger().DPanic(fields...)
+	logger().DPanic(fields...)
 }
 
+// DPanicWithChannel 使用指定channel打印DPanic日志
 func DPanicWithChannel(c string, fields ...zap.Field) {
-	Logger().DPanicWithChannel(c, fields...)
+	logger().DPanicWithChannel(c, fields...)
 }
 
 // Panic log
 func Panic(fields ...zap.Field) {
-	Logger().Panic(fields...)
+	logger().Panic(fields...)
 }
 
+// PanicWithChannel 使用指定channel打印Panic日志
 func PanicWithChannel(c string, fields ...zap.Field) {
-	Logger().PanicWithChannel(c, fields...)
+	logger().PanicWithChannel(c, fields...)
 }
 
 // Fatal log
 func Fatal(fields ...zap.Field) {
-	Logger().Fatal(fields...)
+	logger().Fatal(fields...)
 }
 
+// FatalWithChannel 使用指定channel打印Fatal日志
 func FatalWithChannel(c string, fields ...zap.Field) {
-	Logger().FatalWithChannel(c, fields...)
-}
+	logger().FatalWithChannel(c, fields...)
+}*/

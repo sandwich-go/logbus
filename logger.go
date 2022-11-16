@@ -1,60 +1,43 @@
 package logbus
 
-import (
-	"github.com/sandwich-go/logbus/basics"
-	"github.com/sandwich-go/logbus/config"
-	"github.com/sandwich-go/logbus/fluentd"
-	"github.com/sandwich-go/logbus/global"
-	"github.com/sandwich-go/logbus/monitor"
-	"github.com/sandwich-go/logbus/stdl"
-	"go.uber.org/zap"
-)
-
-var stdLogger *stdl.StdLogger
-
 func init() {
-	Init(config.NewConf())
+	Init(NewConf())
 }
 
-func Init(conf *config.Conf) {
-	basics.InitBasic(conf)
-	stdLogger = stdl.NewDefaultStdLogger(basics.BasicLogger, []string{DefaultTag})
-	if conf.OutputFluentd {
-		fluentd.Init(conf.FluentdConfig)
-	}
-	ImplementGLog(conf.PrintAsError)
-	monitor.SetDefaultMetricsReporter(conf.MonitorOutput,
+// Init logBus初始化 会有两次调用。一次是init()，一次是手动调用Init的时候
+// 允许不手动Init的情况下使用默认配置调用logBus
+func Init(conf *Conf) {
+	initBasics(conf)
+
+	initGlobalStdLoggers()
+
+	// set logger used in glog
+	SetGlobalGLogger(gStdLogger, conf.DefaultChannel, conf.PrintAsError)
+	// init monitor
+	setDefaultMetricsReporter(conf.MonitorOutput,
 		conf.DefaultPrometheusListenAddress,
 		conf.DefaultPrometheusPath,
 		conf.DefaultPercentiles,
 		conf.DefaultLabel,
 		conf.MonitorTimingMaxAge)
-	if conf.MonitorOutput == config.Prometheus {
-		DebugWithChannel(Monitor, zap.String("prometheus [http] listening on", conf.DefaultPrometheusListenAddress), zap.String("path", conf.DefaultPrometheusPath))
-	}
 }
 
-func Logger(tags ...string) ILogger {
-	return stdl.GetStdLogger(tags...)
-}
-
-func Tracker(tags ...string) ITracker {
-	return GetStdLogger(tags...)
-}
-
-func GetStdLogger(tags ...string) *stdl.StdLogger {
-	return stdl.GetStdLogger(tags...)
-}
-
+// Close 程序结束时打印缓存中的所有日志 并清理资源
 func Close() {
-	_ = stdLogger.Sync()
-	PurgeLoggerMap()
-	fluentd.Close()
+	_ = gStdLogger.Sync()
+	//syncLoggerMap()
 }
 
-func PurgeLoggerMap() { //used by logbus
-	global.LoggerMap.Range(func(key, value interface{}) bool {
-		_ = value.(*stdl.StdLogger).Sync()
-		return true
-	})
+func resetLogBus() {
+	//resetLoggerMap()
 }
+
+/*func logger() ILogger {
+	//return getStdLogger()
+	return gStdLogger
+}*/
+
+// getStdLogger 获取指定tags索引的StdLogger
+/*func getStdLogger(tags ...string) *StdLogger {
+	return getLogger(tags...)
+}*/

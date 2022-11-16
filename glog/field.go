@@ -2,8 +2,6 @@ package glog
 
 import (
 	"fmt"
-	"math"
-	"time"
 )
 
 /*
@@ -97,7 +95,7 @@ const (
 	Uint32sType
 )
 
-func (f Field) AddTo(w *bytesFiledWriter) {
+/*func (f Field) AddTo(w *bytesFiledWriter) {
 	if needCheckNil() && (f.Type == ObjectMarshalerType || f.Type == StringerType) && isNil(f.Interface) {
 		return
 	}
@@ -143,7 +141,7 @@ func (f Field) AddTo(w *bytesFiledWriter) {
 	}
 	w.WriteString(ret, f.Key)
 	w.InternalError(f.Key, err)
-}
+}*/
 
 func encodeDeferPanic(fmtString, key string, val interface{}) (ret string, err error) {
 	defer func() {
