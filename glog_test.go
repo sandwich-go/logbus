@@ -14,7 +14,7 @@ import (
 func TestFieldsAndMsg(t *testing.T) {
 	Debug("debug1", zap.Int("int", 123), zap.String("str", "foo"), zap.Error(nil))
 	Info("info2", zap.Float64("float64", 8.99), zap.Bool("bool", true))
-	Warn("", zap.Time("time", time.Now()), zap.Duration("duration", 1*time.Second) /*, zap.Object("obj", map[string]string{"1": "2"})*/)
+	Warn("", zap.Time("time", time.Now()), zap.Duration("duration", 1*time.Second), zap.Reflect("obj", map[string]string{"11": "22"}))
 	Debug("error3", zap.Error(errors.New("rrrrrr")))
 	Error("error4", zap.Binary("binary", []byte{'x'}), zap.Reflect("reflect", zap.Field{Key: "key", Integer: 122, Interface: "xxx"}), zap.Error(errors.New("eeeee")))
 	Convey("add duplicated command flag should panic", t, func() {

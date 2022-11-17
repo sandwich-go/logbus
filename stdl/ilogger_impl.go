@@ -1,11 +1,6 @@
 package stdl
 
-import (
-	"github.com/sandwich-go/logbus/basics"
-	"go.uber.org/zap"
-)
-
-func (s *StdLogger) Debug(fields ...zap.Field) {
+/*func (s *StdLogger) Debug(fields ...zap.Field) {
 	s.z.Debug(basics.Setting.DefaultChannel, fields...)
 }
 
@@ -59,4 +54,4 @@ func (s *StdLogger) Fatal(fields ...zap.Field) {
 
 func (s *StdLogger) FatalWithChannel(c string, fields ...zap.Field) {
 	s.z.Fatal(c, fields...)
-}
+}*/

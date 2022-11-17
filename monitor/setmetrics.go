@@ -1,15 +1,6 @@
 package monitor
 
-import (
-	prometheusClient "github.com/prometheus/client_golang/prometheus"
-	"github.com/sandwich-go/logbus/config"
-	"github.com/sandwich-go/logbus/logreporter"
-	"github.com/sandwich-go/logbus/monitor/noop"
-	"github.com/sandwich-go/logbus/monitor/prometheus"
-	"time"
-)
-
-func SetDefaultMetricsReporter(
+/*func SetDefaultMetricsReporter(
 	monitorOutput config.MonitorOutput,
 	defaultPrometheusListenAddress string,
 	defaultPrometheusPath string,
@@ -29,4 +20,4 @@ func SetDefaultMetricsReporter(
 		}
 		//logbus.DebugWithChannel(logbus.Monitor, zap.String("prometheus [http] listening on", defaultPrometheusListenAddress), zap.String("path", defaultPrometheusPath))
 	}
-}
+}*/

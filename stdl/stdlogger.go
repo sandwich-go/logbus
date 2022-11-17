@@ -1,10 +1,6 @@
 package stdl
 
-import (
-	"go.uber.org/zap"
-)
-
-type StdLogger struct {
+/*type StdLogger struct {
 	z    *zap.Logger
 	tags []string
 }
@@ -42,7 +38,7 @@ func (s *StdLogger) SetZLogger(zl *zap.Logger) {
 
 func (s *StdLogger) Sync() error {
 	return s.z.Sync()
-}
+}*/
 
 // L returns the zap Logger, // delete
 /*func (s *StdLogger) L() *zap.Logger {

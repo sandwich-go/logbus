@@ -1,14 +1,6 @@
 package stdl
 
-import (
-	"github.com/sandwich-go/logbus/basics"
-	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
-
-	"github.com/sandwich-go/logbus/utils"
-)
-
-func toFields(msg string, uid uint64, fields []zap.Field) []zap.Field {
+/*func toFields(msg string, uid uint64, fields []zap.Field) []zap.Field {
 	data, _ := utils.Zap2Json(fields)
 	res := []zap.Field{
 		zap.String("msg", msg),
@@ -37,4 +29,4 @@ func (s *StdLogger) Msg(level zapcore.Level, msg string, uid uint64, fields ...z
 	case zapcore.FatalLevel:
 		s.z.Fatal(basics.Setting.DefaultChannel, fields...)
 	}
-}
+}*/

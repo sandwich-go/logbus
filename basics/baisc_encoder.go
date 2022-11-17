@@ -1,15 +1,6 @@
 package basics
 
-import (
-	"github.com/rs/xid"
-	"github.com/sandwich-go/logbus/config"
-	"github.com/sandwich-go/logbus/globalfields"
-	"go.uber.org/zap"
-	"go.uber.org/zap/buffer"
-	"go.uber.org/zap/zapcore"
-)
-
-type glsEncoder struct {
+/*type glsEncoder struct {
 	zapcore.Encoder
 }
 
@@ -38,4 +29,4 @@ func NewConsoleEncoder(config zapcore.EncoderConfig) (encoder zapcore.Encoder) {
 
 func NewJSONEncoder(config zapcore.EncoderConfig) (encoder zapcore.Encoder) {
 	return newGlsEncoder(zapcore.NewJSONEncoder(config))
-}
+}*/

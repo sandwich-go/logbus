@@ -1,17 +1,8 @@
 // Original source: github.com/micro/micro/v3/metrics/logging/reporter.go
 package logreporter
 
-import (
-	"github.com/sandwich-go/logbus/config"
-	"github.com/sandwich-go/logbus/stdl"
-	"time"
-
-	"github.com/prometheus/client_golang/prometheus"
-	"go.uber.org/zap"
-)
-
 // logReporter is an implementation of monitor.logReporter:
-type logReporter struct {
+/*type logReporter struct {
 	lg *stdl.StdLogger
 }
 
@@ -42,4 +33,4 @@ func (r *logReporter) Gauge(metricName string, value float64, labels prometheus.
 func (r *logReporter) Timing(metricName string, value time.Duration, labels prometheus.Labels) error {
 	r.lg.InfoWithChannel(config.Monitor, zap.String("type", "Timing"), zap.String(metricName, value.String()), zap.Any("labels", labels))
 	return nil
-}
+}*/

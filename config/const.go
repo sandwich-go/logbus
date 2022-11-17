@@ -1,6 +1,6 @@
 package config
 
-const (
+/*const (
 	THINKINGDATA = "thinkingdata"
 	SERVERLOG    = "server"
 	BIGQUERY     = "bigquery"
@@ -28,8 +28,9 @@ const (
 	DefaultTag = "logbus"
 	MonitorTag = "monitor"
 	LogId      = "log_xid"
-)
+)*/
 
-func NewDefaultConf() *Conf {
+/*func NewDefaultConf() *Conf {
 	return newDefaultConf()
 }
+*/

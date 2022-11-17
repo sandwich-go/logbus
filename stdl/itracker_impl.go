@@ -1,20 +1,6 @@
 package stdl
 
-import (
-	"fmt"
-	"github.com/sandwich-go/logbus/basics"
-	"github.com/sandwich-go/logbus/config"
-
-	"github.com/sandwich-go/logbus/utils"
-
-	"github.com/sandwich-go/logbus/bigquery"
-	"github.com/sandwich-go/logbus/thinkingdata"
-
-	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
-)
-
-func (s *StdLogger) Track(fields ...zap.Field) error {
+/*func (s *StdLogger) Track(fields ...zap.Field) error {
 	for _, v := range s.tags {
 		switch v {
 		case config.THINKINGDATA:
@@ -55,4 +41,4 @@ func (s *StdLogger) PrintBigQuery(tableName zap.Field, fields ...zap.Field) {
 	}
 	fields = append([]zap.Field{tableName, zap.ByteString(config.MsgBody, bytes)})
 	s.InfoWithChannel(config.BIGQUERY, fields...)
-}
+}*/

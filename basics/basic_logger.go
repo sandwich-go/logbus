@@ -1,13 +1,6 @@
 package basics
 
-import (
-	"github.com/sandwich-go/logbus/config"
-	"github.com/sandwich-go/logbus/global"
-	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
-)
-
-var BasicLogger *zap.Logger
+/*var BasicLogger *zap.Logger
 var BasicSugarLogger *zap.SugaredLogger
 
 var Setting = config.NewDefaultConf()
@@ -42,3 +35,4 @@ func ResetLogBus() {
 		return true
 	})
 }
+*/

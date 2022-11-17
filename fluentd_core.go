@@ -1,13 +1,7 @@
-package basics
-
-import (
-	"go.uber.org/zap/zapcore"
-
-	"github.com/sandwich-go/logbus/fluentd"
-)
+package logbus
 
 // NewFluentdCore creates a Core that writes logs to a WriteSyncer.
-func NewFluentdCore(cfg zapcore.EncoderConfig, tags []string, enab zapcore.LevelEnabler) zapcore.Core {
+/*func NewFluentdCore(cfg zapcore.EncoderConfig, tags []string, enab zapcore.LevelEnabler) zapcore.Core {
 	enc := NewFluentdEncoder(cfg)
 	return &fluentdCore{
 		LevelEnabler: enab,
@@ -18,7 +12,7 @@ func NewFluentdCore(cfg zapcore.EncoderConfig, tags []string, enab zapcore.Level
 
 type fluentdCore struct {
 	zapcore.LevelEnabler
-	enc  *fluentdEncoder
+	enc  *basics.fluentdEncoder
 	tags []string
 }
 
@@ -62,4 +56,4 @@ func (c *fluentdCore) clone() *fluentdCore {
 		enc:          c.enc.Clone(),
 		tags:         c.tags,
 	}
-}
+}*/

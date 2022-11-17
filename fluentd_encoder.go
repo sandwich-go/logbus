@@ -1,8 +1,7 @@
-package basics
+package logbus
 
 import (
 	"errors"
-	"github.com/sandwich-go/logbus/config"
 	"github.com/sandwich-go/logbus/globalfields"
 	"time"
 
@@ -61,7 +60,7 @@ func (fe *fluentdEncoder) GetAllEntry(ent zapcore.Entry, fields []zapcore.Field)
 	if glsFields := globalfields.GetGlobalFields(); glsFields != nil {
 		head = append(head, glsFields...)
 	}
-	head = append(head, zap.String(config.LogId, xid.New().String())) // 日志规范要求必须有xid
+	head = append(head, zap.String(LogId, xid.New().String())) // 日志规范要求必须有xid
 	objEncoder := zapcore.NewMapObjectEncoder()
 	for _, v := range head {
 		if v.Type == zapcore.TimeType {

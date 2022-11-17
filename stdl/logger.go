@@ -1,19 +1,8 @@
 package stdl
 
-import (
-	"github.com/sandwich-go/logbus/basics"
-	"github.com/sandwich-go/logbus/config"
-	"github.com/sandwich-go/logbus/global"
-	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
-	"os"
-	"sort"
-	"strings"
-)
-
 // getLogger get StdLogger by tagKey. If StdLogger doesn't exist, add a new one
 // to be changed to private function: getLogger(...string)
-func getLogger(tags ...string) *StdLogger {
+/*func getLogger(tags ...string) *StdLogger {
 	if len(tags) == 0 {
 		tags = []string{config.DefaultTag}
 	}
@@ -43,21 +32,21 @@ func getLogger(tags ...string) *StdLogger {
 	if basics.Setting.OutputLocalFile {
 		var writers []zapcore.WriteSyncer
 		for _, tag := range tags {
-			fileWriter := basics.NewFileWriter(tag)
+			fileWriter := logbus.NewFileWriter(tag)
 			writers = append(writers, zapcore.AddSync(fileWriter))
 		}
 		localFileCore := zapcore.NewCore(encoder, zapcore.NewMultiWriteSyncer(writers...), basics.Setting.LogLevel)
 		cores = append(cores, localFileCore)
 	}
 	if basics.Setting.OutputFluentd {
-		fluentdCore := basics.NewFluentdCore(config.EncodeConfig, tags, basics.Setting.LogLevel)
+		fluentdCore := logbus.NewFluentdCore(config.EncodeConfig, tags, basics.Setting.LogLevel)
 		cores = append(cores, fluentdCore)
 	}
 
 	newCore := zap.WrapCore(func(c zapcore.Core) zapcore.Core {
 		return zapcore.NewTee(cores...)
 	})
-	newZapLogger := basics.BasicLogger.WithOptions(newCore)
+	newZapLogger := logbus.gBasicZLogger.WithOptions(newCore)
 	logger := NewDefaultStdLogger(newZapLogger, tags)
 
 	global.LoggerMap.Store(tagKey, logger)
@@ -68,4 +57,4 @@ func getLogger(tags ...string) *StdLogger {
 func getTagKey(tags []string) string {
 	sort.Strings(tags)
 	return strings.Join(tags, ".")
-}
+}*/
