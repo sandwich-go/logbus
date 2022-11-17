@@ -84,3 +84,7 @@ func Object(key string, val zapcore.ObjectMarshaler) Field {
 func ErrorField(err error) Field {
 	return zap.Error(err)
 }
+
+func Any(key string, value interface{}) Field {
+	return zap.Any(key, value)
+}
