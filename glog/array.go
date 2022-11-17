@@ -1,8 +1,12 @@
 package glog
 
-import "fmt"
+import (
+	"fmt"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
+)
 
-// Ints constructs a field that carries a slice of integers.
+/*// Ints constructs a field that carries a slice of integers.
 func Ints(key string, nums []int) Field {
 	return Field{Key: key, Type: ArrayMarshalerType, Interface: nums, ArrayType: IntsType}
 }
@@ -20,17 +24,29 @@ func Int32s(key string, nums []int32) Field {
 // Strings constructs a field that carries a slice of strings.
 func Strings(key string, ss []string) Field {
 	return Field{Key: key, Type: ArrayMarshalerType, Interface: ss, ArrayType: StringsType}
+}*/
+
+type stringerArray struct {
+	se StringerEach
+}
+
+func (ss stringerArray) MarshalLogArray(arr zapcore.ArrayEncoder) error {
+	ss.se.Each(func(fs fmt.Stringer) {
+		arr.AppendString(fs.String())
+	})
+	return nil
 }
 
 type StringerEach interface {
 	Each(handler func(stringer fmt.Stringer))
 }
 
-func Stringers(key string, se StringerEach) Field {
-	return Field{Key: key, Type: ArrayMarshalerType, Interface: se, ArrayType: StringersType}
+func Stringers(key string, se StringerEach) zap.Field {
+	return zap.Array(key, stringerArray{se: se})
+	//return Field{Key: key, Type: ArrayMarshalerType, Interface: se, ArrayType: StringersType}
 }
 
-// Uints constructs a field that carries a slice of unsigned integers.
+/*// Uints constructs a field that carries a slice of unsigned integers.
 func Uints(key string, nums []uint) Field {
 	return Field{Key: key, Type: ArrayMarshalerType, Interface: nums, ArrayType: UintsType}
 }
@@ -43,4 +59,4 @@ func Uint64s(key string, nums []uint64) Field {
 // Uint32s constructs a field that carries a slice of unsigned integers.
 func Uint32s(key string, nums []uint32) Field {
 	return Field{Key: key, Type: ArrayMarshalerType, Interface: nums, ArrayType: Uint32sType}
-}
+}*/

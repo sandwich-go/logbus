@@ -1,10 +1,6 @@
 package logbus
 
-import (
-	"github.com/sandwich-go/logbus/config"
-)
-
-const (
+/*const (
 	THINKINGDATA = config.THINKINGDATA
 	SERVERLOG    = config.SERVERLOG
 	BIGQUERY     = config.BIGQUERY
@@ -30,4 +26,4 @@ var (
 	DefaultTag = config.DefaultTag
 	MonitorTag = config.MonitorTag
 	LogId      = config.LogId
-)
+)*/

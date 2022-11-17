@@ -22,8 +22,7 @@ func main() {
 		logbus.WithDefaultTag("Advance")),
 	)
 
-	// reason: 两种同等作用的写法，保留一个
-	// tag=logbus.DefaultTag  dd_meta_channel=setting.DefaultChannel
+	// default channel, default tag
 	logbus.Warn("", zap.Int("money", 648))
 
 	// reason: 打点的推荐方式：使用预定义的tags

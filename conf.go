@@ -16,7 +16,7 @@ func _ConfOptionDeclareWithDefault() interface{} {
 		"Dev":            false,                           // false 输出json格式， true 则输出带颜色的易读log @MethodComment(是否输出带颜色的易读log，默认关闭)
 		"DefaultChannel": string(SERVERLOG),               // 默认的dd_meta_channel @MethodComment(设置默认的dd_meta_channel)
 		"DefaultTag":     string(DefaultTag),              // 默认打印的tag @MethodComment(设置默认的tag)
-		"CallerSkip":     1,                               // zap logger callerSkip @MethodComment(等于zap.CallerSkip)
+		"CallerSkip":     2,                               // zap logger callerSkip @MethodComment(等于zap.CallerSkip)
 		//"LogId":         true,                            // 输出 log id @MethodComment(是否输出log_xid，默认开启) // 日志规范要求必须要有xid 不作为配置放出
 		"StackLogLevel": (zapcore.Level)(zap.ErrorLevel), //@MethodComment(打印stack的最低级别，默认ErrorLevel stack if level >= StackLogLevel)
 		// stdout
