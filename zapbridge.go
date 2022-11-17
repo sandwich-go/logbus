@@ -80,3 +80,7 @@ func Duration(key string, val time.Duration) Field {
 func Object(key string, val zapcore.ObjectMarshaler) Field {
 	return zap.Object(key, val)
 }
+
+func ErrorField(err error) Field {
+	return zap.Error(err)
+}
