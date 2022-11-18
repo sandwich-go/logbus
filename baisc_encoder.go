@@ -14,7 +14,7 @@ type glsEncoder struct {
 func (g *glsEncoder) EncodeEntry(entry zapcore.Entry, fields []zapcore.Field) (*buffer.Buffer, error) {
 	var head []zapcore.Field
 	head = append(head, zap.String(LogId, xid.New().String())) // 日志规范要求必须有xid
-	if glsFields := getGlobalFields(); glsFields != nil {
+	if glsFields := GetGlobalFields(); glsFields != nil {
 		head = append(head, glsFields...)
 	}
 	fields = append(head, fields...)

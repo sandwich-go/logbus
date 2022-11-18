@@ -8,7 +8,7 @@ func main() {
 	// close logger before exit
 	defer logbus.Close()
 
-	// Init with conf
+	// 主线程中使用 非线程安全
 	logbus.Init(logbus.NewConf(logbus.WithDev(true), logbus.WithDefaultChannel("Simple")))
 
 	// Print server debug log, dd_meta_channel=setting.DefaultChannel

@@ -21,20 +21,20 @@ func init() {
 	} else {
 		ReservedGlobalFields = append(ReservedGlobalFields, String("host_name", "-"))
 	}
-	appendGlobalFields()
+	AppendGlobalFields()
 }
 
 // ReservedGlobalFields 预留的全局字段，可以通过显式这只为空清除
 var ReservedGlobalFields []Field
 
-func getGlobalFields() []Field { return globalFields }
+func GetGlobalFields() []Field { return globalFields }
 
-func setGlobalFields(fields []Field) {
+func SetGlobalFields(fields []Field) {
 	cacheUserDefineFields = fields
 	freshGlobal()
 }
 
-func appendGlobalFields(fields ...Field) {
+func AppendGlobalFields(fields ...Field) {
 	cacheUserDefineFields = append(cacheUserDefineFields, fields...)
 	freshGlobal()
 }
