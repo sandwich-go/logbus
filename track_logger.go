@@ -2,7 +2,6 @@ package logbus
 
 import (
 	"fmt"
-	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 
 	"github.com/sandwich-go/logbus/bigquery"
@@ -11,7 +10,6 @@ import (
 
 // Tracker 获取ITracker来打印thinkingData和bigQuery日志
 func Tracker(tags ...string) ITracker {
-	//return getStdLogger(tags...)
 	return &TrackLogger{
 		StdLogger: gStdLogger,
 		tags:      tags,
@@ -23,7 +21,7 @@ type TrackLogger struct {
 	tags []string
 }
 
-func (t *TrackLogger) Track(fields ...zap.Field) error {
+func (t *TrackLogger) Track(fields ...Field) error {
 	for _, tag := range t.tags {
 		switch tag {
 		case THINKINGDATA:

@@ -77,3 +77,7 @@ func Uint16s(key string, nums []uint16) Field {
 func Errors(key string, errs []error) Field {
 	return zap.Errors(key, errs)
 }
+
+func Uintptrs(key string, us []uintptr) Field {
+	return zap.Uintptrs(key, us)
+}

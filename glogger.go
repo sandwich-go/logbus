@@ -14,60 +14,7 @@ type GLogger struct {
 	depthLogger  sync.Map
 }
 
-/*type stringerArray struct {
-	se glog.StringerEach
-}
-
-func (ss stringerArray) MarshalLogArray(arr zapcore.ArrayEncoder) error {
-	ss.se.Each(func(fs fmt.Stringer) {
-		arr.AppendString(fs.String())
-	})
-	return nil
-}
-
-func (s *GLogger) convertField(msg string, fields ...glog.Field) (ret []zap.Field) {
-	ret = append(ret, zap.String("glog-msg", msg))
-	for _, f := range fields {
-		if f.Type == glog.ArrayMarshalerType {
-			switch f.ArrayType {
-			case glog.StringsType:
-				ret = append(ret, zap.Strings(f.Key, f.Interface.([]string)))
-			case glog.StringersType:
-				ret = append(ret, zap.Array(f.Key, stringerArray{se: f.Interface.(glog.StringerEach)}))
-			case glog.IntsType:
-				ret = append(ret, zap.Ints(f.Key, f.Interface.([]int)))
-			case glog.Int64sType:
-				ret = append(ret, zap.Int64s(f.Key, f.Interface.([]int64)))
-			case glog.Int32sType:
-				ret = append(ret, zap.Int32s(f.Key, f.Interface.([]int32)))
-			case glog.UintsType:
-				ret = append(ret, zap.Uints(f.Key, f.Interface.([]uint)))
-			case glog.Uint64sType:
-				ret = append(ret, zap.Uint64s(f.Key, f.Interface.([]uint64)))
-			case glog.Uint32sType:
-				ret = append(ret, zap.Uint32s(f.Key, f.Interface.([]uint32)))
-			default:
-				ret = append(ret, zap.Any(f.Key, f.Interface))
-			}
-			continue
-		}
-		if f.Type == glog.ObjectMarshalerType {
-			if _, ok := f.Interface.(zapcore.ObjectMarshaler); !ok {
-				f.Type = glog.ReflectType
-			}
-		}
-		ret = append(ret, zap.Field{
-			Key:       f.Key,
-			Type:      zapcore.FieldType(f.Type),
-			Integer:   f.Integer,
-			String:    f.String,
-			Interface: f.Interface,
-		})
-	}
-	return ret
-}*/
-
-func (s *GLogger) printAsErr(fields ...zap.Field) bool {
+func (s *GLogger) printAsErr(fields ...Field) bool {
 	hasErr := false
 	for _, v := range fields {
 		if v.Type == zapcore.ErrorType {
@@ -85,8 +32,8 @@ func (s *GLogger) syncDepthLogger() {
 	})
 }
 
-func (s *GLogger) Debug(msg string, fields ...zap.Field) {
-	fields = append(fields, zap.String("glog-msg", msg))
+func (s *GLogger) Debug(msg string, fields ...Field) {
+	fields = append(fields, String("glog-msg", msg))
 	if s.printAsError && s.printAsErr(fields...) {
 		s.stdLogger.ErrorWithChannel(s.channelKey, fields...)
 		return
@@ -94,8 +41,8 @@ func (s *GLogger) Debug(msg string, fields ...zap.Field) {
 	s.stdLogger.DebugWithChannel(s.channelKey, fields...)
 }
 
-func (s *GLogger) Info(msg string, fields ...zap.Field) {
-	fields = append(fields, zap.String("glog-msg", msg))
+func (s *GLogger) Info(msg string, fields ...Field) {
+	fields = append(fields, String("glog-msg", msg))
 	if s.printAsError && s.printAsErr(fields...) {
 		s.stdLogger.ErrorWithChannel(s.channelKey, fields...)
 		return
@@ -103,31 +50,31 @@ func (s *GLogger) Info(msg string, fields ...zap.Field) {
 	s.stdLogger.InfoWithChannel(s.channelKey, fields...)
 }
 
-func (s *GLogger) Warn(msg string, fields ...zap.Field) {
-	fields = append(fields, zap.String("glog-msg", msg))
+func (s *GLogger) Warn(msg string, fields ...Field) {
+	fields = append(fields, String("glog-msg", msg))
 	if s.printAsError && s.printAsErr(fields...) {
 		s.stdLogger.ErrorWithChannel(s.channelKey, fields...)
 		return
 	}
 	s.stdLogger.WarnWithChannel(s.channelKey, fields...)
 }
-func (s *GLogger) Error(msg string, fields ...zap.Field) {
-	fields = append(fields, zap.String("glog-msg", msg))
+func (s *GLogger) Error(msg string, fields ...Field) {
+	fields = append(fields, String("glog-msg", msg))
 	s.stdLogger.ErrorWithChannel(s.channelKey, fields...)
 }
 
-func (s *GLogger) DPanic(msg string, fields ...zap.Field) {
-	fields = append(fields, zap.String("glog-msg", msg))
+func (s *GLogger) DPanic(msg string, fields ...Field) {
+	fields = append(fields, String("glog-msg", msg))
 	s.stdLogger.DPanicWithChannel(s.channelKey, fields...)
 }
 
-func (s *GLogger) Panic(msg string, fields ...zap.Field) {
-	fields = append(fields, zap.String("glog-msg", msg))
+func (s *GLogger) Panic(msg string, fields ...Field) {
+	fields = append(fields, String("glog-msg", msg))
 	s.stdLogger.PanicWithChannel(s.channelKey, fields...)
 }
 
-func (s *GLogger) Fatal(msg string, fields ...zap.Field) {
-	fields = append(fields, zap.String("glog-msg", msg))
+func (s *GLogger) Fatal(msg string, fields ...Field) {
+	fields = append(fields, String("glog-msg", msg))
 	s.stdLogger.FatalWithChannel(s.channelKey, fields...)
 }
 
@@ -140,8 +87,8 @@ func (s *GLogger) getDepthLogger(depth int) *zap.Logger {
 	return cloneLogger
 }
 
-func (s *GLogger) GDebugDepth(depth int, msg string, fields ...zap.Field) {
-	fields = append(fields, zap.String("glog-msg", msg))
+func (s *GLogger) GDebugDepth(depth int, msg string, fields ...Field) {
+	fields = append(fields, String("glog-msg", msg))
 	lg := s.getDepthLogger(depth)
 	if s.printAsError && s.printAsErr(fields...) {
 		lg.Error(s.channelKey, fields...)
@@ -150,8 +97,8 @@ func (s *GLogger) GDebugDepth(depth int, msg string, fields ...zap.Field) {
 	lg.Debug(s.channelKey, fields...)
 }
 
-func (s *GLogger) GInfoDepth(depth int, msg string, fields ...zap.Field) {
-	fields = append(fields, zap.String("glog-msg", msg))
+func (s *GLogger) GInfoDepth(depth int, msg string, fields ...Field) {
+	fields = append(fields, String("glog-msg", msg))
 	lg := s.getDepthLogger(depth)
 	if s.printAsError && s.printAsErr(fields...) {
 		lg.Error(s.channelKey, fields...)
@@ -159,8 +106,8 @@ func (s *GLogger) GInfoDepth(depth int, msg string, fields ...zap.Field) {
 	}
 	lg.Info(s.channelKey, fields...)
 }
-func (s *GLogger) GWarnDepth(depth int, msg string, fields ...zap.Field) {
-	fields = append(fields, zap.String("glog-msg", msg))
+func (s *GLogger) GWarnDepth(depth int, msg string, fields ...Field) {
+	fields = append(fields, String("glog-msg", msg))
 	lg := s.getDepthLogger(depth)
 	if s.printAsError && s.printAsErr(fields...) {
 		lg.Error(s.channelKey, fields...)
@@ -168,8 +115,8 @@ func (s *GLogger) GWarnDepth(depth int, msg string, fields ...zap.Field) {
 	}
 	lg.Warn(s.channelKey, fields...)
 }
-func (s *GLogger) GErrorDepth(depth int, msg string, fields ...zap.Field) {
-	fields = append(fields, zap.String("glog-msg", msg))
+func (s *GLogger) GErrorDepth(depth int, msg string, fields ...Field) {
+	fields = append(fields, String("glog-msg", msg))
 	lg := s.getDepthLogger(depth)
 	if s.printAsError && s.printAsErr(fields...) {
 		lg.Error(s.channelKey, fields...)
@@ -177,44 +124,44 @@ func (s *GLogger) GErrorDepth(depth int, msg string, fields ...zap.Field) {
 	}
 	lg.Error(s.channelKey, fields...)
 }
-func (s *GLogger) GFatalDepth(depth int, msg string, fields ...zap.Field) {
-	fields = append(fields, zap.String("glog-msg", msg))
+func (s *GLogger) GFatalDepth(depth int, msg string, fields ...Field) {
+	fields = append(fields, String("glog-msg", msg))
 	lg := s.getDepthLogger(depth)
 	lg.Fatal(s.channelKey, fields...)
 }
 
 // WithChannel
-func (s *GLogger) DebugWithChannel(c string, msg string, fields ...zap.Field) {
-	fields = append(fields, zap.String("glog-msg", msg))
+func (s *GLogger) DebugWithChannel(c string, msg string, fields ...Field) {
+	fields = append(fields, String("glog-msg", msg))
 	gStdLogger.DebugWithChannel(c, fields...)
 }
 
-func (s *GLogger) InfoWithChannel(c string, msg string, fields ...zap.Field) {
-	fields = append(fields, zap.String("glog-msg", msg))
+func (s *GLogger) InfoWithChannel(c string, msg string, fields ...Field) {
+	fields = append(fields, String("glog-msg", msg))
 	s.stdLogger.InfoWithChannel(c, fields...)
 }
 
-func (s *GLogger) WarnWithChannel(c string, msg string, fields ...zap.Field) {
-	fields = append(fields, zap.String("glog-msg", msg))
+func (s *GLogger) WarnWithChannel(c string, msg string, fields ...Field) {
+	fields = append(fields, String("glog-msg", msg))
 	s.stdLogger.WarnWithChannel(c, fields...)
 }
 
-func (s *GLogger) ErrorWithChannel(c string, msg string, fields ...zap.Field) {
-	fields = append(fields, zap.String("glog-msg", msg))
+func (s *GLogger) ErrorWithChannel(c string, msg string, fields ...Field) {
+	fields = append(fields, String("glog-msg", msg))
 	s.stdLogger.ErrorWithChannel(c, fields...)
 }
 
-func (s *GLogger) DPanicWithChannel(c string, msg string, fields ...zap.Field) {
-	fields = append(fields, zap.String("glog-msg", msg))
+func (s *GLogger) DPanicWithChannel(c string, msg string, fields ...Field) {
+	fields = append(fields, String("glog-msg", msg))
 	s.stdLogger.DPanicWithChannel(c, fields...)
 }
 
-func (s *GLogger) PanicWithChannel(c string, msg string, fields ...zap.Field) {
-	fields = append(fields, zap.String("glog-msg", msg))
+func (s *GLogger) PanicWithChannel(c string, msg string, fields ...Field) {
+	fields = append(fields, String("glog-msg", msg))
 	s.stdLogger.PanicWithChannel(c, fields...)
 }
 
-func (s *GLogger) FatalWithChannel(c string, msg string, fields ...zap.Field) {
-	fields = append(fields, zap.String("glog-msg", msg))
+func (s *GLogger) FatalWithChannel(c string, msg string, fields ...Field) {
+	fields = append(fields, String("glog-msg", msg))
 	s.stdLogger.FatalWithChannel(c, fields...)
 }

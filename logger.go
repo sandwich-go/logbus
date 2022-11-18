@@ -25,19 +25,9 @@ func Init(conf *Conf) {
 // Close 程序结束时打印缓存中的所有日志 并清理资源
 func Close() {
 	_ = gStdLogger.Sync()
-	//syncLoggerMap()
+	newGlobalGLogger.syncDepthLogger()
 }
 
 func resetLogBus() {
 	//resetLoggerMap()
 }
-
-/*func logger() ILogger {
-	//return getStdLogger()
-	return gStdLogger
-}*/
-
-// getStdLogger 获取指定tags索引的StdLogger
-/*func getStdLogger(tags ...string) *StdLogger {
-	return getLogger(tags...)
-}*/

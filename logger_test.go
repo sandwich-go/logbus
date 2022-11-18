@@ -31,10 +31,10 @@ func TestStdLogger(t *testing.T) {
 		getStdLogger().PrintThingkingData(data)
 	})*/
 	Convey("test server log to stdout\n", t, func() {
-		Debug("", zap.Int("int", 111))
-		Info("", zap.Int("int", 111), zap.String("str", "222"))
-		Warn("", zap.Int("int", 111), zap.String("str", "222"), zap.Bool("b", true))
-		Error("", zap.Int("int", 111), zap.String("str", "222"), zap.Bool("b", true), zap.Error(errors.New("this is a test error")))
+		Debug("", Int("int", 111))
+		Info("", Int("int", 111), String("str", "222"))
+		Warn("", Int("int", 111), String("str", "222"), Bool("b", true))
+		Error("", Int("int", 111), String("str", "222"), Bool("b", true), ErrorField(errors.New("this is a test error")))
 		//StdLogger().WithOptions(zap.AddCallerSkip(10)).Fatal("fatal", zap.Int("int", 111), zap.String("str", "222"), zap.Bool("b", true), zap.Error(nil))
 	})
 }
@@ -43,27 +43,27 @@ func TestPrintComplexTag(t *testing.T) {
 	Init(NewConf(WithLogLevel(zap.DebugLevel), WithCallerSkip(2)))
 	defer resetLogBus()
 	Convey("test only tga to stdout\n", t, func() {
-		err := Tracker(THINKINGDATA).Track(zap.String(thinkingdata.ACCOUNT, "111"), zap.String(thinkingdata.TYPE, thinkingdata.USER_SET_ONCE),
-			zap.String("player_name", "zhang liu"), zap.Int("level", 11), zap.Bool("bool", true), zap.Strings("strings", []string{"x", "y"}))
+		err := Tracker(THINKINGDATA).Track(String(thinkingdata.ACCOUNT, "111"), String(thinkingdata.TYPE, thinkingdata.USER_SET_ONCE),
+			String("player_name", "zhang liu"), Int("level", 11), Bool("bool", true), Strings("strings", []string{"x", "y"}))
 		So(err, ShouldBeNil)
 	})
 	Convey("test only bigquery to stdout\n", t, func() {
-		err := Tracker(BIGQUERY).Track(zap.String("$user_id", "111"), zap.Time("$optime", time.Now()), zap.String(bigquery.TableNameKey, "oplog"),
-			zap.String("player_name", "zhang liu"), zap.Int("level", 11), zap.Bool("bool", true), zap.Strings("strings", []string{"x", "y"}))
+		err := Tracker(BIGQUERY).Track(String("$user_id", "111"), Time("$optime", time.Now()), String(bigquery.TableNameKey, "oplog"),
+			String("player_name", "zhang liu"), Int("level", 11), Bool("bool", true), Strings("strings", []string{"x", "y"}))
 		So(err, ShouldBeNil)
 	})
 	Convey("test bigquery and tga - UseRecord false to stdout\n", t, func() {
-		err := Tracker(BIGQUERY, THINKINGDATA).Track(zap.String(thinkingdata.ACCOUNT, "111"), zap.String(thinkingdata.TYPE, thinkingdata.TRACK),
-			zap.String(thinkingdata.EVENT, "login"),
-			zap.String("$user_id", "111"), zap.Time("$optime", time.Now()), zap.String(bigquery.TableNameKey, "oplog"),
-			zap.String("player_name", "zhang liu"), zap.Int("level", 11), zap.Bool("bool", true), zap.Strings("strings", []string{"x", "y"}))
+		err := Tracker(BIGQUERY, THINKINGDATA).Track(String(thinkingdata.ACCOUNT, "111"), String(thinkingdata.TYPE, thinkingdata.TRACK),
+			String(thinkingdata.EVENT, "login"),
+			String("$user_id", "111"), Time("$optime", time.Now()), String(bigquery.TableNameKey, "oplog"),
+			String("player_name", "zhang liu"), Int("level", 11), Bool("bool", true), Strings("strings", []string{"x", "y"}))
 		So(err, ShouldBeNil)
 	})
 	Convey("test tga and bigquery - UseRecord true to stdout\n", t, func() {
 		bigquery.UseRecord = true
-		err := Tracker(THINKINGDATA, BIGQUERY).Track(zap.String(thinkingdata.ACCOUNT, "111"), zap.String(thinkingdata.TYPE, thinkingdata.USER_SET_ONCE),
-			zap.String("$user_id", "111"), zap.Time("$optime", time.Now()), zap.String(bigquery.TableNameKey, "oplog"),
-			zap.String("player_name", "zhang liu"), zap.Int("level", 11), zap.Bool("bool", true), zap.Strings("strings", []string{"x", "y"}))
+		err := Tracker(THINKINGDATA, BIGQUERY).Track(String(thinkingdata.ACCOUNT, "111"), String(thinkingdata.TYPE, thinkingdata.USER_SET_ONCE),
+			String("$user_id", "111"), Time("$optime", time.Now()), String(bigquery.TableNameKey, "oplog"),
+			String("player_name", "zhang liu"), Int("level", 11), Bool("bool", true), Strings("strings", []string{"x", "y"}))
 		So(err, ShouldBeNil)
 	})
 }

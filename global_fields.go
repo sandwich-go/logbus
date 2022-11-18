@@ -13,28 +13,28 @@ var globalFields []zap.Field
 var cacheUserDefineFields []zap.Field
 
 func init() {
-	ReservedGlobalFields = append(ReservedGlobalFields, zap.String("server_id", xid.New().String()))
-	ReservedGlobalFields = append(ReservedGlobalFields, zap.String("server_ip", xip.GetLocalIP()))
-	ReservedGlobalFields = append(ReservedGlobalFields, zap.Int64("server_birth", xtime.Unix()))
+	ReservedGlobalFields = append(ReservedGlobalFields, String("server_id", xid.New().String()))
+	ReservedGlobalFields = append(ReservedGlobalFields, String("server_ip", xip.GetLocalIP()))
+	ReservedGlobalFields = append(ReservedGlobalFields, Int64("server_birth", xtime.Unix()))
 	if hostName, err := os.Hostname(); err == nil {
-		ReservedGlobalFields = append(ReservedGlobalFields, zap.String("host_name", hostName))
+		ReservedGlobalFields = append(ReservedGlobalFields, String("host_name", hostName))
 	} else {
-		ReservedGlobalFields = append(ReservedGlobalFields, zap.String("host_name", "-"))
+		ReservedGlobalFields = append(ReservedGlobalFields, String("host_name", "-"))
 	}
 	appendGlobalFields()
 }
 
 // ReservedGlobalFields 预留的全局字段，可以通过显式这只为空清除
-var ReservedGlobalFields []zap.Field
+var ReservedGlobalFields []Field
 
-func getGlobalFields() []zap.Field { return globalFields }
+func getGlobalFields() []Field { return globalFields }
 
-func setGlobalFields(fields []zap.Field) {
+func setGlobalFields(fields []Field) {
 	cacheUserDefineFields = fields
 	freshGlobal()
 }
 
-func appendGlobalFields(fields ...zap.Field) {
+func appendGlobalFields(fields ...Field) {
 	cacheUserDefineFields = append(cacheUserDefineFields, fields...)
 	freshGlobal()
 }

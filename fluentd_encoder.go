@@ -1,19 +1,6 @@
 package logbus
 
-import (
-	"errors"
-	"github.com/sandwich-go/logbus/globalfields"
-	"time"
-
-	"github.com/sandwich-go/logbus/thinkingdata"
-
-	"github.com/rs/xid"
-	"go.uber.org/zap"
-	"go.uber.org/zap/buffer"
-	"go.uber.org/zap/zapcore"
-)
-
-func NewFluentdEncoder(cfg zapcore.EncoderConfig) *fluentdEncoder {
+/*func NewFluentdEncoder(cfg zapcore.EncoderConfig) *fluentdEncoder {
 	return &fluentdEncoder{
 		config:        &cfg,
 		ObjectEncoder: zapcore.NewMapObjectEncoder(),
@@ -85,4 +72,4 @@ func (fe *fluentdEncoder) GetAllEntry(ent zapcore.Entry, fields []zapcore.Field)
 		v.AddTo(objEncoder)
 	}
 	return objEncoder.Fields, nil
-}
+}*/

@@ -8,32 +8,6 @@ import (
 	"go.uber.org/zap"
 )
 
-/*func (s *StdLogger) Track(fields ...zap.Field) error {
-	for _, tag := range s.tags {
-		switch tag {
-		case THINKINGDATA:
-			memoryEncoder := zapcore.NewMapObjectEncoder()
-			for _, v := range fields {
-				v.AddTo(memoryEncoder)
-			}
-			data, err := thinkingdata.ExtractEncoder(memoryEncoder)
-			if err != nil {
-				return err
-			}
-			s.PrintThingkingData(data)
-		case BIGQUERY:
-			tableName, bigFields, err := bigquery.ExtractEncoder(fields)
-			if err != nil {
-				return err
-			}
-			s.PrintBigQuery(tableName, bigFields...)
-		default:
-			return fmt.Errorf("tag %s not implement", tag)
-		}
-	}
-	return nil
-}*/
-
 func (s *StdLogger) PrintThingkingData(data thinkingdata.Data) {
 	bytes, err := data.MarshalAsJson()
 	if err != nil {

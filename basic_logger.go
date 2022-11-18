@@ -63,6 +63,6 @@ func setDefaultMetricsReporter(
 		if err != nil {
 			panic(err)
 		}
-		DebugWithChannel(Monitor, "", zap.String("prometheus [http] listening on", defaultPrometheusListenAddress), zap.String("path", defaultPrometheusPath))
+		DebugWithChannel(Monitor, "", String("prometheus [http] listening on", defaultPrometheusListenAddress), String("path", defaultPrometheusPath))
 	}
 }
