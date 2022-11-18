@@ -12,7 +12,7 @@ func main() {
 	// close logger before exit
 	defer logbus.Close()
 
-	// 只能在主线程中使用 非线程安全
+	// 非线程安全
 	logbus.Init(logbus.NewConf(
 		logbus.WithDev(false),
 		logbus.WithMonitorOutput(logbus.Prometheus),
@@ -32,8 +32,7 @@ func main() {
 	// 非线程安全
 	oldFields := logbus.GetGlobalFields()
 	logbus.AppendGlobalFields(logbus.String("playerid", "gtwefasfwad"))
-	logbus.Warn("", logbus.Int("money", 648))
+	logbus.Warn("", logbus.Int("money", 648)) // has extra global field
 	logbus.SetGlobalFields(oldFields)
-	logbus.Warn("", logbus.Int("money", 648))
-
+	logbus.Warn("", logbus.Int("money", 648)) // reset global field
 }

@@ -16,6 +16,10 @@ func SetGlobalGLogger(logger *StdLogger, channelKey string, printAsError bool, c
 		channelKey = Setting.DefaultChannel
 	}
 
+	if callerSkip <= 0 {
+		callerSkip = Setting.CallerSkip
+	}
+
 	newGlobalGLogger = &GLogger{
 		channelKey: channelKey,
 		stdLogger: &StdLogger{
