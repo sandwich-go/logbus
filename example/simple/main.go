@@ -9,7 +9,7 @@ func main() {
 	defer logbus.Close()
 
 	// Init with conf
-	logbus.Init(logbus.NewConf(logbus.WithDev(true), logbus.WithDefaultChannel("Simple"), logbus.WithCallerSkip(1)))
+	logbus.Init(logbus.NewConf(logbus.WithDev(true), logbus.WithDefaultChannel("Simple")))
 
 	// Print server debug log, dd_meta_channel=setting.DefaultChannel
 	logbus.Debug("", logbus.Int("int", 123))
@@ -27,6 +27,5 @@ func main() {
 	logbus.WarnWithChannel(logbus.BIGQUERY, "", logbus.String("str", "warning"))
 
 	// Print bi log, dd_meta_channel=bi
-	//logbus.logger().L().Info("bi", zap.Int("money", 648)) // L()来输入dd_meta_channel的方式废弃
 	logbus.InfoWithChannel(logbus.BI, "", logbus.Int("money", 648))
 }

@@ -1,7 +1,7 @@
 package logbus
 
 // default logger provided
-var newGlobalGLogger NewILogger //= NewDefaultLogger(log.New(os.Stdout, "", log.LstdFlags|log.Llongfile))
+var newGlobalGLogger NewILogger
 
 func Debug(msg string, v ...Field) {
 	newGlobalGLogger.Debug(msg, v...)

@@ -1,7 +1,6 @@
 package logbus
 
 import (
-	"fmt"
 	"go.uber.org/zap"
 )
 
@@ -16,8 +15,6 @@ func SetGlobalGLogger(logger *StdLogger, channelKey string, printAsError bool, c
 	if channelKey == "" {
 		channelKey = Setting.DefaultChannel
 	}
-
-	fmt.Println("callSkip=", callerSkip)
 
 	newGlobalGLogger = &GLogger{
 		channelKey: channelKey,
