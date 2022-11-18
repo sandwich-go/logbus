@@ -172,7 +172,7 @@ func newDefaultConf() *Conf {
 		WithDev(false),
 		WithDefaultChannel(SERVERLOG),
 		WithDefaultTag(DefaultTag),
-		WithCallerSkip(2),
+		WithCallerSkip(1),
 		WithStackLogLevel(zap.ErrorLevel),
 		WithBufferedStdout(false),
 		WithMonitorOutput(Noop),

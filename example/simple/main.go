@@ -9,7 +9,7 @@ func main() {
 	defer logbus.Close()
 
 	// Init with conf
-	logbus.Init(logbus.NewConf(logbus.WithDev(true), logbus.WithDefaultChannel("Simple")))
+	logbus.Init(logbus.NewConf(logbus.WithDev(true), logbus.WithDefaultChannel("Simple"), logbus.WithCallerSkip(1)))
 
 	// Print server debug log, dd_meta_channel=setting.DefaultChannel
 	logbus.Debug("", logbus.Int("int", 123))

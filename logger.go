@@ -12,7 +12,7 @@ func Init(conf *Conf) {
 	initGlobalStdLoggers()
 
 	// set logger used in glog
-	SetGlobalGLogger(gStdLogger, conf.DefaultChannel, conf.PrintAsError)
+	SetGlobalGLogger(gStdLogger, conf.DefaultChannel, conf.PrintAsError, conf.CallerSkip)
 	// init monitor
 	setDefaultMetricsReporter(conf.MonitorOutput,
 		conf.DefaultPrometheusListenAddress,
