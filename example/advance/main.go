@@ -28,8 +28,4 @@ func main() {
 	_ = logbus.Tracker(logbus.THINKINGDATA, logbus.BIGQUERY).Track(logbus.String(thinkingdata.ACCOUNT, "111"), logbus.String(thinkingdata.TYPE, thinkingdata.USER_SET_ONCE),
 		logbus.String("$user_id", "111"), logbus.Time("$optime", time.Now()), logbus.String(bigquery.TableNameKey, "oplog"),
 		logbus.String("player_name", "zhang liu"), logbus.Int("level", 11), logbus.Bool("bool", true), logbus.Strings("strings", []string{"x", "y"}))
-
-	// hook field: add playerid=gtwefasfwad for all logs below
-	//logbus.appendGlobalFields(zap.String("playerid", "gtwefasfwad")) // Deprecated
-	logbus.Warn("", logbus.Int("money", 648))
 }
