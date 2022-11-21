@@ -28,4 +28,7 @@ func main() {
 
 	// Print bi log, dd_meta_channel=bi
 	logbus.InfoWithChannel(logbus.BI, "", logbus.Int("money", 648))
+
+	// User defined channel
+	logbus.InfoWithChannel("UserDefine", "", logbus.Strings("str1", []string{"hello", "world"}))
 }
