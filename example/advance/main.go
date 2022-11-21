@@ -29,10 +29,7 @@ func main() {
 		logbus.String("$user_id", "111"), logbus.Time("$optime", time.Now()), logbus.String(bigquery.TableNameKey, "oplog"),
 		logbus.String("player_name", "zhang liu"), logbus.Int("level", 11), logbus.Bool("bool", true), logbus.Strings("strings", []string{"x", "y"}))
 
-	// 非线程安全
-	oldFields := logbus.GetGlobalFields()
+	// 增加全局域 非线程安全
 	logbus.AppendGlobalFields(logbus.String("playerid", "gtwefasfwad"))
 	logbus.Warn("", logbus.Int("money", 648)) // has extra global field
-	logbus.SetGlobalFields(oldFields)
-	logbus.Warn("", logbus.Int("money", 648)) // reset global field
 }
