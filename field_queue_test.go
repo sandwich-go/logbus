@@ -1,7 +1,6 @@
-package fieldqueue
+package logbus
 
 import (
-	"github.com/sandwich-go/logbus"
 	"testing"
 
 	"go.uber.org/zap"
@@ -24,6 +23,6 @@ func TestFieldQueue(t *testing.T) {
 		data = q.Retrieve()
 		So(len(data), ShouldEqual, 1)
 		So(data[0].Integer, ShouldEqual, 11)
-		logbus.Debug("test fieldQueue ", q.Retrieve()...)
+		Debug("test fieldQueue ", q.Retrieve()...)
 	})
 }

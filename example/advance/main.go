@@ -1,6 +1,7 @@
 package main
 
 import (
+	"go.uber.org/zap"
 	"time"
 
 	"github.com/sandwich-go/logbus"
@@ -32,4 +33,9 @@ func main() {
 	// 增加全局域 非线程安全
 	logbus.AppendGlobalFields(logbus.String("playerid", "gtwefasfwad"))
 	logbus.Warn("", logbus.Int("money", 648)) // has extra global field
+
+	q := logbus.NewQueue()
+	q.Push(zap.Int("i", 1))
+	q.Push(zap.Int("j", 2))
+	logbus.Debug("queue", q.Retrieve()...)
 }

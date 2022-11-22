@@ -1,13 +1,11 @@
-package fieldqueue
+package logbus
 
 import (
 	"sync"
-
-	"go.uber.org/zap"
 )
 
 type FieldQueue struct {
-	buff []zap.Field
+	buff []Field
 }
 
 var queuePool = sync.Pool{
@@ -26,12 +24,12 @@ func (fq *FieldQueue) Reset() {
 	fq.buff = fq.buff[:0]
 }
 
-func (fq *FieldQueue) Push(field zap.Field) {
+func (fq *FieldQueue) Push(field Field) {
 	fq.buff = append(fq.buff, field)
 }
 
 // 每个FieldQueue应该只被调用一次
-func (fq *FieldQueue) Retrieve() (data []zap.Field) {
+func (fq *FieldQueue) Retrieve() (data []Field) {
 	data = fq.buff
 	queuePool.Put(fq)
 	return
