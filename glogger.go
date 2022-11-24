@@ -27,7 +27,9 @@ func (s *GLogger) printAsErr(fields ...Field) bool {
 
 func (s *GLogger) syncDepthLogger() {
 	s.depthLogger.Range(func(key, value interface{}) bool {
-		_ = value.(*StdLogger).Sync()
+		if l, ok := value.(*zap.Logger); ok {
+			_ = l.Sync()
+		}
 		return true
 	})
 }
