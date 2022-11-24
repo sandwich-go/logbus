@@ -74,6 +74,10 @@ func Uint16s(key string, nums []uint16) Field {
 	return zap.Uint16s(key, nums)
 }
 
+func Uint8s(key string, nums []uint8) Field {
+	return zap.Uint8s(key, nums)
+}
+
 func Errors(key string, errs []error) Field {
 	return zap.Errors(key, errs)
 }

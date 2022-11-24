@@ -57,6 +57,10 @@ func Uint16(key string, val uint16) Field {
 	return zap.Uint16(key, val)
 }
 
+func Uint8(key string, val uint8) Field {
+	return zap.Uint8(key, val)
+}
+
 func Reflect(key string, val interface{}) Field {
 	return zap.Reflect(key, val)
 }
