@@ -32,6 +32,7 @@ func initBasics(c *Conf) {
 	// init gBasicZLogger
 	var err error
 	ZapConf.Level = zap.NewAtomicLevelAt(c.LogLevel)
+	ZapConf.EncoderConfig = EncodeConfig
 	if c.Dev {
 		ZapConf.Development = true
 	}
@@ -39,6 +40,7 @@ func initBasics(c *Conf) {
 		zap.AddCallerSkip(c.CallerSkip),
 		zap.AddStacktrace(c.StackLogLevel),
 		zap.WithClock(&localClock{}),
+		zap.WithCaller(ZapConf.EncoderConfig.CallerKey != ""),
 	)
 	if err != nil {
 		panic(err)
