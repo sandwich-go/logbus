@@ -1,9 +1,10 @@
 package logbus
 
 import (
+	"sync"
+
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-	"sync"
 )
 
 // GLogger 全局对象的类型定义
@@ -12,6 +13,22 @@ type GLogger struct {
 	printAsError bool
 	stdLogger    *StdLogger // 对外隐藏StdLogger
 	depthLogger  sync.Map
+}
+
+type GLoggerVisitor interface {
+	GetChannelKey() string
+	GetPrintAsError() bool
+	GetStdLogger() *StdLogger
+}
+
+func (s *GLogger) GetChannelKey() string {
+	return s.channelKey
+}
+func (s *GLogger) GetPrintAsError() bool {
+	return s.printAsError
+}
+func (s *GLogger) GetStdLogger() *StdLogger {
+	return s.stdLogger
 }
 
 func (s *GLogger) printAsErr(fields ...Field) bool {
