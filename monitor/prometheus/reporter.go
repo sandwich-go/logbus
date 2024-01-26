@@ -2,12 +2,14 @@
 package prometheus
 
 import (
+	"github.com/prometheus/client_golang/prometheus/collectors"
 	"net/http"
 	"strings"
 	"sync"
 	"time"
 
 	"github.com/sandwich-go/boost"
+
 	"github.com/sandwich-go/logbus/monitor/prometheus/node"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -31,8 +33,14 @@ type Reporter struct {
 }
 
 func init() {
-	boost.LogErrorAndEatError(DefaultPrometheusRegistry.Register(prometheus.NewGoCollector()))
-	boost.LogErrorAndEatError(DefaultPrometheusRegistry.Register(prometheus.NewProcessCollector(prometheus.ProcessCollectorOpts{Namespace: "goruntime"})))
+	boost.LogErrorAndEatError(DefaultPrometheusRegistry.Register(collectors.NewGoCollector(
+		collectors.WithGoCollectorRuntimeMetrics(collectors.MetricsAll),
+	)))
+	boost.LogErrorAndEatError(DefaultPrometheusRegistry.Register(
+		collectors.NewProcessCollector(collectors.ProcessCollectorOpts{
+			Namespace: "goruntime",
+		})),
+	)
 }
 
 // New returns a configured prometheus reporter:
