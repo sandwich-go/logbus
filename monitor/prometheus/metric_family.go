@@ -3,7 +3,6 @@ package prometheus
 
 import (
 	"fmt"
-	"github.com/sandwich-go/boost/singleflight"
 	"sync"
 	"time"
 
@@ -12,12 +11,9 @@ import (
 
 // metricFamily stores our cached metrics:
 type metricFamily struct {
-	countersSingle *singleflight.Group
-	counters       sync.Map
-	gaugesSingle   *singleflight.Group
-	gauges         sync.Map
-	timingsSingle  *singleflight.Group
-	timings        sync.Map
+	counters sync.Map
+	gauges   sync.Map
+	timings  sync.Map
 
 	defaultLabels      prometheus.Labels
 	prometheusRegistry *prometheus.Registry
@@ -39,9 +35,6 @@ func (r *Reporter) newMetricFamily(defaultPercentiles []float64, defaultLabel pr
 	}
 
 	return metricFamily{
-		countersSingle:     singleflight.New(),
-		gaugesSingle:       singleflight.New(),
-		timingsSingle:      singleflight.New(),
 		defaultLabels:      r.convertLabels(defaultLabel),
 		timingMaxAge:       timingMaxAge,
 		prometheusRegistry: r.prometheusRegistry,
@@ -63,21 +56,18 @@ func (mf *metricFamily) getCounter(name string, labels prometheus.Labels) *prome
 	if c, ok := mf.counters.Load(name); ok {
 		return c.(*prometheus.CounterVec)
 	}
-	c, _ := mf.countersSingle.Do(name, func() (interface{}, error) {
-		// Make a new counter:
-		counter := prometheus.NewCounterVec(
-			prometheus.CounterOpts{
-				Name:        name,
-				ConstLabels: mf.defaultLabels,
-			},
-			mf.listTagKeys(labels),
-		)
-
-		// Register it and add it to our list:
+	counter := prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Name:        name,
+			ConstLabels: mf.defaultLabels,
+		},
+		mf.listTagKeys(labels),
+	)
+	c, loaded := mf.counters.LoadOrStore(name, counter)
+	if !loaded {
 		mf.prometheusRegistry.MustRegister(counter)
-		mf.counters.Store(name, counter)
-		return counter, nil
-	})
+	}
+
 	return c.(*prometheus.CounterVec)
 }
 
@@ -87,20 +77,17 @@ func (mf *metricFamily) getGauge(name string, labels prometheus.Labels) *prometh
 	if g, ok := mf.gauges.Load(name); ok {
 		return g.(*prometheus.GaugeVec)
 	}
-	g, _ := mf.gaugesSingle.Do(name, func() (interface{}, error) {
-		gauge := prometheus.NewGaugeVec(
-			prometheus.GaugeOpts{
-				Name:        name,
-				ConstLabels: mf.defaultLabels,
-			},
-			mf.listTagKeys(labels),
-		)
-
-		// Register it and add it to our list:
+	gauge := prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name:        name,
+			ConstLabels: mf.defaultLabels,
+		},
+		mf.listTagKeys(labels),
+	)
+	g, loaded := mf.gauges.LoadOrStore(name, gauge)
+	if !loaded {
 		mf.prometheusRegistry.MustRegister(gauge)
-		mf.gauges.Store(name, gauge)
-		return gauge, nil
-	})
+	}
 	return g.(*prometheus.GaugeVec)
 }
 
@@ -110,23 +97,18 @@ func (mf *metricFamily) getTiming(name string, labels prometheus.Labels) *promet
 	if t, ok := mf.timings.Load(name); ok {
 		return t.(*prometheus.SummaryVec)
 	}
-
-	t, _ := mf.timingsSingle.Do(name, func() (interface{}, error) {
-		// Make a new timing:
-		timing := prometheus.NewSummaryVec(
-			prometheus.SummaryOpts{
-				Name:        name,
-				ConstLabels: mf.defaultLabels,
-				Objectives:  mf.timingObjectives,
-				MaxAge:      mf.timingMaxAge,
-			},
-			mf.listTagKeys(labels),
-		)
-
-		// Register it and add it to our list:
+	timing := prometheus.NewSummaryVec(
+		prometheus.SummaryOpts{
+			Name:        name,
+			ConstLabels: mf.defaultLabels,
+			Objectives:  mf.timingObjectives,
+			MaxAge:      mf.timingMaxAge,
+		},
+		mf.listTagKeys(labels),
+	)
+	t, loaded := mf.timings.LoadOrStore(name, timing)
+	if !loaded {
 		mf.prometheusRegistry.MustRegister(timing)
-		mf.timings.Store(name, timing)
-		return timing, nil
-	})
+	}
 	return t.(*prometheus.SummaryVec)
 }
