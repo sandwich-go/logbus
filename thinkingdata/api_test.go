@@ -23,7 +23,7 @@ func TestUser(t *testing.T) {
 func TestTrack(t *testing.T) {
 	Convey("User track", t, func() {
 		properties := map[string]interface{}{"#ip": "10.0.0.1", "player_name": "zhang san", "level": 9}
-		data, err := Track("111", "", "login", properties)
+		data, err := Track("111", "", "login", "", properties)
 		So(err, ShouldBeNil)
 		So(data.Time, ShouldNotBeEmpty)
 		So(data.Type, ShouldEqual, TRACK)

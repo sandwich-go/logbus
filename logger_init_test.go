@@ -54,11 +54,32 @@ func TestPrintComplexTag(t *testing.T) {
 	})
 	Convey("test bigquery and tga - UseRecord false to stdout\n", t, func() {
 		err := Tracker(BIGQUERY, THINKINGDATA).Track(String(thinkingdata.ACCOUNT, "111"), String(thinkingdata.TYPE, thinkingdata.TRACK),
-			String(thinkingdata.EVENT, "login"),
+			String(thinkingdata.EVENT, "login"), String(thinkingdata.EVENT_ID, "ID1"),
 			String("$user_id", "111"), Time("$optime", time.Now()), String(bigquery.TableNameKey, "oplog"),
 			String("player_name", "zhang liu"), Int("level", 11), Bool("bool", true), Strings("strings", []string{"x", "y"}))
 		So(err, ShouldBeNil)
 	})
+	Convey("test tga", t, func() {
+		Convey("without event_id, should be fine", func() {
+			err := Tracker(THINKINGDATA).Track(String(thinkingdata.ACCOUNT, "111"), String(thinkingdata.TYPE, thinkingdata.TRACK),
+				String(thinkingdata.EVENT, "login"),
+				String("player_name", "zhang liu"), Int("level", 11), Bool("bool", true), Strings("strings", []string{"x", "y"}))
+			So(err, ShouldBeNil)
+		})
+		Convey("with legal event_id, should be fine", func() {
+			err := Tracker(THINKINGDATA).Track(String(thinkingdata.ACCOUNT, "111"), String(thinkingdata.TYPE, thinkingdata.TRACK),
+				String(thinkingdata.EVENT, "login"), String(thinkingdata.EVENT_ID, "ID1"),
+				String("player_name", "zhang liu"), Int("level", 11), Bool("bool", true), Strings("strings", []string{"x", "y"}))
+			So(err, ShouldBeNil)
+		})
+		Convey("with illegal event_id, should return error", func() {
+			err := Tracker(THINKINGDATA).Track(String(thinkingdata.ACCOUNT, "111"), String(thinkingdata.TYPE, thinkingdata.TRACK),
+				String(thinkingdata.EVENT, "login"), String(thinkingdata.EVENT_ID, "_dfa"),
+				String("player_name", "zhang liu"), Int("level", 11), Bool("bool", true), Strings("strings", []string{"x", "y"}))
+			So(err, ShouldNotBeNil)
+		})
+	})
+
 	Convey("test tga and bigquery - UseRecord true to stdout\n", t, func() {
 		bigquery.UseRecord = true
 		err := Tracker(THINKINGDATA, BIGQUERY).Track(String(thinkingdata.ACCOUNT, "111"), String(thinkingdata.TYPE, thinkingdata.USER_SET_ONCE),
@@ -84,7 +105,7 @@ func TestTagLoggerThinkingData(t *testing.T) {
 		Convey("test thinkingdata Stdout\n", func() {
 			Init(NewConf(WithLogLevel(zap.DebugLevel)))
 			properties := map[string]interface{}{"#ip": "10.0.0.1", "player_name": "zhang san", "level": 7}
-			data, err := thinkingdata.Track("111", "", "login", properties)
+			data, err := thinkingdata.Track("111", "", "login", "", properties)
 			So(err, ShouldBeNil)
 			Info("", zap.Object("tga", data))
 		})

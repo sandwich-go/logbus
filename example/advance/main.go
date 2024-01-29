@@ -31,6 +31,11 @@ func main() {
 		logbus.String("$user_id", "111"), logbus.Time("$optime", time.Now()), logbus.String(bigquery.TableNameKey, "oplog"),
 		logbus.String("player_name", "zhang liu"), logbus.Int("level", 11), logbus.Bool("bool", true), logbus.Strings("strings", []string{"x", "y"}))
 
+	// Print tga event log. thinkingdata.EVENT_ID is optional. Provide event_id, if want to update existing events
+	_ = logbus.Tracker(logbus.THINKINGDATA).Track(logbus.String(thinkingdata.ACCOUNT, "111"), logbus.String(thinkingdata.TYPE, thinkingdata.TRACK),
+		logbus.String(thinkingdata.EVENT_ID, "ID1"), logbus.String(thinkingdata.EVENT, "login"), logbus.Time("$optime", time.Now()),
+		logbus.String("player_name", "zhang liu"), logbus.Int("level", 11), logbus.Bool("bool", true), logbus.Strings("strings", []string{"x", "y"}))
+
 	// scope logger
 	playerLogger := logbus.NewScopeLogger("Player", zap.String("playername", "zhangsong"), zap.Int("playerid", 123))
 	guildLogger := logbus.NewScopeLogger("Guild", zap.String("guildname", "guild1"))

@@ -1,10 +1,11 @@
 package thinkingdata
 
 import (
-	"github.com/sandwich-go/logbus/utils"
 	"github.com/sandwich-go/zapgen/zapencoder"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+
+	"github.com/sandwich-go/logbus/utils"
 )
 
 var emptyData = Data{}
@@ -25,27 +26,27 @@ type Data struct {
 
 func (d Data) MarshalLogObject(enc zapcore.ObjectEncoder) error {
 	if d.AccountId != "" {
-		enc.AddString("#account_id", d.AccountId)
+		enc.AddString(ACCOUNT, d.AccountId)
 	}
 	if d.DistinctId != "" {
-		enc.AddString("#distinct_id", d.DistinctId)
+		enc.AddString(DISTINCT, d.DistinctId)
 	}
-	enc.AddString("#type", d.Type)
-	enc.AddString("#time", d.Time)
+	enc.AddString(TYPE, d.Type)
+	enc.AddString(TIME, d.Time)
 	if d.EventName != "" {
-		enc.AddString("#event_name", d.EventName)
+		enc.AddString(EVENT, d.EventName)
 	}
 	if d.EventId != "" {
-		enc.AddString("#event_id", d.EventId)
+		enc.AddString(EVENT_ID, d.EventId)
 	}
 	if d.FirstCheckId != "" {
-		enc.AddString("#first_check_id", d.FirstCheckId)
+		enc.AddString(FIRST_CHECK_ID, d.FirstCheckId)
 	}
 	if d.Ip != "" {
-		enc.AddString("#ip", d.Ip)
+		enc.AddString(IP, d.Ip)
 	}
 	if d.UUID != "" {
-		enc.AddString("#uuid", d.UUID)
+		enc.AddString(UUID, d.UUID)
 	}
 	return enc.AddObject("properties", zapencoder.StringInterfaceMap(d.Properties))
 }
@@ -53,27 +54,27 @@ func (d Data) MarshalLogObject(enc zapcore.ObjectEncoder) error {
 func (d Data) MarshalAsJson() ([]byte, error) {
 	var fields = make([]zap.Field, 0, 10)
 	if d.AccountId != "" {
-		fields = append(fields, zap.String("#account_id", d.AccountId))
+		fields = append(fields, zap.String(ACCOUNT, d.AccountId))
 	}
 	if d.DistinctId != "" {
-		fields = append(fields, zap.String("#distinct_id", d.DistinctId))
+		fields = append(fields, zap.String(DISTINCT, d.DistinctId))
 	}
-	fields = append(fields, zap.String("#type", d.Type))
-	fields = append(fields, zap.String("#time", d.Time))
+	fields = append(fields, zap.String(TYPE, d.Type))
+	fields = append(fields, zap.String(TIME, d.Time))
 	if d.EventName != "" {
-		fields = append(fields, zap.String("#event_name", d.EventName))
+		fields = append(fields, zap.String(EVENT, d.EventName))
 	}
 	if d.EventId != "" {
-		fields = append(fields, zap.String("#event_id", d.EventId))
+		fields = append(fields, zap.String(EVENT_ID, d.EventId))
 	}
 	if d.FirstCheckId != "" {
-		fields = append(fields, zap.String("#first_check_id", d.FirstCheckId))
+		fields = append(fields, zap.String(FIRST_CHECK_ID, d.FirstCheckId))
 	}
 	if d.Ip != "" {
-		fields = append(fields, zap.String("#ip", d.Ip))
+		fields = append(fields, zap.String(IP, d.Ip))
 	}
 	if d.UUID != "" {
-		fields = append(fields, zap.String("#uuid", d.UUID))
+		fields = append(fields, zap.String(UUID, d.UUID))
 	}
 	fields = append(fields, zap.Object("properties", zapencoder.StringInterfaceMap(d.Properties)))
 	return utils.Zap2Json(fields)
