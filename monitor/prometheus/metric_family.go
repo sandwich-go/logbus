@@ -3,6 +3,7 @@ package prometheus
 
 import (
 	"fmt"
+	"github.com/sandwich-go/boost/singleflight"
 	"sync"
 	"time"
 
@@ -11,12 +12,12 @@ import (
 
 // metricFamily stores our cached metrics:
 type metricFamily struct {
-	counterMutex sync.Mutex
-	counters     map[string]*prometheus.CounterVec
-	gaugeMutex   sync.Mutex
-	gauges       map[string]*prometheus.GaugeVec
-	timingMutex  sync.Mutex
-	timings      map[string]*prometheus.SummaryVec
+	countersSingle *singleflight.Group
+	counters       sync.Map
+	gaugesSingle   *singleflight.Group
+	gauges         sync.Map
+	timingsSingle  *singleflight.Group
+	timings        sync.Map
 
 	defaultLabels      prometheus.Labels
 	prometheusRegistry *prometheus.Registry
@@ -38,9 +39,9 @@ func (r *Reporter) newMetricFamily(defaultPercentiles []float64, defaultLabel pr
 	}
 
 	return metricFamily{
-		counters:           make(map[string]*prometheus.CounterVec),
-		gauges:             make(map[string]*prometheus.GaugeVec),
-		timings:            make(map[string]*prometheus.SummaryVec),
+		countersSingle:     singleflight.New(),
+		gaugesSingle:       singleflight.New(),
+		timingsSingle:      singleflight.New(),
 		defaultLabels:      r.convertLabels(defaultLabel),
 		timingMaxAge:       timingMaxAge,
 		prometheusRegistry: r.prometheusRegistry,
@@ -58,15 +59,13 @@ func (mf *metricFamily) listTagKeys(labels prometheus.Labels) (labelKeys []strin
 
 // getCounter either gets a counter, or makes a new one:
 func (mf *metricFamily) getCounter(name string, labels prometheus.Labels) *prometheus.CounterVec {
-	mf.counterMutex.Lock()
-	defer mf.counterMutex.Unlock()
-
 	// See if we already have this counter:
-	counter, ok := mf.counters[name]
-	if !ok {
-
+	if c, ok := mf.counters.Load(name); ok {
+		return c.(*prometheus.CounterVec)
+	}
+	c, _ := mf.countersSingle.Do(name, func() (interface{}, error) {
 		// Make a new counter:
-		counter = prometheus.NewCounterVec(
+		counter := prometheus.NewCounterVec(
 			prometheus.CounterOpts{
 				Name:        name,
 				ConstLabels: mf.defaultLabels,
@@ -76,23 +75,20 @@ func (mf *metricFamily) getCounter(name string, labels prometheus.Labels) *prome
 
 		// Register it and add it to our list:
 		mf.prometheusRegistry.MustRegister(counter)
-		mf.counters[name] = counter
-	}
-
-	return counter
+		mf.counters.Store(name, counter)
+		return counter, nil
+	})
+	return c.(*prometheus.CounterVec)
 }
 
 // getGauge either gets a gauge, or makes a new one:
 func (mf *metricFamily) getGauge(name string, labels prometheus.Labels) *prometheus.GaugeVec {
-	mf.gaugeMutex.Lock()
-	defer mf.gaugeMutex.Unlock()
-
 	// See if we already have this gauge:
-	gauge, ok := mf.gauges[name]
-	if !ok {
-
-		// Make a new gauge:
-		gauge = prometheus.NewGaugeVec(
+	if g, ok := mf.gauges.Load(name); ok {
+		return g.(*prometheus.GaugeVec)
+	}
+	g, _ := mf.gaugesSingle.Do(name, func() (interface{}, error) {
+		gauge := prometheus.NewGaugeVec(
 			prometheus.GaugeOpts{
 				Name:        name,
 				ConstLabels: mf.defaultLabels,
@@ -102,23 +98,22 @@ func (mf *metricFamily) getGauge(name string, labels prometheus.Labels) *prometh
 
 		// Register it and add it to our list:
 		mf.prometheusRegistry.MustRegister(gauge)
-		mf.gauges[name] = gauge
-	}
-
-	return gauge
+		mf.gauges.Store(name, gauge)
+		return gauge, nil
+	})
+	return g.(*prometheus.GaugeVec)
 }
 
 // getTiming either gets a timing, or makes a new one:
 func (mf *metricFamily) getTiming(name string, labels prometheus.Labels) *prometheus.SummaryVec {
-	mf.timingMutex.Lock()
-	defer mf.timingMutex.Unlock()
-
 	// See if we already have this timing:
-	timing, ok := mf.timings[name]
-	if !ok {
+	if t, ok := mf.timings.Load(name); ok {
+		return t.(*prometheus.SummaryVec)
+	}
 
+	t, _ := mf.timingsSingle.Do(name, func() (interface{}, error) {
 		// Make a new timing:
-		timing = prometheus.NewSummaryVec(
+		timing := prometheus.NewSummaryVec(
 			prometheus.SummaryOpts{
 				Name:        name,
 				ConstLabels: mf.defaultLabels,
@@ -130,8 +125,8 @@ func (mf *metricFamily) getTiming(name string, labels prometheus.Labels) *promet
 
 		// Register it and add it to our list:
 		mf.prometheusRegistry.MustRegister(timing)
-		mf.timings[name] = timing
-	}
-
-	return timing
+		mf.timings.Store(name, timing)
+		return timing, nil
+	})
+	return t.(*prometheus.SummaryVec)
 }
