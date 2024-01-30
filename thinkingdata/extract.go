@@ -2,6 +2,7 @@ package thinkingdata
 
 import (
 	"errors"
+	"unicode"
 
 	"go.uber.org/zap/zapcore"
 )
@@ -25,12 +26,30 @@ func ExtractEncoder(memoryEncoder *zapcore.MapObjectEncoder) (Data, error) {
 	}
 	userType, ok1 := memoryEncoder.Fields[TYPE]
 	eventName, hasEvent := memoryEncoder.Fields[EVENT]
+
+	// event_id
+	eventID, _ := memoryEncoder.Fields[EVENT_ID]
+	if eventID == nil {
+		eventID = ""
+	}
+	strEventID, ok := eventID.(string)
+	if !ok {
+		return emptyData, errors.New("#event_id must be string")
+	}
+	if len(strEventID) > 0 { // #event_id如果存在，必须以字母或数字开头
+		firstChar := rune(eventID.(string)[0])
+		if !unicode.IsLetter(firstChar) && !unicode.IsDigit(firstChar) {
+			return emptyData, errors.New("the event name must start with a letter or number")
+		}
+	}
+
 	delete(memoryEncoder.Fields, ACCOUNT)
 	delete(memoryEncoder.Fields, DISTINCT)
 	delete(memoryEncoder.Fields, TYPE)
 	delete(memoryEncoder.Fields, EVENT)
+	delete(memoryEncoder.Fields, EVENT_ID)
 	if hasEvent {
-		return Track(accountId.(string), distinctId.(string), eventName.(string), memoryEncoder.Fields)
+		return Track(accountId.(string), distinctId.(string), eventName.(string), strEventID, memoryEncoder.Fields)
 	}
 	if ok1 {
 		if userType.(string) == TRACK {
