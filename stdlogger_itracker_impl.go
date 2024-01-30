@@ -9,7 +9,7 @@ import (
 )
 
 func (s *StdLogger) PrintThingkingData(data thinkingdata.Data) {
-	bytes, err := data.MarshalAsJson()
+	bytes, err := data.MarshalAsJsonV2()
 	if err != nil {
 		s.ErrorWithChannel(Setting.DefaultChannel, zap.String("PrintThingkingData", err.Error()))
 	}

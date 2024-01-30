@@ -80,6 +80,46 @@ func (d Data) MarshalAsJson() ([]byte, error) {
 	return utils.Zap2Json(fields)
 }
 
+func (d Data) MarshalAsJsonV2() ([]byte, error) {
+	var fields [10]zap.Field
+	index := 0
+
+	if d.AccountId != "" {
+		fields[index] = zap.String(ACCOUNT, d.AccountId)
+		index++
+	}
+	if d.DistinctId != "" {
+		fields[index] = zap.String(DISTINCT, d.DistinctId)
+		index++
+	}
+	fields[index] = zap.String(TYPE, d.Type)
+	index++
+	fields[index] = zap.String(TIME, d.Time)
+	index++
+	if d.EventName != "" {
+		fields[index] = zap.String(EVENT, d.EventName)
+		index++
+	}
+	if d.EventId != "" {
+		fields[index] = zap.String(EVENT_ID, d.EventId)
+		index++
+	}
+	if d.FirstCheckId != "" {
+		fields[index] = zap.String(FIRST_CHECK_ID, d.FirstCheckId)
+		index++
+	}
+	if d.Ip != "" {
+		fields[index] = zap.String(IP, d.Ip)
+		index++
+	}
+	if d.UUID != "" {
+		fields[index] = zap.String(UUID, d.UUID)
+		index++
+	}
+	fields[index] = zap.Object("properties", zapencoder.StringInterfaceMap(d.Properties))
+	return utils.Zap2Json(fields[:index])
+}
+
 //var json = jsoniter.ConfigCompatibleWithStandardLibrary
 //func (d Data) MarshalAsJsonV2() ([]byte, error) {
 //	return json.Marshal(d)
