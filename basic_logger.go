@@ -1,13 +1,14 @@
 package logbus
 
 import (
+	"time"
+
 	prometheusClient "github.com/prometheus/client_golang/prometheus"
 	"github.com/sandwich-go/logbus/monitor"
 	"github.com/sandwich-go/logbus/monitor/noop"
 	"github.com/sandwich-go/logbus/monitor/prometheus"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-	"time"
 )
 
 var (

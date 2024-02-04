@@ -10,5 +10,6 @@ require (
 	github.com/sandwich-go/zapgen v0.0.0-20220915080429-843fca246b24
 	github.com/shirou/gopsutil/v3 v3.22.10
 	github.com/smartystreets/goconvey v1.7.2
+	github.com/stretchr/testify v1.8.1
 	go.uber.org/zap v1.23.0
 )

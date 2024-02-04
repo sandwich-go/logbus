@@ -1,10 +1,11 @@
 package logbus
 
 import (
-	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
 	"os"
 	"time"
+
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 var EncodeConfig = zapcore.EncoderConfig{

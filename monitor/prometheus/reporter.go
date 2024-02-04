@@ -2,11 +2,12 @@
 package prometheus
 
 import (
-	"github.com/prometheus/client_golang/prometheus/collectors"
 	"net/http"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/prometheus/client_golang/prometheus/collectors"
 
 	"github.com/sandwich-go/boost"
 
