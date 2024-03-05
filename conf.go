@@ -1,6 +1,7 @@
 package logbus
 
 import (
+	"os"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -21,6 +22,8 @@ func _ConfOptionDeclareWithDefault() interface{} {
 		"StackLogLevel": (zapcore.Level)(zap.ErrorLevel), //@MethodComment(打印stack的最低级别，默认ErrorLevel stack if level >= StackLogLevel)
 		// stdout
 		"BufferedStdout": false, // @MethodComment(输出stdout时使用 logbus.BufferedWriteSyncer)
+		// WriteSyncer
+		"WriteSyncer": zapcore.WriteSyncer(os.Stdout), // @MethodComment(输出日志的WriteSyncer，默认为os.Stdout)
 
 		// monitor
 		"MonitorOutput": MonitorOutput(Noop), // [Logbus, Noop, Prometheus] @MethodComment(监控输出 Logbus, Noop, Prometheus)

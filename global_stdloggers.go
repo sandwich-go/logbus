@@ -1,8 +1,6 @@
 package logbus
 
 import (
-	"os"
-
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -41,11 +39,14 @@ func newNLoggerInstance(tagName string, fields ...zap.Field) *StdLogger {
 	}
 
 	// stdout 只能输出到stdout
-	var writer zapcore.WriteSyncer
-	writer = os.Stdout
+	//var writer zapcore.WriteSyncer
+	//writer = os.Stdout
+	var writer = Setting.WriteSyncer
 	if Setting.BufferedStdout {
+		BufferedWriteSyncer.WS = Setting.WriteSyncer
 		writer = BufferedWriteSyncer
 	}
+
 	stdCore := zapcore.NewCore(encoder, writer, Setting.LogLevel).With(append([]zap.Field{zap.String(Tags, tagName)}, fields...))
 	cores = append(cores, stdCore)
 
