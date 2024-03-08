@@ -1,4 +1,12 @@
-### v1.1.0 🌈 (2024-03-08 11:28:30)
+### v1.1.1 🌈 (2024-03-08 18:01:13)
+
+#### 🐛  Bug Fixed
+  * tga日志缺少properties字段 ([ecab5d2](https://github.com/sandwich-go/logbus/commit/ecab5d2efa7eb02453e5e7ee56097f11c3ba92c3)) (<small>[Daming Yang](daming.yang@centurygame.com)@2024-03-08 18:01:13 &#43;0800 &#43;0800</small>)
+
+#### 🤖  Tools
+  * **sem**: make changelog ([7587e39](https://github.com/sandwich-go/logbus/commit/7587e39cfab844dcc846a77aea45c4dd9236a06f)) (<small>[zhengyang.zhu](zhengyang.zhu@centurygame.com)@2024-03-08 11:47:05 &#43;0800 &#43;0800</small>)
+
+### v1.1.0 (2024-03-08 11:28:30)
 
 #### 🚀  New Feature
   * add GetZapLogger() ([3a5adc3](https://github.com/sandwich-go/logbus/commit/3a5adc37b874f24413373996e4bd5681ea71ccc6)) (<small>[zhengyang.zhu](zhengyang.zhu@centurygame.com)@2024-02-04 15:12:55 &#43;0800 &#43;0800</small>)
