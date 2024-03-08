@@ -4,6 +4,7 @@
 package logbus
 
 import (
+	"os"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -23,6 +24,8 @@ type Conf struct {
 	StackLogLevel zapcore.Level
 	// stdout
 	BufferedStdout bool
+	// WriteSyncer
+	WriteSyncer zapcore.WriteSyncer
 	// monitor
 	MonitorOutput MonitorOutput // [Logbus, Noop, Prometheus]
 	// The Prometheus metrics will be made available on this port:
@@ -108,6 +111,13 @@ func WithBufferedStdout(v bool) ConfOption {
 	}
 }
 
+// WithWriteSyncer 输出日志的WriteSyncer，默认为os.Stdout
+func WithWriteSyncer(v zapcore.WriteSyncer) ConfOption {
+	return func(cc *Conf) {
+		cc.WriteSyncer = v
+	}
+}
+
 // WithMonitorOutput 监控输出 Logbus, Noop, Prometheus
 func WithMonitorOutput(v MonitorOutput) ConfOption {
 	return func(cc *Conf) {
@@ -175,6 +185,7 @@ func newDefaultConf() *Conf {
 		WithCallerSkip(2),
 		WithStackLogLevel(zap.ErrorLevel),
 		WithBufferedStdout(false),
+		WithWriteSyncer(os.Stdout),
 		WithMonitorOutput(Noop),
 		WithDefaultPrometheusListenAddress(":9158"),
 		WithDefaultPrometheusPath("/metrics"),
@@ -197,6 +208,7 @@ func (cc *Conf) GetDefaultTag() string                     { return cc.DefaultTa
 func (cc *Conf) GetCallerSkip() int                        { return cc.CallerSkip }
 func (cc *Conf) GetStackLogLevel() zapcore.Level           { return cc.StackLogLevel }
 func (cc *Conf) GetBufferedStdout() bool                   { return cc.BufferedStdout }
+func (cc *Conf) GetWriteSyncer() zapcore.WriteSyncer       { return cc.WriteSyncer }
 func (cc *Conf) GetMonitorOutput() MonitorOutput           { return cc.MonitorOutput }
 func (cc *Conf) GetDefaultPrometheusListenAddress() string { return cc.DefaultPrometheusListenAddress }
 func (cc *Conf) GetDefaultPrometheusPath() string          { return cc.DefaultPrometheusPath }
@@ -214,6 +226,7 @@ type ConfVisitor interface {
 	GetCallerSkip() int
 	GetStackLogLevel() zapcore.Level
 	GetBufferedStdout() bool
+	GetWriteSyncer() zapcore.WriteSyncer
 	GetMonitorOutput() MonitorOutput
 	GetDefaultPrometheusListenAddress() string
 	GetDefaultPrometheusPath() string

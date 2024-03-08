@@ -1,9 +1,10 @@
 package logbus
 
 import (
+	"time"
+
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-	"time"
 )
 
 func Array(key string, val zapcore.ArrayMarshaler) Field {

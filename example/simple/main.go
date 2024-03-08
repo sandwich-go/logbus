@@ -9,7 +9,8 @@ func main() {
 	defer logbus.Close()
 
 	// 主线程中使用 非线程安全
-	logbus.Init(logbus.NewConf(logbus.WithDev(true), logbus.WithDefaultChannel("Simple")))
+	logbus.EncodeConfig.CallerKey = "caller"
+	logbus.Init(logbus.NewConf(logbus.WithDev(false), logbus.WithDefaultChannel("Simple")))
 
 	// Print server debug log, dd_meta_channel=setting.DefaultChannel
 	logbus.Debug("", logbus.Int("int", 123))

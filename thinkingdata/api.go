@@ -8,18 +8,18 @@ func User(accountId, distinctId, dataType string, properties map[string]interfac
 	if properties == nil && dataType != USER_DEL {
 		return emptyData, errors.New("invalid params for " + dataType + ": properties is nil")
 	}
-	return add(accountId, distinctId, dataType, "", properties)
+	return add(accountId, distinctId, dataType, "", "", properties)
 }
 
-func Track(accountId, distinctId, eventName string, properties map[string]interface{}) (Data, error) {
+func Track(accountId, distinctId, eventName, eventID string, properties map[string]interface{}) (Data, error) {
 	if len(eventName) == 0 {
 		return emptyData, errors.New("the event name must be provided")
 	}
 	dataType := TRACK
-	return add(accountId, distinctId, dataType, eventName, properties)
+	return add(accountId, distinctId, dataType, eventName, eventID, properties)
 }
 
-func add(accountId, distinctId, dataType, eventName string, properties map[string]interface{}) (Data, error) {
+func add(accountId, distinctId, dataType, eventName, eventID string, properties map[string]interface{}) (Data, error) {
 	if len(accountId) == 0 && len(distinctId) == 0 {
 		return emptyData, errors.New("invalid parameters: account_id and distinct_id cannot be empty at the same time")
 	}
@@ -39,6 +39,7 @@ func add(accountId, distinctId, dataType, eventName string, properties map[strin
 		Type:       dataType,
 		Time:       eventTime,
 		EventName:  eventName,
+		EventId:    eventID,
 		Ip:         ip,
 		UUID:       uuid,
 		Properties: properties,

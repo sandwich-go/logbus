@@ -11,12 +11,9 @@ import (
 
 // metricFamily stores our cached metrics:
 type metricFamily struct {
-	counterMutex sync.Mutex
-	counters     map[string]*prometheus.CounterVec
-	gaugeMutex   sync.Mutex
-	gauges       map[string]*prometheus.GaugeVec
-	timingMutex  sync.Mutex
-	timings      map[string]*prometheus.SummaryVec
+	counters sync.Map
+	gauges   sync.Map
+	timings  sync.Map
 
 	defaultLabels      prometheus.Labels
 	prometheusRegistry *prometheus.Registry
@@ -38,9 +35,6 @@ func (r *Reporter) newMetricFamily(defaultPercentiles []float64, defaultLabel pr
 	}
 
 	return metricFamily{
-		counters:           make(map[string]*prometheus.CounterVec),
-		gauges:             make(map[string]*prometheus.GaugeVec),
-		timings:            make(map[string]*prometheus.SummaryVec),
 		defaultLabels:      r.convertLabels(defaultLabel),
 		timingMaxAge:       timingMaxAge,
 		prometheusRegistry: r.prometheusRegistry,
@@ -58,80 +52,63 @@ func (mf *metricFamily) listTagKeys(labels prometheus.Labels) (labelKeys []strin
 
 // getCounter either gets a counter, or makes a new one:
 func (mf *metricFamily) getCounter(name string, labels prometheus.Labels) *prometheus.CounterVec {
-	mf.counterMutex.Lock()
-	defer mf.counterMutex.Unlock()
-
 	// See if we already have this counter:
-	counter, ok := mf.counters[name]
-	if !ok {
-
-		// Make a new counter:
-		counter = prometheus.NewCounterVec(
-			prometheus.CounterOpts{
-				Name:        name,
-				ConstLabels: mf.defaultLabels,
-			},
-			mf.listTagKeys(labels),
-		)
-
-		// Register it and add it to our list:
+	if c, ok := mf.counters.Load(name); ok {
+		return c.(*prometheus.CounterVec)
+	}
+	counter := prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Name:        name,
+			ConstLabels: mf.defaultLabels,
+		},
+		mf.listTagKeys(labels),
+	)
+	c, loaded := mf.counters.LoadOrStore(name, counter)
+	if !loaded {
 		mf.prometheusRegistry.MustRegister(counter)
-		mf.counters[name] = counter
 	}
 
-	return counter
+	return c.(*prometheus.CounterVec)
 }
 
 // getGauge either gets a gauge, or makes a new one:
 func (mf *metricFamily) getGauge(name string, labels prometheus.Labels) *prometheus.GaugeVec {
-	mf.gaugeMutex.Lock()
-	defer mf.gaugeMutex.Unlock()
-
 	// See if we already have this gauge:
-	gauge, ok := mf.gauges[name]
-	if !ok {
-
-		// Make a new gauge:
-		gauge = prometheus.NewGaugeVec(
-			prometheus.GaugeOpts{
-				Name:        name,
-				ConstLabels: mf.defaultLabels,
-			},
-			mf.listTagKeys(labels),
-		)
-
-		// Register it and add it to our list:
-		mf.prometheusRegistry.MustRegister(gauge)
-		mf.gauges[name] = gauge
+	if g, ok := mf.gauges.Load(name); ok {
+		return g.(*prometheus.GaugeVec)
 	}
-
-	return gauge
+	gauge := prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name:        name,
+			ConstLabels: mf.defaultLabels,
+		},
+		mf.listTagKeys(labels),
+	)
+	g, loaded := mf.gauges.LoadOrStore(name, gauge)
+	if !loaded {
+		mf.prometheusRegistry.MustRegister(gauge)
+	}
+	return g.(*prometheus.GaugeVec)
 }
 
 // getTiming either gets a timing, or makes a new one:
 func (mf *metricFamily) getTiming(name string, labels prometheus.Labels) *prometheus.SummaryVec {
-	mf.timingMutex.Lock()
-	defer mf.timingMutex.Unlock()
-
 	// See if we already have this timing:
-	timing, ok := mf.timings[name]
-	if !ok {
-
-		// Make a new timing:
-		timing = prometheus.NewSummaryVec(
-			prometheus.SummaryOpts{
-				Name:        name,
-				ConstLabels: mf.defaultLabels,
-				Objectives:  mf.timingObjectives,
-				MaxAge:      mf.timingMaxAge,
-			},
-			mf.listTagKeys(labels),
-		)
-
-		// Register it and add it to our list:
-		mf.prometheusRegistry.MustRegister(timing)
-		mf.timings[name] = timing
+	if t, ok := mf.timings.Load(name); ok {
+		return t.(*prometheus.SummaryVec)
 	}
-
-	return timing
+	timing := prometheus.NewSummaryVec(
+		prometheus.SummaryOpts{
+			Name:        name,
+			ConstLabels: mf.defaultLabels,
+			Objectives:  mf.timingObjectives,
+			MaxAge:      mf.timingMaxAge,
+		},
+		mf.listTagKeys(labels),
+	)
+	t, loaded := mf.timings.LoadOrStore(name, timing)
+	if !loaded {
+		mf.prometheusRegistry.MustRegister(timing)
+	}
+	return t.(*prometheus.SummaryVec)
 }

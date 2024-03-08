@@ -1,5 +1,7 @@
 package logbus
 
+import "go.uber.org/zap"
+
 // default logger provided
 var newGlobalGLogger NewILogger
 
@@ -73,4 +75,13 @@ func ErrorDepth(depth int, msg string, v ...Field) {
 // FatalDepth 用于glog被再封装
 func FatalDepth(depth int, msg string, v ...Field) {
 	newGlobalGLogger.GFatalDepth(depth, msg, v...)
+}
+
+// GetZapLogger
+func GetZapLogger() *zap.Logger {
+	from, ok := newGlobalGLogger.(GLoggerVisitor)
+	if !ok {
+		return nil
+	}
+	return from.GetStdLogger().getZapLogger()
 }

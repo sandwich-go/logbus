@@ -21,3 +21,7 @@ func (s *StdLogger) SetZLogger(zl *zap.Logger) {
 func (s *StdLogger) Sync() error {
 	return s.z.Sync()
 }
+
+func (s *StdLogger) getZapLogger() *zap.Logger {
+	return s.z
+}

@@ -17,8 +17,8 @@ type ProcessStata interface {
 	ResidentMemory() int
 }
 
-//GetProcessStat 获取进程状态查看器
-//interval: 控制获取状态的频率，默认30s，最小15s，
+// GetProcessStat 获取进程状态查看器
+// interval: 控制获取状态的频率，默认30s，最小15s，
 func GetProcessStat(interval time.Duration) ProcessStata {
 	if minInterval <= interval && instance.statInterval > interval {
 		instance.statInterval = interval

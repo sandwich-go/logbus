@@ -1,8 +1,9 @@
 package logbus
 
 import (
-	"go.uber.org/zap/zapcore"
 	"time"
+
+	"go.uber.org/zap/zapcore"
 
 	"github.com/sandwich-go/boost/z"
 )
