@@ -117,6 +117,7 @@ func (d Data) MarshalAsJsonV2() ([]byte, error) {
 		index++
 	}
 	fields[index] = zap.Object("properties", zapencoder.StringInterfaceMap(d.Properties))
+	index++
 	return utils.Zap2Json(fields[:index])
 }
 
