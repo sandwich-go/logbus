@@ -26,19 +26,39 @@ func TestStdLogger(t *testing.T) {
 	})))
 	defer resetLogBus()
 	defer Close()
-	/*Convey("test PrintThingkingData to stdout\n", t, func() {
-		properties := map[string]interface{}{"#ip": "10.0.0.2", "player_name": "zhang si", "level": 8, "data": []string{"x", "y"}}
-		data, err := thinkingdata.User("111", "", thinkingdata.USER_SET_ONCE, properties)
-		So(err, ShouldBeNil)
-		getStdLogger().PrintThingkingData(data)
-	})*/
 	Convey("test server log to stdout\n", t, func() {
 		Debug("", Int("int", 111))
 		Info("", Int("int", 111), String("str", "222"))
 		Warn("", Int("int", 111), String("str", "222"), Bool("b", true))
 		Error("", Int("int", 111), String("str", "222"), Bool("b", true), ErrorField(errors.New("this is a test error")))
 		//StdLogger().WithOptions(zap.AddCallerSkip(10)).Fatal("fatal", zap.Int("int", 111), zap.String("str", "222"), zap.Bool("b", true), zap.Error(nil))
-		So(gStdLogger.fetch()[0].Key, ShouldEqual, "dd_meta_channel")
+		So(gStdLogger.fetch, ShouldEqual, nil)
+	})
+}
+
+func TestScopeLogger(t *testing.T) {
+	refresh = true
+	scopLogger1 := NewScopeLoggerWithFetchFunc("test1", nil)
+	scopLogger2 := NewScopeLoggerWithFetchFunc("test2", func() []Field {
+		return []zap.Field{String("dd_meta_channel", "test2")}
+	})
+	Convey("test scope log\n", t, func() {
+		So(len(cacheGLogger), ShouldEqual, 2)
+		So(refresh, ShouldEqual, true)
+	})
+	Init(NewConf(WithLogLevel(zap.InfoLevel), WithBufferedStdout(true), WithFetchLogContext(func() []zap.Field {
+		return []zap.Field{String("dd_meta_channel", "test1")}
+	})))
+	scopLogger3 := NewScopeLogger("test3")
+	defer resetLogBus()
+	defer Close()
+	Convey("test scope log\n", t, func() {
+		scopLogger1.Debug("", Int("int", 111))                       // should not print
+		scopLogger1.Info("", Int("int", 111), String("str", "222"))  // should print with dd_meta_channel test1
+		scopLogger2.Warn("", Int("int", 111), String("str", "222"))  // should print with dd_meta_channel test2
+		scopLogger3.Error("", Int("int", 111), String("str", "222")) // should print with dd_meta_channel test1
+		So(cacheGLogger, ShouldEqual, nil)
+		So(refresh, ShouldEqual, false)
 	})
 }
 

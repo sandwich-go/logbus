@@ -1,7 +1,12 @@
 package logbus
 
+// refresh 用于刷新在Init() 之前创建的logger
+var refresh = true
+
 func init() {
+	refresh = false // 默认不执行 业务调用时执行且只执行一次
 	Init(NewConf())
+	refresh = true
 }
 
 // Init logBus初始化 会有两次调用。一次是init()，一次是手动调用Init的时候
@@ -12,7 +17,6 @@ func Init(conf *Conf) {
 	initGlobalStdLoggers()
 
 	// set logger used in glog
-	gStdLogger.fetch = conf.FetchLogContext
 	SetGlobalGLogger(gStdLogger, conf.DefaultChannel, conf.PrintAsError, conf.CallerSkip)
 
 	// init monitor
@@ -22,6 +26,11 @@ func Init(conf *Conf) {
 		conf.DefaultPercentiles,
 		conf.DefaultLabel,
 		conf.MonitorTimingMaxAge)
+
+	if refresh {
+		refresh = false
+		refreshEarlyLogger()
+	}
 }
 
 // Close 程序结束时打印缓存中的所有日志 并清理资源
