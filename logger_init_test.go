@@ -42,6 +42,7 @@ func TestScopeLogger(t *testing.T) {
 	scopLogger2 := NewScopeLoggerWithFetchFunc("test2", func() []Field {
 		return []zap.Field{String("dd_meta_channel", "test2")}
 	})
+	scopLogger1.Debug("", Int("int", 111))
 	Convey("test scope log\n", t, func() {
 		So(len(cacheGLogger), ShouldEqual, 2)
 		So(refresh, ShouldEqual, true)

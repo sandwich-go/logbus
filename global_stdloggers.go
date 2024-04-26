@@ -25,7 +25,7 @@ func initGlobalStdLoggers() {
 func NewScopeLogger(tagName string, fields ...zap.Field) NewILogger {
 	if refresh {
 		lg := &GLogger{
-			stdLogger: &StdLogger{},
+			stdLogger: newNLoggerInstance(tagName, fields...),
 		}
 		cacheGLogger = append(cacheGLogger, GLoggerCache{
 			tagName: tagName,
