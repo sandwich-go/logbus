@@ -21,7 +21,9 @@ func TestMain(m *testing.M) {
 }
 
 func TestStdLogger(t *testing.T) {
-	Init(NewConf(WithLogLevel(zap.InfoLevel), WithBufferedStdout(true)))
+	Init(NewConf(WithLogLevel(zap.InfoLevel), WithBufferedStdout(true), WithFetchLogContext(func() []zap.Field {
+		return []zap.Field{String("dd_meta_channel", "fetch")}
+	})))
 	defer resetLogBus()
 	defer Close()
 	/*Convey("test PrintThingkingData to stdout\n", t, func() {
@@ -36,6 +38,7 @@ func TestStdLogger(t *testing.T) {
 		Warn("", Int("int", 111), String("str", "222"), Bool("b", true))
 		Error("", Int("int", 111), String("str", "222"), Bool("b", true), ErrorField(errors.New("this is a test error")))
 		//StdLogger().WithOptions(zap.AddCallerSkip(10)).Fatal("fatal", zap.Int("int", 111), zap.String("str", "222"), zap.Bool("b", true), zap.Error(nil))
+		So(gStdLogger.fetch()[0].Key, ShouldEqual, "dd_meta_channel")
 	})
 }
 

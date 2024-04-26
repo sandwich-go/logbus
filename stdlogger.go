@@ -5,7 +5,8 @@ import (
 )
 
 type StdLogger struct {
-	z *zap.Logger
+	fetch FetchLogContext
+	z     *zap.Logger
 }
 
 func (s *StdLogger) WithOptions(opts ...zap.Option) *zap.Logger {

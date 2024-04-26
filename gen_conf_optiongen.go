@@ -15,11 +15,12 @@ import (
 // Conf should use NewConf to initialize it
 type Conf struct {
 	// log
-	LogLevel       zapcore.Level
-	Dev            bool   // false 输出json格式， true 则输出带颜色的易读log
-	DefaultChannel string // 默认的dd_meta_channel
-	DefaultTag     string // 默认打印的tag
-	CallerSkip     int    // zap logger callerSkip
+	LogLevel        zapcore.Level
+	Dev             bool            // false 输出json格式， true 则输出带颜色的易读log
+	DefaultChannel  string          // 默认的dd_meta_channel
+	DefaultTag      string          // 默认打印的tag
+	CallerSkip      int             // zap logger callerSkip
+	FetchLogContext FetchLogContext // 打印日志时，获取额外的field
 	//"LogId":         true,                            // 输出 log id  // 日志规范要求必须要有xid 不作为配置放出
 	StackLogLevel zapcore.Level
 	// stdout
@@ -97,6 +98,13 @@ func WithCallerSkip(v int) ConfOption {
 	}
 }
 
+// WithFetchLogContext 获取额外的field
+func WithFetchLogContext(v FetchLogContext) ConfOption {
+	return func(cc *Conf) {
+		cc.FetchLogContext = v
+	}
+}
+
 // WithStackLogLevel 是否输出log_xid，默认开启,打印stack的最低级别，默认ErrorLevel stack if level >= StackLogLevel
 func WithStackLogLevel(v zapcore.Level) ConfOption {
 	return func(cc *Conf) {
@@ -146,6 +154,13 @@ func WithDefaultPercentiles(v ...float64) ConfOption {
 	}
 }
 
+// AppendDefaultPercentiles 监控统计耗时的分位值，默认统计耗时的 50%, 75%, 99%, 100% 的分位数
+func AppendDefaultPercentiles(v ...float64) ConfOption {
+	return func(cc *Conf) {
+		cc.DefaultPercentiles = append(cc.DefaultPercentiles, v...)
+	}
+}
+
 // WithDefaultLabel 监控额外添加的全局label，会在监控指标中显示
 func WithDefaultLabel(v prometheus.Labels) ConfOption {
 	return func(cc *Conf) {
@@ -173,16 +188,15 @@ func InstallConfWatchDog(dog func(cc *Conf)) { watchDogConf = dog }
 // watchDogConf global watch dog
 var watchDogConf func(cc *Conf)
 
-// newDefaultConf new default Conf
-func newDefaultConf() *Conf {
-	cc := &Conf{}
-
+// setConfDefaultValue default Conf value
+func setConfDefaultValue(cc *Conf) {
 	for _, opt := range [...]ConfOption{
 		WithLogLevel(zap.DebugLevel),
 		WithDev(false),
 		WithDefaultChannel(SERVERLOG),
 		WithDefaultTag(DefaultTag),
 		WithCallerSkip(2),
+		WithFetchLogContext(nil),
 		WithStackLogLevel(zap.ErrorLevel),
 		WithBufferedStdout(false),
 		WithWriteSyncer(os.Stdout),
@@ -196,7 +210,12 @@ func newDefaultConf() *Conf {
 	} {
 		opt(cc)
 	}
+}
 
+// newDefaultConf new default Conf
+func newDefaultConf() *Conf {
+	cc := &Conf{}
+	setConfDefaultValue(cc)
 	return cc
 }
 
@@ -206,6 +225,7 @@ func (cc *Conf) GetDev() bool                              { return cc.Dev }
 func (cc *Conf) GetDefaultChannel() string                 { return cc.DefaultChannel }
 func (cc *Conf) GetDefaultTag() string                     { return cc.DefaultTag }
 func (cc *Conf) GetCallerSkip() int                        { return cc.CallerSkip }
+func (cc *Conf) GetFetchLogContext() FetchLogContext       { return cc.FetchLogContext }
 func (cc *Conf) GetStackLogLevel() zapcore.Level           { return cc.StackLogLevel }
 func (cc *Conf) GetBufferedStdout() bool                   { return cc.BufferedStdout }
 func (cc *Conf) GetWriteSyncer() zapcore.WriteSyncer       { return cc.WriteSyncer }
@@ -224,6 +244,7 @@ type ConfVisitor interface {
 	GetDefaultChannel() string
 	GetDefaultTag() string
 	GetCallerSkip() int
+	GetFetchLogContext() FetchLogContext
 	GetStackLogLevel() zapcore.Level
 	GetBufferedStdout() bool
 	GetWriteSyncer() zapcore.WriteSyncer

@@ -12,6 +12,7 @@ func Init(conf *Conf) {
 	initGlobalStdLoggers()
 
 	// set logger used in glog
+	gStdLogger.fetch = conf.FetchLogContext
 	SetGlobalGLogger(gStdLogger, conf.DefaultChannel, conf.PrintAsError, conf.CallerSkip)
 
 	// init monitor

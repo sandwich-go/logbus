@@ -20,10 +20,14 @@ func NewScopeLogger(tagName string, fields ...zap.Field) NewILogger {
 	if !ok {
 		return nil
 	}
+
+	newStdLogger := newNLoggerInstance(tagName, fields...)
+	newStdLogger.fetch = from.GetStdLogger().fetch
+
 	return &GLogger{
 		channelKey:   from.GetChannelKey(),
 		printAsError: from.GetPrintAsError(),
-		stdLogger:    newNLoggerInstance(tagName, fields...),
+		stdLogger:    newStdLogger,
 	}
 }
 

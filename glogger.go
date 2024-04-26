@@ -97,11 +97,14 @@ func (s *GLogger) Fatal(msg string, fields ...Field) {
 	s.stdLogger.FatalWithChannel(s.channelKey, fields...)
 }
 
-func (s *GLogger) getDepthLogger(depth int) *zap.Logger {
+func (s *GLogger) getDepthLogger(depth int) *StdLogger {
 	if lg, ok := s.depthLogger.Load(depth); ok {
-		return lg.(*zap.Logger)
+		return lg.(*StdLogger)
 	}
-	cloneLogger := s.stdLogger.WithOptions(zap.AddCallerSkip(depth))
+	cloneLogger := &StdLogger{
+		fetch: s.stdLogger.fetch,
+		z:     s.stdLogger.WithOptions(zap.AddCallerSkip(depth)),
+	}
 	s.depthLogger.Store(depth, cloneLogger)
 	return cloneLogger
 }
@@ -110,43 +113,43 @@ func (s *GLogger) GDebugDepth(depth int, msg string, fields ...Field) {
 	fields = append(fields, String("message", msg))
 	lg := s.getDepthLogger(depth)
 	if s.printAsError && s.printAsErr(fields...) {
-		lg.Error(s.channelKey, fields...)
+		lg.ErrorWithChannel(s.channelKey, fields...)
 		return
 	}
-	lg.Debug(s.channelKey, fields...)
+	lg.DebugWithChannel(s.channelKey, fields...)
 }
 
 func (s *GLogger) GInfoDepth(depth int, msg string, fields ...Field) {
 	fields = append(fields, String("message", msg))
 	lg := s.getDepthLogger(depth)
 	if s.printAsError && s.printAsErr(fields...) {
-		lg.Error(s.channelKey, fields...)
+		lg.ErrorWithChannel(s.channelKey, fields...)
 		return
 	}
-	lg.Info(s.channelKey, fields...)
+	lg.InfoWithChannel(s.channelKey, fields...)
 }
 func (s *GLogger) GWarnDepth(depth int, msg string, fields ...Field) {
 	fields = append(fields, String("message", msg))
 	lg := s.getDepthLogger(depth)
 	if s.printAsError && s.printAsErr(fields...) {
-		lg.Error(s.channelKey, fields...)
+		lg.ErrorWithChannel(s.channelKey, fields...)
 		return
 	}
-	lg.Warn(s.channelKey, fields...)
+	lg.WarnWithChannel(s.channelKey, fields...)
 }
 func (s *GLogger) GErrorDepth(depth int, msg string, fields ...Field) {
 	fields = append(fields, String("message", msg))
 	lg := s.getDepthLogger(depth)
 	if s.printAsError && s.printAsErr(fields...) {
-		lg.Error(s.channelKey, fields...)
+		lg.ErrorWithChannel(s.channelKey, fields...)
 		return
 	}
-	lg.Error(s.channelKey, fields...)
+	lg.ErrorWithChannel(s.channelKey, fields...)
 }
 func (s *GLogger) GFatalDepth(depth int, msg string, fields ...Field) {
 	fields = append(fields, String("message", msg))
 	lg := s.getDepthLogger(depth)
-	lg.Fatal(s.channelKey, fields...)
+	lg.FatalWithChannel(s.channelKey, fields...)
 }
 
 // WithChannel
