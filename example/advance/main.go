@@ -50,4 +50,8 @@ func main() {
 	q.Push(logbus.Int("i", 1))
 	q.Push(logbus.Int("j", 2))
 	logbus.Debug("queue", q.Retrieve()...)
+
+	logbus.ReservedGlobalFields = nil
+	logbus.SetGlobalFields(nil)
+	logbus.Info("clean log")
 }
