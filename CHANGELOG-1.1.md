@@ -1,4 +1,30 @@
-### v1.1.1 🌈 (2024-03-08 18:01:13)
+### v1.1.5 🌈 (2024-05-23 11:52:27)
+
+#### 🐛  Bug Fixed
+  * log caller ([b46d66c](https://github.com/sandwich-go/logbus/commit/b46d66c8f75421bcbe910ceab4db56720e1889ce)) (<small>[zhengyang.zhu](zhengyang.zhu@centurygame.com)@2024-05-23 11:52:27 &#43;0800 &#43;0800</small>)
+
+#### 🧪  Testing
+  * add SetGlobalFields example ([8cbfa03](https://github.com/sandwich-go/logbus/commit/8cbfa0362829a5f594949677f5a528c38f38ea4d)) (<small>[zhengyang.zhu](zhengyang.zhu@centurygame.com)@2024-05-08 18:01:31 &#43;0800 &#43;0800</small>)
+
+### v1.1.4 (2024-04-26 20:27:54)
+
+#### 🐛  Bug Fixed
+  * support NewScopeLogger before Init ([4536760](https://github.com/sandwich-go/logbus/commit/4536760b92a2c43575dc0a14a44b4730ba80036b)) (<small>[zhengyang.zhu](zhengyang.zhu@centurygame.com)@2024-04-26 20:27:54 &#43;0800 &#43;0800</small>)
+
+### v1.1.3 (2024-04-26 16:28:26)
+
+#### 🐛  Bug Fixed
+  * 刷新在logbus.Init()之前生成的 NewScopeLogger ([79b5288](https://github.com/sandwich-go/logbus/commit/79b5288828bfd5a3261697481decf3b3f97c128d)) (<small>[zhengyang.zhu](zhengyang.zhu@centurygame.com)@2024-04-26 16:28:26 &#43;0800 &#43;0800</small>)
+
+### v1.1.2 (2024-04-26 14:58:54)
+
+#### 🚀  New Feature
+  * add FetchLogContext option ([96e757b](https://github.com/sandwich-go/logbus/commit/96e757bb1b2118a09faef4856c2a6d92ea981146)) (<small>[zhengyang.zhu](zhengyang.zhu@centurygame.com)@2024-04-26 14:58:54 &#43;0800 &#43;0800</small>)
+
+#### 🤖  Tools
+  * **sem**: make changelog ([de9802a](https://github.com/sandwich-go/logbus/commit/de9802aee38fee357492f0d84d7e4f07a5c09c05)) (<small>[Daming Yang](daming.yang@centurygame.com)@2024-03-08 18:01:29 &#43;0800 &#43;0800</small>)
+
+### v1.1.1 (2024-03-08 18:01:13)
 
 #### 🐛  Bug Fixed
   * tga日志缺少properties字段 ([ecab5d2](https://github.com/sandwich-go/logbus/commit/ecab5d2efa7eb02453e5e7ee56097f11c3ba92c3)) (<small>[Daming Yang](daming.yang@centurygame.com)@2024-03-08 18:01:13 &#43;0800 &#43;0800</small>)
