@@ -18,9 +18,8 @@ func newLogReporter() *logReporter {
 	logger := &logReporter{
 		lg: gMonitorLogger,
 	}
-
-	logger.lg.SetZLogger(logger.lg.WithOptions(zap.AddCallerSkip(2)))
 	logger.lg.DebugWithChannel(Monitor, zap.String("start", "monitor will be logged"))
+	// logger.lg.SetZLogger(logger.lg.WithOptions(zap.AddCallerSkip(0)))
 	return logger
 }
 

@@ -40,6 +40,8 @@ func NewScopeLogger(tagName string, fields ...zap.Field) NewILogger {
 	}
 
 	newStdLogger := newNLoggerInstance(tagName, fields...)
+	// 比 newGlobalGLogger 少一层调用
+	newStdLogger.z = newStdLogger.z.WithOptions(zap.AddCallerSkip(-1))
 
 	return &GLogger{
 		channelKey:   from.GetChannelKey(),

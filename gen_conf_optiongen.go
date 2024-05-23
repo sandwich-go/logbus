@@ -195,7 +195,7 @@ func setConfDefaultValue(cc *Conf) {
 		WithDev(false),
 		WithDefaultChannel(SERVERLOG),
 		WithDefaultTag(DefaultTag),
-		WithCallerSkip(2),
+		WithCallerSkip(3),
 		WithFetchLogContext(nil),
 		WithStackLogLevel(zap.ErrorLevel),
 		WithBufferedStdout(false),

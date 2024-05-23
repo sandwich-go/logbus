@@ -2,7 +2,6 @@ package logbus
 
 import (
 	"errors"
-	"os"
 	"testing"
 	"time"
 
@@ -64,7 +63,7 @@ func TestScopeLogger(t *testing.T) {
 }
 
 func TestPrintComplexTag(t *testing.T) {
-	Init(NewConf(WithLogLevel(zap.DebugLevel), WithCallerSkip(2)))
+	Init(NewConf(WithLogLevel(zap.DebugLevel)))
 	defer resetLogBus()
 	Convey("test only tga to stdout\n", t, func() {
 		err := Tracker(THINKINGDATA).Track(String(thinkingdata.ACCOUNT, "111"), String(thinkingdata.TYPE, thinkingdata.USER_SET_ONCE),
@@ -111,13 +110,6 @@ func TestPrintComplexTag(t *testing.T) {
 			String("player_name", "zhang liu"), Int("level", 11), Bool("bool", true), Strings("strings", []string{"x", "y"}))
 		So(err, ShouldBeNil)
 	})
-}
-func fileExists(path string) bool {
-	_, err := os.Stat(path)
-	if err == nil {
-		return true
-	}
-	return false
 }
 
 func TestTagLoggerThinkingData(t *testing.T) {

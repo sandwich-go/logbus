@@ -17,7 +17,7 @@ func Init(conf *Conf) {
 	initGlobalStdLoggers()
 
 	// set logger used in glog
-	SetGlobalGLogger(gStdLogger, conf.DefaultChannel, conf.PrintAsError, conf.CallerSkip)
+	SetGlobalGLogger(gStdLogger, conf.DefaultChannel, conf.PrintAsError, 0)
 
 	// init monitor
 	setDefaultMetricsReporter(conf.MonitorOutput,
