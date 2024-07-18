@@ -1,4 +1,12 @@
-### v1.1.5 🌈 (2024-05-23 11:52:27)
+### v1.1.6 🌈 (2024-07-18 18:02:49)
+
+#### 🤖  Tools
+  * **sem**: make changelog ([77b1c84](https://github.com/sandwich-go/logbus/commit/77b1c84631b023e5616eb8ae44c236dcd431f9da)) (<small>[zhengyang.zhu](zhengyang.zhu@centurygame.com)@2024-05-23 11:53:00 &#43;0800 &#43;0800</small>)
+
+#### 💪  Commit
+  * 调整tga日志级别到warn，fix项目组变更日志级别之后报错 ([0583bd8](https://github.com/sandwich-go/logbus/commit/0583bd82cea8d266fb37dfc352c6bb574e285214)) (<small>[biyongze](yongze.bi@centurygame.com)@2024-07-18 18:02:49 &#43;0800 &#43;0800</small>)
+
+### v1.1.5 (2024-05-23 11:52:27)
 
 #### 🐛  Bug Fixed
   * log caller ([b46d66c](https://github.com/sandwich-go/logbus/commit/b46d66c8f75421bcbe910ceab4db56720e1889ce)) (<small>[zhengyang.zhu](zhengyang.zhu@centurygame.com)@2024-05-23 11:52:27 &#43;0800 &#43;0800</small>)
