@@ -25,7 +25,7 @@ type TrackLogger struct {
 }
 
 func (t *TrackLogger) Track(fields ...Field) error {
-	if ce := t.StdLogger.z.Check(zapcore.InfoLevel, ""); ce == nil {
+	if ce := t.StdLogger.z.Check(zapcore.WarnLevel, ""); ce == nil {
 		// 检查逻辑前置，不做无用功
 		return ErrIgnore
 	}
