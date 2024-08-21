@@ -2,13 +2,6 @@ package logbus
 
 import (
 	"github.com/sandwich-go/logbus/thinkingdata"
-	"os"
-	"strconv"
-	"time"
-)
-
-const (
-	envTGATimeZoneOffset = "TGA_TIMEZONE_OFFSET"
 )
 
 // refresh 用于刷新在Init() 之前创建的logger
@@ -43,12 +36,7 @@ func Init(conf *Conf) {
 		refreshEarlyLogger()
 	}
 
-	if os.Getenv(envTGATimeZoneOffset) != "" {
-		offset, ok := strconv.ParseInt(os.Getenv(envTGATimeZoneOffset), 10, 64)
-		if ok == nil {
-			thinkingdata.LocationTGA = time.FixedZone("", int(offset))
-		}
-	}
+	thinkingdata.Init()
 }
 
 // Close 程序结束时打印缓存中的所有日志 并清理资源
