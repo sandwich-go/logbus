@@ -25,13 +25,7 @@ func mergeProperties(target, source map[string]interface{}) {
 	}
 }
 
-func extractTime(p map[string]interface{}) (tm string) {
-	defer func() {
-		if tm == "" {
-			tm = time.Now().In(locationTGA).Format(DATE_FORMAT)
-		}
-	}()
-
+func extractTime(p map[string]interface{}) string {
 	if t, ok := p["#time"]; ok {
 		delete(p, "#time")
 		switch v := t.(type) {
@@ -40,11 +34,11 @@ func extractTime(p map[string]interface{}) (tm string) {
 		case time.Time:
 			return v.Format(DATE_FORMAT)
 		default:
-			return ""
+			return time.Now().In(locationTGA).Format(DATE_FORMAT)
 		}
 	}
 
-	return ""
+	return time.Now().In(locationTGA).Format(DATE_FORMAT)
 }
 
 func extractStringProperty(p map[string]interface{}, key string) string {
