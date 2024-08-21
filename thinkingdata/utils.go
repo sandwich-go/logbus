@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-var TgaLocation = time.UTC
+var LocationTGA = time.UTC
 
 var KeyPattern, _ = regexp.Compile(KEY_PATTERN)
 
@@ -27,7 +27,9 @@ func mergeProperties(target, source map[string]interface{}) {
 
 func extractTime(p map[string]interface{}) (tm string) {
 	defer func() {
-		tm = time.Now().In(TgaLocation).Format(DATE_FORMAT)
+		if tm == "" {
+			tm = time.Now().In(LocationTGA).Format(DATE_FORMAT)
+		}
 	}()
 
 	if t, ok := p["#time"]; ok {

@@ -46,7 +46,7 @@ func Init(conf *Conf) {
 	if os.Getenv(envTGATimeZoneOffset) != "" {
 		offset, ok := strconv.ParseInt(os.Getenv(envTGATimeZoneOffset), 10, 64)
 		if ok == nil {
-			thinkingdata.TgaLocation = time.FixedZone("", int(offset))
+			thinkingdata.LocationTGA = time.FixedZone("", int(offset))
 		}
 	}
 }
