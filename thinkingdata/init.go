@@ -10,10 +10,10 @@ const (
 	envTGATimeZoneOffset = "TGA_TIMEZONE_OFFSET"
 )
 
-func Init() {
+func init() {
 	if os.Getenv(envTGATimeZoneOffset) != "" {
-		offset, ok := strconv.ParseInt(os.Getenv(envTGATimeZoneOffset), 10, 64)
-		if ok == nil {
+		offset, err := strconv.ParseInt(os.Getenv(envTGATimeZoneOffset), 10, 64)
+		if err == nil {
 			locationTGA = time.FixedZone("", int(offset))
 		}
 	}

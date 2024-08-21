@@ -1,9 +1,5 @@
 package logbus
 
-import (
-	"github.com/sandwich-go/logbus/thinkingdata"
-)
-
 // refresh 用于刷新在Init() 之前创建的logger
 var refresh = true
 
@@ -35,8 +31,6 @@ func Init(conf *Conf) {
 		refresh = false
 		refreshEarlyLogger()
 	}
-
-	thinkingdata.Init()
 }
 
 // Close 程序结束时打印缓存中的所有日志 并清理资源
