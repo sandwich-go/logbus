@@ -11,6 +11,10 @@ import (
 	"time"
 )
 
+const (
+	envTGATimeZone = "TGA_TIMEZONE_UTC8"
+)
+
 var KeyPattern, _ = regexp.Compile(KEY_PATTERN)
 
 func checkPattern(name []byte) bool {
@@ -23,7 +27,17 @@ func mergeProperties(target, source map[string]interface{}) {
 	}
 }
 
-func extractTime(p map[string]interface{}) string {
+func extractTime(p map[string]interface{}) (tm string) {
+	defer func() {
+		location := time.UTC
+		if tm == "" {
+			if os.Getenv(envTGATimeZone) == "true" {
+				location, _ = time.LoadLocation("Asia/Shanghai")
+			}
+			tm = time.Now().In(location).Format(DATE_FORMAT)
+		}
+	}()
+
 	if t, ok := p["#time"]; ok {
 		delete(p, "#time")
 		switch v := t.(type) {
@@ -32,11 +46,11 @@ func extractTime(p map[string]interface{}) string {
 		case time.Time:
 			return v.Format(DATE_FORMAT)
 		default:
-			return time.Now().Format(DATE_FORMAT)
+			return ""
 		}
 	}
 
-	return time.Now().Format(DATE_FORMAT)
+	return ""
 }
 
 func extractStringProperty(p map[string]interface{}, key string) string {
