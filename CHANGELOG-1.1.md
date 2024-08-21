@@ -1,4 +1,12 @@
-### v1.1.6 🌈 (2024-07-18 18:02:49)
+### v1.1.7 🌈 (2024-08-21 15:21:26)
+
+#### 🤖  Tools
+  * **sem**: make changelog ([1b0aef4](https://github.com/sandwich-go/logbus/commit/1b0aef4690c6853559651879f9ea8a97717d41c0)) (<small>[biyongze](yongze.bi@centurygame.com)@2024-07-18 18:03:20 &#43;0800 &#43;0800</small>)
+
+#### 💪  Commit
+  * tga使用环境变量来控制是否使用utc8 ([28d157e](https://github.com/sandwich-go/logbus/commit/28d157e5708ac8a7e8eedb75e448c07ef938fbfa)) (<small>[biyongze](yongze.bi@centurygame.com)@2024-08-21 15:21:26 &#43;0800 &#43;0800</small>)
+
+### v1.1.6 (2024-07-18 18:02:49)
 
 #### 🤖  Tools
   * **sem**: make changelog ([77b1c84](https://github.com/sandwich-go/logbus/commit/77b1c84631b023e5616eb8ae44c236dcd431f9da)) (<small>[zhengyang.zhu](zhengyang.zhu@centurygame.com)@2024-05-23 11:53:00 &#43;0800 &#43;0800</small>)
