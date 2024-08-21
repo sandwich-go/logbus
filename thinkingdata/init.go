@@ -1,6 +1,8 @@
 package thinkingdata
 
 import (
+	"fmt"
+	"github.com/sandwich-go/boost/xpanic"
 	"os"
 	"strconv"
 	"time"
@@ -13,8 +15,8 @@ const (
 func init() {
 	if os.Getenv(envTGATimeZoneOffset) != "" {
 		offset, err := strconv.ParseInt(os.Getenv(envTGATimeZoneOffset), 10, 64)
-		if err == nil {
-			locationTGA = time.FixedZone("", int(offset))
-		}
+		xpanic.WhenTrue(err != nil, fmt.Sprintf("TGA_TIMEZONE_OFFSET %s is not number", os.Getenv(envTGATimeZoneOffset)))
+		xpanic.WhenTrue(offset > 12*60 || offset < -12*60, fmt.Sprintf("TGA_TIMEZONE_OFFSET %d is out of range", offset))
+		locationTGA = time.FixedZone("", int(offset))
 	}
 }
