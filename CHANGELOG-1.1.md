@@ -1,4 +1,21 @@
-### v1.1.7 🌈 (2024-08-21 15:21:26)
+### v1.1.8 🌈 (2024-08-30 15:16:49)
+
+#### 🐛  Bug Fixed
+  * tga时区偏移量错误 ([7240e69](https://github.com/sandwich-go/logbus/commit/7240e6988f88e5b00256e73b2559c47d443a6ab0)) (<small>[biyongze](yongze.bi@centurygame.com)@2024-08-21 17:38:08 &#43;0800 &#43;0800</small>)
+  * 调整代码规范 ([b490840](https://github.com/sandwich-go/logbus/commit/b490840ddd1827d157a0ee23d9c1249b6b33cefc)) (<small>[biyongze](yongze.bi@centurygame.com)@2024-08-21 17:18:25 &#43;0800 &#43;0800</small>)
+  * tga时区设置判断条件 ([b15a009](https://github.com/sandwich-go/logbus/commit/b15a009fc809b67c1d9bc1fcd49aa214898b3225)) (<small>[biyongze](yongze.bi@centurygame.com)@2024-08-21 16:43:23 &#43;0800 &#43;0800</small>)
+
+#### 🤖  Tools
+  * **sem**: make changelog ([7f3529e](https://github.com/sandwich-go/logbus/commit/7f3529eac821f11804ead4f6ba1937f599384706)) (<small>[biyongze](yongze.bi@centurygame.com)@2024-08-21 15:52:00 &#43;0800 &#43;0800</small>)
+
+#### 💪  Commit
+  * Update const.go from const to var ([63dacc9](https://github.com/sandwich-go/logbus/commit/63dacc9327828ccd7323decc75b1be7fb3f8fb37)) (<small>[timestee](19310233&#43;timestee@users.noreply.github.com)@2024-08-30 15:16:49 &#43;0800 &#43;0800</small>)
+  * tga时区调整：偏移量不正确的时候panic ([b32e4f1](https://github.com/sandwich-go/logbus/commit/b32e4f169422a2bb14ad350f5f737ec23fc5dbe6)) (<small>[biyongze](yongze.bi@centurygame.com)@2024-08-21 17:32:18 &#43;0800 &#43;0800</small>)
+  * tga时区调整： 去掉defer ([bd41545](https://github.com/sandwich-go/logbus/commit/bd415453ad179e7242e5b36f02624463080471b2)) (<small>[biyongze](yongze.bi@centurygame.com)@2024-08-21 17:00:59 &#43;0800 &#43;0800</small>)
+  * tga时区调整:逻辑内聚 ([0484b5c](https://github.com/sandwich-go/logbus/commit/0484b5cf570037850e9e35d6ac74a03115ae2090)) (<small>[biyongze](yongze.bi@centurygame.com)@2024-08-21 16:58:49 &#43;0800 &#43;0800</small>)
+  * 使用offset方式变更tga时区 ([30118c3](https://github.com/sandwich-go/logbus/commit/30118c36dab3f912e2b8c84305f46ce3e9710d64)) (<small>[biyongze](yongze.bi@centurygame.com)@2024-08-21 16:31:40 &#43;0800 &#43;0800</small>)
+
+### v1.1.7 (2024-08-21 15:21:26)
 
 #### 🤖  Tools
   * **sem**: make changelog ([1b0aef4](https://github.com/sandwich-go/logbus/commit/1b0aef4690c6853559651879f9ea8a97717d41c0)) (<small>[biyongze](yongze.bi@centurygame.com)@2024-07-18 18:03:20 &#43;0800 &#43;0800</small>)
