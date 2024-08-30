@@ -1,4 +1,14 @@
-### v1.1.8 🌈 (2024-08-30 15:16:49)
+### v1.1.9 🌈 (2024-08-30 16:51:49)
+
+#### 🐛  Bug Fixed
+  * fetch nil ([8956878](https://github.com/sandwich-go/logbus/commit/89568789d399dcbd4fa372a2c9155130913551db)) (<small>[hui.wang](hui.wang@centurygame.com)@2024-08-30 16:51:49 &#43;0800 &#43;0800</small>)
+  * msg body key ([aa59d7a](https://github.com/sandwich-go/logbus/commit/aa59d7a8ac937160835f7d03288ce7218367636e)) (<small>[hui.wang](hui.wang@centurygame.com)@2024-08-30 15:47:10 &#43;0800 &#43;0800</small>)
+  * logbus key ([c584fd2](https://github.com/sandwich-go/logbus/commit/c584fd2935549bfac979533ece01098e8e7d0a5c)) (<small>[hui.wang](hui.wang@centurygame.com)@2024-08-30 15:42:16 &#43;0800 &#43;0800</small>)
+
+#### 🤖  Tools
+  * **sem**: make changelog ([869a45f](https://github.com/sandwich-go/logbus/commit/869a45ffe43623a6888c4ead4cb0d91481410f5b)) (<small>[hui.wang](hui.wang@centurygame.com)@2024-08-30 15:18:49 &#43;0800 &#43;0800</small>)
+
+### v1.1.8 (2024-08-30 15:16:49)
 
 #### 🐛  Bug Fixed
   * tga时区偏移量错误 ([7240e69](https://github.com/sandwich-go/logbus/commit/7240e6988f88e5b00256e73b2559c47d443a6ab0)) (<small>[biyongze](yongze.bi@centurygame.com)@2024-08-21 17:38:08 &#43;0800 &#43;0800</small>)
