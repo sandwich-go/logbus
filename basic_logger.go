@@ -17,6 +17,7 @@ var (
 )
 
 func initBasics(c *Conf) {
+	initZapSetting()
 	resetLogBus()
 	// init logBus global setting
 	Setting = c
