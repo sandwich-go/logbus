@@ -1,6 +1,6 @@
 package logbus
 
-const (
+var (
 	THINKINGDATA = "thinkingdata"
 	SERVERLOG    = "server"
 	BIGQUERY     = "bigquery"
@@ -8,7 +8,7 @@ const (
 	Monitor      = "monitor"
 )
 
-const (
+var (
 	Meta     = "dd_meta_channel"
 	MsgBody  = "msg"
 	LevelKey = "log_level"
@@ -24,7 +24,7 @@ const (
 	Noop
 )
 
-const (
+var (
 	DefaultTag = "logbus"
 	MonitorTag = "monitor"
 	LogId      = "log_xid"
