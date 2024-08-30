@@ -1,64 +1,44 @@
 package logbus
 
-func (s *StdLogger) DebugWithChannel(c string, fields ...Field) {
-	if s.fetch != nil {
-		fields = append(fields, s.fetch()...)
-	} else if Setting.FetchLogContext != nil {
-		fields = append(fields, Setting.FetchLogContext()...)
+func (s *StdLogger) fields(fields []Field) []Field {
+	f := s.fetch
+	if f == nil {
+		f = Setting.FetchLogContext
 	}
-	s.z.Debug(c, fields...)
+	if f == nil {
+		return fields
+	}
+	fRet := f()
+	if fRet == nil {
+		return fields
+	}
+	return append(fields, fRet...)
+}
+
+func (s *StdLogger) DebugWithChannel(c string, fields ...Field) {
+	s.z.Debug(c, s.fields(fields)...)
 }
 
 func (s *StdLogger) InfoWithChannel(c string, fields ...Field) {
-	if s.fetch != nil {
-		fields = append(fields, s.fetch()...)
-	} else if Setting.FetchLogContext != nil {
-		fields = append(fields, Setting.FetchLogContext()...)
-	}
-	s.z.Info(c, fields...)
+	s.z.Info(c, s.fields(fields)...)
 }
 
 func (s *StdLogger) WarnWithChannel(c string, fields ...Field) {
-	if s.fetch != nil {
-		fields = append(fields, s.fetch()...)
-	} else if Setting.FetchLogContext != nil {
-		fields = append(fields, Setting.FetchLogContext()...)
-	}
-	s.z.Warn(c, fields...)
+	s.z.Warn(c, s.fields(fields)...)
 }
 
 func (s *StdLogger) ErrorWithChannel(c string, fields ...Field) {
-	if s.fetch != nil {
-		fields = append(fields, s.fetch()...)
-	} else if Setting.FetchLogContext != nil {
-		fields = append(fields, Setting.FetchLogContext()...)
-	}
-	s.z.Error(c, fields...)
+	s.z.Error(c, s.fields(fields)...)
 }
 
 func (s *StdLogger) DPanicWithChannel(c string, fields ...Field) {
-	if s.fetch != nil {
-		fields = append(fields, s.fetch()...)
-	} else if Setting.FetchLogContext != nil {
-		fields = append(fields, Setting.FetchLogContext()...)
-	}
-	s.z.DPanic(c, fields...)
+	s.z.DPanic(c, s.fields(fields)...)
 }
 
 func (s *StdLogger) PanicWithChannel(c string, fields ...Field) {
-	if s.fetch != nil {
-		fields = append(fields, s.fetch()...)
-	} else if Setting.FetchLogContext != nil {
-		fields = append(fields, Setting.FetchLogContext()...)
-	}
-	s.z.Panic(c, fields...)
+	s.z.Panic(c, s.fields(fields)...)
 }
 
 func (s *StdLogger) FatalWithChannel(c string, fields ...Field) {
-	if s.fetch != nil {
-		fields = append(fields, s.fetch()...)
-	} else if Setting.FetchLogContext != nil {
-		fields = append(fields, Setting.FetchLogContext()...)
-	}
-	s.z.Fatal(c, fields...)
+	s.z.Fatal(c, s.fields(fields)...)
 }
