@@ -52,7 +52,7 @@ func (s *GLogger) syncDepthLogger() {
 }
 
 func (s *GLogger) Debug(msg string, fields ...Field) {
-	fields = append(fields, String("message", msg))
+	fields = append(fields, String(MsgBody, msg))
 	if s.printAsError && s.printAsErr(fields...) {
 		s.stdLogger.ErrorWithChannel(s.channelKey, fields...)
 		return
@@ -61,7 +61,7 @@ func (s *GLogger) Debug(msg string, fields ...Field) {
 }
 
 func (s *GLogger) Info(msg string, fields ...Field) {
-	fields = append(fields, String("message", msg))
+	fields = append(fields, String(MsgBody, msg))
 	if s.printAsError && s.printAsErr(fields...) {
 		s.stdLogger.ErrorWithChannel(s.channelKey, fields...)
 		return
@@ -70,7 +70,7 @@ func (s *GLogger) Info(msg string, fields ...Field) {
 }
 
 func (s *GLogger) Warn(msg string, fields ...Field) {
-	fields = append(fields, String("message", msg))
+	fields = append(fields, String(MsgBody, msg))
 	if s.printAsError && s.printAsErr(fields...) {
 		s.stdLogger.ErrorWithChannel(s.channelKey, fields...)
 		return
@@ -78,22 +78,22 @@ func (s *GLogger) Warn(msg string, fields ...Field) {
 	s.stdLogger.WarnWithChannel(s.channelKey, fields...)
 }
 func (s *GLogger) Error(msg string, fields ...Field) {
-	fields = append(fields, String("message", msg))
+	fields = append(fields, String(MsgBody, msg))
 	s.stdLogger.ErrorWithChannel(s.channelKey, fields...)
 }
 
 func (s *GLogger) DPanic(msg string, fields ...Field) {
-	fields = append(fields, String("message", msg))
+	fields = append(fields, String(MsgBody, msg))
 	s.stdLogger.DPanicWithChannel(s.channelKey, fields...)
 }
 
 func (s *GLogger) Panic(msg string, fields ...Field) {
-	fields = append(fields, String("message", msg))
+	fields = append(fields, String(MsgBody, msg))
 	s.stdLogger.PanicWithChannel(s.channelKey, fields...)
 }
 
 func (s *GLogger) Fatal(msg string, fields ...Field) {
-	fields = append(fields, String("message", msg))
+	fields = append(fields, String(MsgBody, msg))
 	s.stdLogger.FatalWithChannel(s.channelKey, fields...)
 }
 
@@ -110,7 +110,7 @@ func (s *GLogger) getDepthLogger(depth int) *StdLogger {
 }
 
 func (s *GLogger) GDebugDepth(depth int, msg string, fields ...Field) {
-	fields = append(fields, String("message", msg))
+	fields = append(fields, String(MsgBody, msg))
 	lg := s.getDepthLogger(depth)
 	if s.printAsError && s.printAsErr(fields...) {
 		lg.ErrorWithChannel(s.channelKey, fields...)
@@ -120,7 +120,7 @@ func (s *GLogger) GDebugDepth(depth int, msg string, fields ...Field) {
 }
 
 func (s *GLogger) GInfoDepth(depth int, msg string, fields ...Field) {
-	fields = append(fields, String("message", msg))
+	fields = append(fields, String(MsgBody, msg))
 	lg := s.getDepthLogger(depth)
 	if s.printAsError && s.printAsErr(fields...) {
 		lg.ErrorWithChannel(s.channelKey, fields...)
@@ -129,7 +129,7 @@ func (s *GLogger) GInfoDepth(depth int, msg string, fields ...Field) {
 	lg.InfoWithChannel(s.channelKey, fields...)
 }
 func (s *GLogger) GWarnDepth(depth int, msg string, fields ...Field) {
-	fields = append(fields, String("message", msg))
+	fields = append(fields, String(MsgBody, msg))
 	lg := s.getDepthLogger(depth)
 	if s.printAsError && s.printAsErr(fields...) {
 		lg.ErrorWithChannel(s.channelKey, fields...)
@@ -138,7 +138,7 @@ func (s *GLogger) GWarnDepth(depth int, msg string, fields ...Field) {
 	lg.WarnWithChannel(s.channelKey, fields...)
 }
 func (s *GLogger) GErrorDepth(depth int, msg string, fields ...Field) {
-	fields = append(fields, String("message", msg))
+	fields = append(fields, String(MsgBody, msg))
 	lg := s.getDepthLogger(depth)
 	if s.printAsError && s.printAsErr(fields...) {
 		lg.ErrorWithChannel(s.channelKey, fields...)
@@ -147,43 +147,43 @@ func (s *GLogger) GErrorDepth(depth int, msg string, fields ...Field) {
 	lg.ErrorWithChannel(s.channelKey, fields...)
 }
 func (s *GLogger) GFatalDepth(depth int, msg string, fields ...Field) {
-	fields = append(fields, String("message", msg))
+	fields = append(fields, String(MsgBody, msg))
 	lg := s.getDepthLogger(depth)
 	lg.FatalWithChannel(s.channelKey, fields...)
 }
 
 // WithChannel
 func (s *GLogger) DebugWithChannel(c string, msg string, fields ...Field) {
-	fields = append(fields, String("message", msg))
+	fields = append(fields, String(MsgBody, msg))
 	gStdLogger.DebugWithChannel(c, fields...)
 }
 
 func (s *GLogger) InfoWithChannel(c string, msg string, fields ...Field) {
-	fields = append(fields, String("message", msg))
+	fields = append(fields, String(MsgBody, msg))
 	s.stdLogger.InfoWithChannel(c, fields...)
 }
 
 func (s *GLogger) WarnWithChannel(c string, msg string, fields ...Field) {
-	fields = append(fields, String("message", msg))
+	fields = append(fields, String(MsgBody, msg))
 	s.stdLogger.WarnWithChannel(c, fields...)
 }
 
 func (s *GLogger) ErrorWithChannel(c string, msg string, fields ...Field) {
-	fields = append(fields, String("message", msg))
+	fields = append(fields, String(MsgBody, msg))
 	s.stdLogger.ErrorWithChannel(c, fields...)
 }
 
 func (s *GLogger) DPanicWithChannel(c string, msg string, fields ...Field) {
-	fields = append(fields, String("message", msg))
+	fields = append(fields, String(MsgBody, msg))
 	s.stdLogger.DPanicWithChannel(c, fields...)
 }
 
 func (s *GLogger) PanicWithChannel(c string, msg string, fields ...Field) {
-	fields = append(fields, String("message", msg))
+	fields = append(fields, String(MsgBody, msg))
 	s.stdLogger.PanicWithChannel(c, fields...)
 }
 
 func (s *GLogger) FatalWithChannel(c string, msg string, fields ...Field) {
-	fields = append(fields, String("message", msg))
+	fields = append(fields, String(MsgBody, msg))
 	s.stdLogger.FatalWithChannel(c, fields...)
 }
