@@ -13,6 +13,12 @@ var globalFields []zap.Field
 var cacheUserDefineFields []zap.Field
 
 func init() {
+	for _, key := range []string{"sys_env_name", "sys_stage", "sys_cd_service"} {
+		val := os.Getenv(key)
+		if val != "" {
+			ReservedGlobalFields = append(ReservedGlobalFields, String(key, val))
+		}
+	}
 	ReservedGlobalFields = append(ReservedGlobalFields, String("server_id", xid.New().String()))
 	ReservedGlobalFields = append(ReservedGlobalFields, String("server_ip", xip.GetLocalIP()))
 	ReservedGlobalFields = append(ReservedGlobalFields, Int64("server_birth", xtime.Unix()))
