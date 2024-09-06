@@ -26,8 +26,8 @@ func _ConfOptionDeclareWithDefault() interface{} {
 		// stdout
 		"BufferedStdout": false, // @MethodComment(输出stdout时使用 logbus.BufferedWriteSyncer)
 		// WriteSyncer
-		"WriteSyncer": zapcore.WriteSyncer(os.Stdout), // @MethodComment(输出日志的WriteSyncer，默认为os.Stdout)
-
+		"WriteSyncer":    zapcore.WriteSyncer(os.Stdout), // @MethodComment(输出日志的WriteSyncer，默认为os.Stdout)
+		"UseSystemClock": false,                          // @MethodComment(是否使用系统时钟, 默认使用offset时钟)
 		// monitor
 		"MonitorOutput": MonitorOutput(Noop), // [Logbus, Noop, Prometheus] @MethodComment(监控输出 Logbus, Noop, Prometheus)
 		// The Prometheus metrics will be made available on this port: @MethodComment(prometheus监控输出端口，k8s集群保持默认9158端口)

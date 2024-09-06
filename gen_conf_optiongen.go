@@ -26,7 +26,8 @@ type Conf struct {
 	// stdout
 	BufferedStdout bool
 	// WriteSyncer
-	WriteSyncer zapcore.WriteSyncer
+	WriteSyncer    zapcore.WriteSyncer
+	UseSystemClock bool
 	// monitor
 	MonitorOutput MonitorOutput // [Logbus, Noop, Prometheus]
 	// The Prometheus metrics will be made available on this port:
@@ -45,7 +46,7 @@ type Conf struct {
 func NewConf(opts ...ConfOption) *Conf {
 	cc := newDefaultConf()
 	for _, opt := range opts {
-		opt(cc)
+		opt.Apply(cc)
 	}
 	if watchDogConf != nil {
 		watchDogConf(cc)
@@ -56,127 +57,144 @@ func NewConf(opts ...ConfOption) *Conf {
 // ApplyOption apply multiple new option
 func (cc *Conf) ApplyOption(opts ...ConfOption) {
 	for _, opt := range opts {
-		opt(cc)
+		opt.Apply(cc)
 	}
 }
 
-// ConfOption option func
-type ConfOption func(cc *Conf)
+// ConfOptionFunc option func
+type ConfOption interface {
+	Apply(cc *Conf)
+}
+
+var _ ConfOption = ConfOptionFunc(nil)
+
+type ConfOptionFunc func(cc *Conf)
+
+func (f ConfOptionFunc) Apply(cc *Conf) {
+	f(cc)
+}
 
 // WithLogLevel 日志级别，默认 zap.DebugLevel
-func WithLogLevel(v zapcore.Level) ConfOption {
+func WithLogLevel(v zapcore.Level) ConfOptionFunc {
 	return func(cc *Conf) {
 		cc.LogLevel = v
 	}
 }
 
 // WithDev 是否输出带颜色的易读log，默认关闭
-func WithDev(v bool) ConfOption {
+func WithDev(v bool) ConfOptionFunc {
 	return func(cc *Conf) {
 		cc.Dev = v
 	}
 }
 
 // WithDefaultChannel 设置默认的dd_meta_channel
-func WithDefaultChannel(v string) ConfOption {
+func WithDefaultChannel(v string) ConfOptionFunc {
 	return func(cc *Conf) {
 		cc.DefaultChannel = v
 	}
 }
 
 // WithDefaultTag 设置默认的tag
-func WithDefaultTag(v string) ConfOption {
+func WithDefaultTag(v string) ConfOptionFunc {
 	return func(cc *Conf) {
 		cc.DefaultTag = v
 	}
 }
 
 // WithCallerSkip 等于zap.CallerSkip
-func WithCallerSkip(v int) ConfOption {
+func WithCallerSkip(v int) ConfOptionFunc {
 	return func(cc *Conf) {
 		cc.CallerSkip = v
 	}
 }
 
 // WithFetchLogContext 获取额外的field
-func WithFetchLogContext(v FetchLogContext) ConfOption {
+func WithFetchLogContext(v FetchLogContext) ConfOptionFunc {
 	return func(cc *Conf) {
 		cc.FetchLogContext = v
 	}
 }
 
 // WithStackLogLevel 是否输出log_xid，默认开启,打印stack的最低级别，默认ErrorLevel stack if level >= StackLogLevel
-func WithStackLogLevel(v zapcore.Level) ConfOption {
+func WithStackLogLevel(v zapcore.Level) ConfOptionFunc {
 	return func(cc *Conf) {
 		cc.StackLogLevel = v
 	}
 }
 
 // WithBufferedStdout 输出stdout时使用 logbus.BufferedWriteSyncer
-func WithBufferedStdout(v bool) ConfOption {
+func WithBufferedStdout(v bool) ConfOptionFunc {
 	return func(cc *Conf) {
 		cc.BufferedStdout = v
 	}
 }
 
 // WithWriteSyncer 输出日志的WriteSyncer，默认为os.Stdout
-func WithWriteSyncer(v zapcore.WriteSyncer) ConfOption {
+func WithWriteSyncer(v zapcore.WriteSyncer) ConfOptionFunc {
 	return func(cc *Conf) {
 		cc.WriteSyncer = v
 	}
 }
 
+// WithUseSystemClock 是否使用系统时钟, 默认使用offset时钟
+func WithUseSystemClock(v bool) ConfOptionFunc {
+	return func(cc *Conf) {
+		cc.UseSystemClock = v
+	}
+}
+
 // WithMonitorOutput 监控输出 Logbus, Noop, Prometheus
-func WithMonitorOutput(v MonitorOutput) ConfOption {
+func WithMonitorOutput(v MonitorOutput) ConfOptionFunc {
 	return func(cc *Conf) {
 		cc.MonitorOutput = v
 	}
 }
 
 // WithDefaultPrometheusListenAddress prometheus监控输出端口，k8s集群保持默认9158端口
-func WithDefaultPrometheusListenAddress(v string) ConfOption {
+func WithDefaultPrometheusListenAddress(v string) ConfOptionFunc {
 	return func(cc *Conf) {
 		cc.DefaultPrometheusListenAddress = v
 	}
 }
 
 // WithDefaultPrometheusPath prometheus监控输出接口path
-func WithDefaultPrometheusPath(v string) ConfOption {
+func WithDefaultPrometheusPath(v string) ConfOptionFunc {
 	return func(cc *Conf) {
 		cc.DefaultPrometheusPath = v
 	}
 }
 
 // WithDefaultPercentiles 监控统计耗时的分位值，默认统计耗时的 50%, 75%, 99%, 100% 的分位数
-func WithDefaultPercentiles(v ...float64) ConfOption {
+func WithDefaultPercentiles(v ...float64) ConfOptionFunc {
 	return func(cc *Conf) {
 		cc.DefaultPercentiles = v
 	}
 }
 
 // AppendDefaultPercentiles 监控统计耗时的分位值，默认统计耗时的 50%, 75%, 99%, 100% 的分位数
-func AppendDefaultPercentiles(v ...float64) ConfOption {
+func AppendDefaultPercentiles(v ...float64) ConfOptionFunc {
 	return func(cc *Conf) {
 		cc.DefaultPercentiles = append(cc.DefaultPercentiles, v...)
 	}
 }
 
 // WithDefaultLabel 监控额外添加的全局label，会在监控指标中显示
-func WithDefaultLabel(v prometheus.Labels) ConfOption {
+func WithDefaultLabel(v prometheus.Labels) ConfOptionFunc {
 	return func(cc *Conf) {
 		cc.DefaultLabel = v
 	}
 }
 
 // WithMonitorTimingMaxAge monitor.Timing数据的最大生命周期
-func WithMonitorTimingMaxAge(v time.Duration) ConfOption {
+func WithMonitorTimingMaxAge(v time.Duration) ConfOptionFunc {
 	return func(cc *Conf) {
 		cc.MonitorTimingMaxAge = v
 	}
 }
 
 // WithPrintAsError glog输出field带error时，将日志级别提升到error
-func WithPrintAsError(v bool) ConfOption {
+func WithPrintAsError(v bool) ConfOptionFunc {
 	return func(cc *Conf) {
 		cc.PrintAsError = v
 	}
@@ -190,7 +208,7 @@ var watchDogConf func(cc *Conf)
 
 // setConfDefaultValue default Conf value
 func setConfDefaultValue(cc *Conf) {
-	for _, opt := range [...]ConfOption{
+	for _, opt := range [...]ConfOptionFunc{
 		WithLogLevel(zap.DebugLevel),
 		WithDev(false),
 		WithDefaultChannel(SERVERLOG),
@@ -200,6 +218,7 @@ func setConfDefaultValue(cc *Conf) {
 		WithStackLogLevel(zap.ErrorLevel),
 		WithBufferedStdout(false),
 		WithWriteSyncer(os.Stdout),
+		WithUseSystemClock(false),
 		WithMonitorOutput(Noop),
 		WithDefaultPrometheusListenAddress(":9158"),
 		WithDefaultPrometheusPath("/metrics"),
@@ -229,6 +248,7 @@ func (cc *Conf) GetFetchLogContext() FetchLogContext       { return cc.FetchLogC
 func (cc *Conf) GetStackLogLevel() zapcore.Level           { return cc.StackLogLevel }
 func (cc *Conf) GetBufferedStdout() bool                   { return cc.BufferedStdout }
 func (cc *Conf) GetWriteSyncer() zapcore.WriteSyncer       { return cc.WriteSyncer }
+func (cc *Conf) GetUseSystemClock() bool                   { return cc.UseSystemClock }
 func (cc *Conf) GetMonitorOutput() MonitorOutput           { return cc.MonitorOutput }
 func (cc *Conf) GetDefaultPrometheusListenAddress() string { return cc.DefaultPrometheusListenAddress }
 func (cc *Conf) GetDefaultPrometheusPath() string          { return cc.DefaultPrometheusPath }
@@ -248,6 +268,7 @@ type ConfVisitor interface {
 	GetStackLogLevel() zapcore.Level
 	GetBufferedStdout() bool
 	GetWriteSyncer() zapcore.WriteSyncer
+	GetUseSystemClock() bool
 	GetMonitorOutput() MonitorOutput
 	GetDefaultPrometheusListenAddress() string
 	GetDefaultPrometheusPath() string

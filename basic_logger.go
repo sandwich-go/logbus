@@ -38,10 +38,15 @@ func initBasics(c *Conf) {
 	if c.Dev {
 		ZapConf.Development = true
 	}
+	var clock zapcore.Clock
+	clock = localClock{}
+	if c.UseSystemClock {
+		clock = zapcore.DefaultClock
+	}
 	gBasicZLogger, err = ZapConf.Build(
 		zap.AddCallerSkip(c.CallerSkip),
 		zap.AddStacktrace(c.StackLogLevel),
-		zap.WithClock(&localClock{}),
+		zap.WithClock(clock),
 		zap.WithCaller(ZapConf.EncoderConfig.CallerKey != ""),
 	)
 	if err != nil {

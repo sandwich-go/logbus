@@ -22,7 +22,7 @@ func TestMain(m *testing.M) {
 func TestStdLogger(t *testing.T) {
 	Init(NewConf(WithLogLevel(zap.InfoLevel), WithBufferedStdout(true), WithFetchLogContext(func() []zap.Field {
 		return []zap.Field{String("dd_meta_channel", "fetch")}
-	})))
+	}), WithUseSystemClock(true)))
 	defer resetLogBus()
 	defer Close()
 	Convey("test server log to stdout\n", t, func() {
