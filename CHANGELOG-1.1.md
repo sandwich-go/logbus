@@ -1,4 +1,20 @@
-### v1.1.9 🌈 (2024-08-30 16:51:49)
+### v1.1.11 🌈 (2024-09-23 18:54:21)
+
+#### 🚀  New Feature
+  * 增加option 是否使用caller全路径 用于IDE中跳转 ([989be7a](https://github.com/sandwich-go/logbus/commit/989be7a41dbb46d7765c8d697a7518007aa8f300)) (<small>[biyongze](yongze.bi@centurygame.com)@2024-09-23 18:54:21 &#43;0800 &#43;0800</small>)
+
+### v1.1.10 (2024-09-06 11:14:49)
+
+#### 🐛  Bug Fixed
+  * add default log fields ([544922e](https://github.com/sandwich-go/logbus/commit/544922e8732b3817a04d3927bf5c75f78bdb0d60)) (<small>[hui.wang](hui.wang@centurygame.com)@2024-09-05 19:01:21 &#43;0800 &#43;0800</small>)
+
+#### 🚀  New Feature
+  * 增加option使用系统时钟 ([5219b95](https://github.com/sandwich-go/logbus/commit/5219b95fbe6c2f8977798210f0fda5b5bd72307c)) (<small>[zhengyang.zhu](zhengyang.zhu@centurygame.com)@2024-09-06 11:14:49 &#43;0800 &#43;0800</small>)
+
+#### 🤖  Tools
+  * **sem**: make changelog ([5815ae1](https://github.com/sandwich-go/logbus/commit/5815ae135c18f922625e0f69c004489e3f604206)) (<small>[hui.wang](hui.wang@centurygame.com)@2024-08-30 16:57:00 &#43;0800 &#43;0800</small>)
+
+### v1.1.9 (2024-08-30 16:51:49)
 
 #### 🐛  Bug Fixed
   * fetch nil ([8956878](https://github.com/sandwich-go/logbus/commit/89568789d399dcbd4fa372a2c9155130913551db)) (<small>[hui.wang](hui.wang@centurygame.com)@2024-08-30 16:51:49 &#43;0800 &#43;0800</small>)
