@@ -16,10 +16,12 @@ func main() {
 
 	// 非线程安全
 	logbus.Init(logbus.NewConf(
-		logbus.WithDev(false),
+		logbus.WithDev(true),
 		logbus.WithMonitorOutput(logbus.Prometheus),
 		logbus.WithDefaultChannel("Game"),
-		logbus.WithDefaultTag("Advance")),
+		logbus.WithDefaultTag("Advance"),
+		logbus.WithEncodeCallerFull(true),
+	),
 	)
 
 	// default channel, default tag

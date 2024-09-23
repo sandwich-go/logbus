@@ -38,6 +38,7 @@ type Conf struct {
 	DefaultPercentiles  []float64
 	DefaultLabel        prometheus.Labels
 	MonitorTimingMaxAge time.Duration
+	EncodeCallerFull    bool
 	// glog
 	PrintAsError bool
 }
@@ -193,6 +194,13 @@ func WithMonitorTimingMaxAge(v time.Duration) ConfOptionFunc {
 	}
 }
 
+// WithEncodeCallerFull 是否输出完整的caller信息，默认关闭
+func WithEncodeCallerFull(v bool) ConfOptionFunc {
+	return func(cc *Conf) {
+		cc.EncodeCallerFull = v
+	}
+}
+
 // WithPrintAsError glog输出field带error时，将日志级别提升到error
 func WithPrintAsError(v bool) ConfOptionFunc {
 	return func(cc *Conf) {
@@ -225,6 +233,7 @@ func setConfDefaultValue(cc *Conf) {
 		WithDefaultPercentiles([]float64{0.5, 0.75, 0.99, 1}...),
 		WithDefaultLabel(map[string]string{}),
 		WithMonitorTimingMaxAge(time.Minute),
+		WithEncodeCallerFull(false),
 		WithPrintAsError(true),
 	} {
 		opt(cc)
@@ -255,6 +264,7 @@ func (cc *Conf) GetDefaultPrometheusPath() string          { return cc.DefaultPr
 func (cc *Conf) GetDefaultPercentiles() []float64          { return cc.DefaultPercentiles }
 func (cc *Conf) GetDefaultLabel() prometheus.Labels        { return cc.DefaultLabel }
 func (cc *Conf) GetMonitorTimingMaxAge() time.Duration     { return cc.MonitorTimingMaxAge }
+func (cc *Conf) GetEncodeCallerFull() bool                 { return cc.EncodeCallerFull }
 func (cc *Conf) GetPrintAsError() bool                     { return cc.PrintAsError }
 
 // ConfVisitor visitor interface for Conf
@@ -275,6 +285,7 @@ type ConfVisitor interface {
 	GetDefaultPercentiles() []float64
 	GetDefaultLabel() prometheus.Labels
 	GetMonitorTimingMaxAge() time.Duration
+	GetEncodeCallerFull() bool
 	GetPrintAsError() bool
 }
 
