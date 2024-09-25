@@ -1,11 +1,7 @@
 package logbus
 
 import (
-	"github.com/sandwich-go/boost/xpanic"
-	"go.uber.org/zap/buffer"
 	"os"
-	"path/filepath"
-	"runtime"
 	"time"
 
 	"go.uber.org/zap"
@@ -14,19 +10,9 @@ import (
 
 var EncodeConfig zapcore.EncoderConfig
 var ZapConf zap.Config
-var BufferPool buffer.Pool
-var modulePath string
 
 func init() {
 	initZapSetting()
-	BufferPool = buffer.NewPool()
-	modulePath = func() string {
-		_, currentFile, _, _ := runtime.Caller(0)
-		currentDir := filepath.Dir(currentFile)
-		modulePath, err := findModuleRoot(currentDir)
-		xpanic.WhenError(err)
-		return modulePath
-	}()
 }
 
 // initZapSetting 更新配置数据
@@ -41,8 +27,7 @@ func initZapSetting() {
 		LineEnding:    zapcore.DefaultLineEnding,
 		EncodeLevel:   zapcore.LowercaseLevelEncoder,
 		EncodeTime:    zapcore.ISO8601TimeEncoder,
-		//EncodeDuration: zapcore.StringDurationEncoder,
-		EncodeCaller: zapcore.ShortCallerEncoder,
+		EncodeCaller:  zapcore.ShortCallerEncoder,
 	}
 	ZapConf = zap.Config{
 		Development:      false,
@@ -52,18 +37,6 @@ func initZapSetting() {
 		ErrorOutputPaths: []string{},
 	}
 
-}
-
-func CustomCallerEncoder(caller zapcore.EntryCaller, enc zapcore.PrimitiveArrayEncoder) {
-	enc.AppendString(func(ec zapcore.EntryCaller) string {
-		buf := BufferPool.Get()
-		buf.AppendString(getCallerPath(ec.File))
-		buf.AppendByte(':')
-		buf.AppendInt(int64(ec.Line))
-		caller := buf.String()
-		buf.Free()
-		return caller
-	}(caller))
 }
 
 // DurationEncoder serializes a time.Duration to a floating-point number of milliseconds elapsed.

@@ -4,6 +4,7 @@ import (
 	"time"
 
 	prometheusClient "github.com/prometheus/client_golang/prometheus"
+	"github.com/sandwich-go/logbus/debug"
 	"github.com/sandwich-go/logbus/monitor"
 	"github.com/sandwich-go/logbus/monitor/noop"
 	"github.com/sandwich-go/logbus/monitor/prometheus"
@@ -27,7 +28,8 @@ func initBasics(c *Conf) {
 		EncodeConfig.EncodeLevel = zapcore.LowercaseColorLevelEncoder
 		EncodeConfig.CallerKey = "caller"
 		EncodeConfig.EncodeDuration = zapcore.StringDurationEncoder
-		EncodeConfig.EncodeCaller = CustomCallerEncoder
+		debug.MustInitAppModuleFilePath()
+		EncodeConfig.EncodeCaller = debug.RelativePathCallerEncoder
 		if c.EncodeCallerFull {
 			EncodeConfig.EncodeCaller = zapcore.FullCallerEncoder
 		}
