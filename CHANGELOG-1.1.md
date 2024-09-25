@@ -1,4 +1,15 @@
-### v1.1.13 🌈 (2024-09-25 16:05:08)
+### v1.1.14 🌈 (2024-09-25 23:33:31)
+
+#### 🐛  Bug Fixed
+  * call path from app mod ([0e128a4](https://github.com/sandwich-go/logbus/commit/0e128a4bac10026885f8706876b8d6d8d0545b6a)) (<small>[hui.wang](hui.wang@centurygame.com)@2024-09-25 23:33:31 &#43;0800 &#43;0800</small>)
+
+#### 🤖  Tools
+  * **sem**: make changelog ([8b6f961](https://github.com/sandwich-go/logbus/commit/8b6f961e9eb6f1624707bdbcc2e31dc651d7f9d5)) (<small>[biyongze](yongze.bi@centurygame.com)@2024-09-25 16:05:28 &#43;0800 &#43;0800</small>)
+
+#### 💪  Commit
+  * caller path fix ([ac042a8](https://github.com/sandwich-go/logbus/commit/ac042a81afb8404daf3c7dae6c83023154260135)) (<small>[biyongze](yongze.bi@centurygame.com)@2024-09-25 16:22:31 &#43;0800 &#43;0800</small>)
+
+### v1.1.13 (2024-09-25 16:05:08)
 
 #### 🤖  Tools
   * **sem**: make changelog ([3414fc1](https://github.com/sandwich-go/logbus/commit/3414fc17da4c54a2f36f3b249be2e0bee6e31270)) (<small>[biyongze](yongze.bi@centurygame.com)@2024-09-25 12:07:41 &#43;0800 &#43;0800</small>)
