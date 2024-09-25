@@ -4,15 +4,14 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sync"
 )
 
-func getCallerPath(fullPath string) string {
-	currentDir := filepath.Dir(fullPath)
+var pathMap sync.Map
 
-	// 寻找go.mod文件，确定module根目录
-	modulePath, err := findModuleRoot(currentDir)
-	if err != nil {
-		return ""
+func getCallerPath(fullPath string) string {
+	if v, ok := pathMap.Load(fullPath); ok {
+		return v.(string)
 	}
 
 	// 获取从module到当前文件的相对路径
@@ -20,6 +19,8 @@ func getCallerPath(fullPath string) string {
 	if err != nil {
 		return ""
 	}
+
+	pathMap.Store(fullPath, relPath)
 
 	return relPath
 }

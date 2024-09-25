@@ -1,8 +1,11 @@
 package logbus
 
 import (
+	"github.com/sandwich-go/boost/xpanic"
 	"go.uber.org/zap/buffer"
 	"os"
+	"path/filepath"
+	"runtime"
 	"time"
 
 	"go.uber.org/zap"
@@ -12,10 +15,18 @@ import (
 var EncodeConfig zapcore.EncoderConfig
 var ZapConf zap.Config
 var BufferPool buffer.Pool
+var modulePath string
 
 func init() {
 	initZapSetting()
 	BufferPool = buffer.NewPool()
+	modulePath = func() string {
+		_, currentFile, _, _ := runtime.Caller(0)
+		currentDir := filepath.Dir(currentFile)
+		modulePath, err := findModuleRoot(currentDir)
+		xpanic.WhenError(err)
+		return modulePath
+	}()
 }
 
 // initZapSetting 更新配置数据
