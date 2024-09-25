@@ -1,4 +1,12 @@
-### v1.1.12 🌈 (2024-09-25 12:07:19)
+### v1.1.13 🌈 (2024-09-25 16:05:08)
+
+#### 🤖  Tools
+  * **sem**: make changelog ([3414fc1](https://github.com/sandwich-go/logbus/commit/3414fc17da4c54a2f36f3b249be2e0bee6e31270)) (<small>[biyongze](yongze.bi@centurygame.com)@2024-09-25 12:07:41 &#43;0800 &#43;0800</small>)
+
+#### 💪  Commit
+  * 优化caller path: 存储modulepath 并 缓存 fullpath ([d80fef7](https://github.com/sandwich-go/logbus/commit/d80fef7fc242383dd38afc5b96ab5d2d4a94427d)) (<small>[biyongze](yongze.bi@centurygame.com)@2024-09-25 16:05:08 &#43;0800 &#43;0800</small>)
+
+### v1.1.12 (2024-09-25 12:07:19)
 
 #### 🤖  Tools
   * **sem**: make changelog ([de2b38c](https://github.com/sandwich-go/logbus/commit/de2b38c70ee12e21baa94c03c36018af919d2488)) (<small>[biyongze](yongze.bi@centurygame.com)@2024-09-23 18:54:47 &#43;0800 &#43;0800</small>)
