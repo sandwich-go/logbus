@@ -1,4 +1,12 @@
-### v1.1.11 🌈 (2024-09-23 18:54:21)
+### v1.1.12 🌈 (2024-09-25 12:07:19)
+
+#### 🤖  Tools
+  * **sem**: make changelog ([de2b38c](https://github.com/sandwich-go/logbus/commit/de2b38c70ee12e21baa94c03c36018af919d2488)) (<small>[biyongze](yongze.bi@centurygame.com)@2024-09-23 18:54:47 &#43;0800 &#43;0800</small>)
+
+#### 💪  Commit
+  * dev模式下 call path使用从module开始的相对路径 确保跳转 ([e3a6a98](https://github.com/sandwich-go/logbus/commit/e3a6a98db03a4102f74b53f4c8d43393dcd30073)) (<small>[biyongze](yongze.bi@centurygame.com)@2024-09-25 12:07:19 &#43;0800 &#43;0800</small>)
+
+### v1.1.11 (2024-09-23 18:54:21)
 
 #### 🚀  New Feature
   * 增加option 是否使用caller全路径 用于IDE中跳转 ([989be7a](https://github.com/sandwich-go/logbus/commit/989be7a41dbb46d7765c8d697a7518007aa8f300)) (<small>[biyongze](yongze.bi@centurygame.com)@2024-09-23 18:54:21 &#43;0800 &#43;0800</small>)
