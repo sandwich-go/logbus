@@ -17,7 +17,7 @@ func getCallerPath(fullPath string) string {
 	// 获取从module到当前文件的相对路径
 	relPath, err := filepath.Rel(modulePath, fullPath)
 	if err != nil {
-		return ""
+		return fullPath
 	}
 
 	pathMap.Store(fullPath, relPath)
