@@ -20,7 +20,6 @@ func main() {
 		logbus.WithMonitorOutput(logbus.Prometheus),
 		logbus.WithDefaultChannel("Game"),
 		logbus.WithDefaultTag("Advance"),
-		logbus.WithEncodeCallerFull(true),
 	),
 	)
 

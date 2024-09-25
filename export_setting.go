@@ -1,6 +1,7 @@
 package logbus
 
 import (
+	"go.uber.org/zap/buffer"
 	"os"
 	"time"
 
@@ -10,9 +11,11 @@ import (
 
 var EncodeConfig zapcore.EncoderConfig
 var ZapConf zap.Config
+var BufferPool buffer.Pool
 
 func init() {
 	initZapSetting()
+	BufferPool = buffer.NewPool()
 }
 
 // initZapSetting 更新配置数据
@@ -38,6 +41,18 @@ func initZapSetting() {
 		ErrorOutputPaths: []string{},
 	}
 
+}
+
+func CustomCallerEncoder(caller zapcore.EntryCaller, enc zapcore.PrimitiveArrayEncoder) {
+	enc.AppendString(func(ec zapcore.EntryCaller) string {
+		buf := BufferPool.Get()
+		buf.AppendString(getCallerPath(ec.File))
+		buf.AppendByte(':')
+		buf.AppendInt(int64(ec.Line))
+		caller := buf.String()
+		buf.Free()
+		return caller
+	}(caller))
 }
 
 // DurationEncoder serializes a time.Duration to a floating-point number of milliseconds elapsed.

@@ -27,6 +27,7 @@ func initBasics(c *Conf) {
 		EncodeConfig.EncodeLevel = zapcore.LowercaseColorLevelEncoder
 		EncodeConfig.CallerKey = "caller"
 		EncodeConfig.EncodeDuration = zapcore.StringDurationEncoder
+		EncodeConfig.EncodeCaller = CustomCallerEncoder
 		if c.EncodeCallerFull {
 			EncodeConfig.EncodeCaller = zapcore.FullCallerEncoder
 		}
