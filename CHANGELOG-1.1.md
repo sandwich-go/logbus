@@ -1,4 +1,12 @@
-### v1.1.14 🌈 (2024-09-25 23:33:31)
+### v1.1.15 🌈 (2024-09-26 14:48:28)
+
+#### 🐛  Bug Fixed
+  * EncodeCaller ([7b77166](https://github.com/sandwich-go/logbus/commit/7b77166e0d22f9caa0b69920dcbee13cca6fdb2a)) (<small>[hui.wang](hui.wang@centurygame.com)@2024-09-26 14:48:28 &#43;0800 &#43;0800</small>)
+
+#### 🤖  Tools
+  * **sem**: make changelog ([95662a8](https://github.com/sandwich-go/logbus/commit/95662a8f3caad18e5bf05b109d79006e61692abb)) (<small>[hui.wang](hui.wang@centurygame.com)@2024-09-25 23:33:50 &#43;0800 &#43;0800</small>)
+
+### v1.1.14 (2024-09-25 23:33:31)
 
 #### 🐛  Bug Fixed
   * call path from app mod ([0e128a4](https://github.com/sandwich-go/logbus/commit/0e128a4bac10026885f8706876b8d6d8d0545b6a)) (<small>[hui.wang](hui.wang@centurygame.com)@2024-09-25 23:33:31 &#43;0800 &#43;0800</small>)
