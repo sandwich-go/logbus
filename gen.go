@@ -38,7 +38,7 @@ func _ConfOptionDeclareWithDefault() interface{} {
 		"DefaultPercentiles":  []float64{0.5, 0.75, 0.99, 1},          //@MethodComment(监控统计耗时的分位值，默认统计耗时的 50%, 75%, 99%, 100% 的分位数)
 		"DefaultLabel":        prometheus.Labels(map[string]string{}), //@MethodComment(监控额外添加的全局label，会在监控指标中显示)
 		"MonitorTimingMaxAge": time.Duration(time.Minute),             // @MethodComment(monitor.Timing数据的最大生命周期)
-		"EncodeCallerFull":    false,                                  // @MethodComment(是否输出完整的caller信息，默认关闭)
+		"EncodeCaller":        zapcore.CallerEncoder(nil),             // @MethodComment(指定CallerEncoder)
 
 		// glog
 		"PrintAsError": true, //@MethodComment(glog输出field带error时，将日志级别提升到error)

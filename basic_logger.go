@@ -30,11 +30,12 @@ func initBasics(c *Conf) {
 		EncodeConfig.EncodeDuration = zapcore.StringDurationEncoder
 		debug.MustInitAppModuleFilePath()
 		EncodeConfig.EncodeCaller = debug.RelativePathCallerEncoder
-		if c.EncodeCallerFull {
-			EncodeConfig.EncodeCaller = zapcore.FullCallerEncoder
-		}
 	} else {
 		EncodeConfig.EncodeDuration = DurationEncoder
+	}
+
+	if c.EncodeCaller != nil {
+		EncodeConfig.EncodeCaller = c.EncodeCaller
 	}
 
 	// init gBasicZLogger
