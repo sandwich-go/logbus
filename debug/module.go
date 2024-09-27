@@ -23,7 +23,7 @@ func MustInitAppModuleFilePath() {
 	if !strings.HasSuffix(md, string(os.PathSeparator)) {
 		md = md + string(os.PathSeparator)
 	}
-	if !strings.HasSuffix(pp, string(os.PathSeparator)) {
+	if pp != "" && !strings.HasSuffix(pp, string(os.PathSeparator)) {
 		pp = pp + string(os.PathSeparator)
 	}
 	moduleFilePathWithSeparator = md
@@ -41,7 +41,7 @@ func getModFile(modFile string) (*modfile.File, error) {
 
 	parsedFile, err := modfile.Parse(modFile, modContents, nil)
 	if err != nil {
-		return nil, fmt.Errorf("could not parse mod file")
+		return nil, fmt.Errorf("could not parse mod file:%s :%w", modFile, err)
 	}
 
 	return parsedFile, nil
