@@ -39,7 +39,7 @@ func getModFile(modFile string) (*modfile.File, error) {
 		return nil, fmt.Errorf("could not read modfile: %w", err)
 	}
 
-	parsedFile, err := modfile.Parse(modFile, modContents, nil)
+	parsedFile, err := modfile.ParseLax(modFile, modContents, nil)
 	if err != nil {
 		return nil, fmt.Errorf("could not parse mod file:%s :%w", modFile, err)
 	}
