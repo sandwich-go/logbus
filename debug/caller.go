@@ -20,6 +20,7 @@ func callerRelativePath2Mod(ec zapcore.EntryCaller) string {
 		if strings.HasPrefix(ec.File, packagePathWithSeparator) {
 			return strings.TrimPrefix(ec.File, packagePathWithSeparator)
 		}
+		return ec.FullPath()
 	}
 	return ec.File[idx+1:]
 }
