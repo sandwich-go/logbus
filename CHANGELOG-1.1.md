@@ -1,4 +1,12 @@
-### v1.1.15 🌈 (2024-09-26 14:48:28)
+### v1.1.16 🌈 (2024-09-27 14:43:40)
+
+#### 🐛  Bug Fixed
+  * caller trim package path ([9d5f670](https://github.com/sandwich-go/logbus/commit/9d5f67037ed8d8fb16968a61f73f73ae955431e0)) (<small>[hui.wang](hui.wang@centurygame.com)@2024-09-27 14:43:40 &#43;0800 &#43;0800</small>)
+
+#### 🤖  Tools
+  * **sem**: make changelog ([40d7691](https://github.com/sandwich-go/logbus/commit/40d7691475d8e7501fd098486bc0930eda78516e)) (<small>[hui.wang](hui.wang@centurygame.com)@2024-09-26 14:49:36 &#43;0800 &#43;0800</small>)
+
+### v1.1.15 (2024-09-26 14:48:28)
 
 #### 🐛  Bug Fixed
   * EncodeCaller ([7b77166](https://github.com/sandwich-go/logbus/commit/7b77166e0d22f9caa0b69920dcbee13cca6fdb2a)) (<small>[hui.wang](hui.wang@centurygame.com)@2024-09-26 14:48:28 &#43;0800 &#43;0800</small>)
