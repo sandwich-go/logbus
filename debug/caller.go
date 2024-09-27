@@ -14,12 +14,17 @@ func callerRelativePath2Mod(ec zapcore.EntryCaller) string {
 	if strings.HasPrefix(ec.File, moduleFilePathWithSeparator) {
 		return strings.TrimPrefix(ec.File, moduleFilePathWithSeparator)
 	}
+	// 部分情况下fullPath会为package path / 相对路径
+	if strings.HasPrefix(ec.File, packagePathWithSeparator) {
+		return strings.TrimPrefix(ec.File, packagePathWithSeparator)
+	}
 	idx := strings.LastIndexByte(ec.File, '/')
 	if idx == -1 {
-		// 部分情况下fullPath会为package path / 相对路径
-		if strings.HasPrefix(ec.File, packagePathWithSeparator) {
-			return strings.TrimPrefix(ec.File, packagePathWithSeparator)
-		}
+		return ec.FullPath()
+	}
+	// Find the penultimate separator.
+	idx = strings.LastIndexByte(ec.File[:idx], '/')
+	if idx == -1 {
 		return ec.FullPath()
 	}
 	return ec.File[idx+1:]
