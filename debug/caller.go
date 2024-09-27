@@ -21,19 +21,7 @@ func callerRelativePath2Mod(ec zapcore.EntryCaller) string {
 			return strings.TrimPrefix(ec.File, packagePathWithSeparator)
 		}
 	}
-	// Find the penultimate separator.
-	idx = strings.LastIndexByte(ec.File[:idx], '/')
-	if idx == -1 {
-		return ec.FullPath()
-	}
-	buf := bufferPool.Get()
-	// Keep everything after the penultimate separator.
-	buf.AppendString(ec.File[idx+1:])
-	buf.AppendByte(':')
-	buf.AppendInt(int64(ec.Line))
-	caller := buf.String()
-	buf.Free()
-	return caller
+	return ec.File[idx+1:]
 }
 
 // RelativePathCallerEncoder caller相对路径encoder
