@@ -1,4 +1,13 @@
-### v1.1.18 🌈 (2024-09-27 14:50:50)
+### v1.1.19 🌈 (2024-09-27 15:23:13)
+
+#### 🐛  Bug Fixed
+  * use ParseLax ignore unknown ([0796254](https://github.com/sandwich-go/logbus/commit/07962545648b59140d37c617cacf695bd896e8c7)) (<small>[hui.wang](hui.wang@centurygame.com)@2024-09-27 15:23:13 &#43;0800 &#43;0800</small>)
+  * caller trim package path ([56ef4ae](https://github.com/sandwich-go/logbus/commit/56ef4ae5479df06e2f37e2777129eb236e2df0bb)) (<small>[hui.wang](hui.wang@centurygame.com)@2024-09-27 15:08:24 &#43;0800 &#43;0800</small>)
+
+#### 🤖  Tools
+  * **sem**: make changelog ([deae9c9](https://github.com/sandwich-go/logbus/commit/deae9c954388a6fedd354170343c5d49c8676aa6)) (<small>[hui.wang](hui.wang@centurygame.com)@2024-09-27 14:51:24 &#43;0800 &#43;0800</small>)
+
+### v1.1.18 (2024-09-27 14:50:50)
 
 #### 🐛  Bug Fixed
   * caller trim package path ([7093875](https://github.com/sandwich-go/logbus/commit/70938754aac1b1bf3a9b9c050e553148af1270f4)) (<small>[hui.wang](hui.wang@centurygame.com)@2024-09-27 14:50:50 &#43;0800 &#43;0800</small>)
