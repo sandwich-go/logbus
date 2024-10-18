@@ -1,4 +1,12 @@
-### v1.1.19 🌈 (2024-09-27 15:23:13)
+### v1.1.20 🌈 (2024-10-18 11:12:10)
+
+#### 🤖  Tools
+  * **sem**: make changelog ([b81ee2f](https://github.com/sandwich-go/logbus/commit/b81ee2f1be4194702ecb8b41ecc5aac1bdd4695b)) (<small>[hui.wang](hui.wang@centurygame.com)@2024-09-27 15:24:51 &#43;0800 &#43;0800</small>)
+
+#### 💪  Commit
+  * tga可直接接受thinkingdata.Data作为参数 ([8d36576](https://github.com/sandwich-go/logbus/commit/8d3657671e54aff8e46dfdd17c80f7939c941b93)) (<small>[biyongze](yongze.bi@centurygame.com)@2024-10-18 11:12:10 &#43;0800 &#43;0800</small>)
+
+### v1.1.19 (2024-09-27 15:23:13)
 
 #### 🐛  Bug Fixed
   * use ParseLax ignore unknown ([0796254](https://github.com/sandwich-go/logbus/commit/07962545648b59140d37c617cacf695bd896e8c7)) (<small>[hui.wang](hui.wang@centurygame.com)@2024-09-27 15:23:13 &#43;0800 &#43;0800</small>)
