@@ -16,7 +16,7 @@ func main() {
 
 	// 非线程安全
 	logbus.Init(logbus.NewConf(
-		logbus.WithDev(true),
+		logbus.WithDev(false),
 		logbus.WithMonitorOutput(logbus.Prometheus),
 		logbus.WithDefaultChannel("Game"),
 		logbus.WithDefaultTag("Advance"),
@@ -36,6 +36,21 @@ func main() {
 	_ = logbus.Tracker(logbus.THINKINGDATA).Track(logbus.String(thinkingdata.ACCOUNT, "111"), logbus.String(thinkingdata.TYPE, thinkingdata.TRACK),
 		logbus.String(thinkingdata.EVENT_ID, "ID1"), logbus.String(thinkingdata.EVENT, "login"), logbus.Time("$optime", time.Now()),
 		logbus.String("player_name", "zhang liu"), logbus.Int("level", 11), logbus.Bool("bool", true), logbus.Strings("strings", []string{"x", "y"}))
+
+	ps := make(map[string]interface{})
+	ps["level"] = 11
+	_ = logbus.Tracker(logbus.THINKINGDATA).TrackWithTGAData(thinkingdata.Data{
+		AccountId:    "2222",
+		DistinctId:   "",
+		Type:         thinkingdata.TRACK,
+		Time:         time.Now().String(),
+		EventName:    "login",
+		EventId:      "ID1",
+		FirstCheckId: "",
+		Ip:           "",
+		UUID:         "",
+		Properties:   ps,
+	})
 
 	// scope logger
 	playerLogger := logbus.NewScopeLogger("Player", zap.String("playername", "zhangsong"), zap.Int("playerid", 123))
