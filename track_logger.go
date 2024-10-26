@@ -53,3 +53,12 @@ func (t *TrackLogger) Track(fields ...Field) error {
 	}
 	return nil
 }
+
+func (t *TrackLogger) TrackWithTGAData(d thinkingdata.Data) error {
+	if ce := t.StdLogger.z.Check(zapcore.WarnLevel, ""); ce == nil {
+		// 检查逻辑前置，不做无用功
+		return ErrIgnore
+	}
+	t.StdLogger.PrintThingkingData(d)
+	return nil
+}
