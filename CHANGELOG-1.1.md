@@ -1,4 +1,15 @@
-### v1.1.20 🌈 (2024-10-18 11:12:10)
+### v1.1.21 🌈 (2024-10-26 16:43:55)
+
+#### 🐛  Bug Fixed
+  * InitAppModuleFilePath ([2f01709](https://github.com/sandwich-go/logbus/commit/2f017093c2eeae0a1d2e2c1c2ee7a08872e66008)) (<small>[hui.wang](hui.wang@centurygame.com)@2024-10-26 16:43:44 &#43;0800 &#43;0800</small>)
+
+#### 🤖  Tools
+  * **sem**: make changelog ([0779691](https://github.com/sandwich-go/logbus/commit/077969136990aff7722bef667414f0a862db3402)) (<small>[biyongze](yongze.bi@centurygame.com)@2024-10-18 11:12:40 &#43;0800 &#43;0800</small>)
+
+#### 💪  Commit
+  * Merge branch '1.1/release' of github.com:sandwich-go/logbus into 1.1/release ([47ec533](https://github.com/sandwich-go/logbus/commit/47ec5334236daf5ec995010794ff719ef93e6849)) (<small>[hui.wang](hui.wang@centurygame.com)@2024-10-26 16:43:55 &#43;0800 &#43;0800</small>)
+
+### v1.1.20 (2024-10-18 11:12:10)
 
 #### 🤖  Tools
   * **sem**: make changelog ([b81ee2f](https://github.com/sandwich-go/logbus/commit/b81ee2f1be4194702ecb8b41ecc5aac1bdd4695b)) (<small>[hui.wang](hui.wang@centurygame.com)@2024-09-27 15:24:51 &#43;0800 &#43;0800</small>)
