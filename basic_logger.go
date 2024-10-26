@@ -28,8 +28,12 @@ func initBasics(c *Conf) {
 		EncodeConfig.EncodeLevel = zapcore.LowercaseColorLevelEncoder
 		EncodeConfig.CallerKey = "caller"
 		EncodeConfig.EncodeDuration = zapcore.StringDurationEncoder
-		debug.MustInitAppModuleFilePath()
-		EncodeConfig.EncodeCaller = debug.RelativePathCallerEncoder
+		if err := debug.InitAppModuleFilePath(); err == nil {
+			EncodeConfig.EncodeCaller = debug.RelativePathCallerEncoder
+		} else {
+			// fixme 无法使用相对路径的caller模式，退化到short模式
+			EncodeConfig.EncodeCaller = zapcore.ShortCallerEncoder
+		}
 	} else {
 		EncodeConfig.EncodeDuration = DurationEncoder
 	}

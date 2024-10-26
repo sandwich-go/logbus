@@ -7,7 +7,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/sandwich-go/boost/xpanic"
 	"golang.org/x/mod/modfile"
 )
 
@@ -16,10 +15,12 @@ const modFileName = "go.mod"
 var moduleFilePathWithSeparator string
 var packagePathWithSeparator string
 
-// MustInitAppModuleFilePath 初始化app 的mod file路径
-func MustInitAppModuleFilePath() {
+// InitAppModuleFilePath 初始化app 的mod file路径
+func InitAppModuleFilePath() error {
 	md, pp, err := findModPath()
-	xpanic.WhenError(err)
+	if err != nil {
+		return err
+	}
 	if !strings.HasSuffix(md, string(os.PathSeparator)) {
 		md = md + string(os.PathSeparator)
 	}
@@ -28,6 +29,7 @@ func MustInitAppModuleFilePath() {
 	}
 	moduleFilePathWithSeparator = md
 	packagePathWithSeparator = pp
+	return nil
 }
 
 // getModFile gets the module file from the root of the repo. It returns an error if the module cannot be found.
