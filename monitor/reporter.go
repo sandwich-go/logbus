@@ -10,7 +10,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 )
 
-// logReporter is an interface for collecting and instrumenting metrics
+// Reporter is an interface for collecting and instrumenting metrics
 type Reporter interface {
 	Count(metric string, value int64, labels prometheus.Labels) error
 	Gauge(metric string, value float64, labels prometheus.Labels) error

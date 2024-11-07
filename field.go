@@ -2,6 +2,7 @@ package logbus
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"go.uber.org/zap"
@@ -10,6 +11,33 @@ import (
 
 type Field = zap.Field
 
+const defaultMaskN = 3
+
+func maskN(val string, n int) string {
+	// 如果字符串长度小于等于 3*n，返回等长的掩码
+	if len(val) <= 3*n {
+		return strings.Repeat("*", len(val))
+	}
+	start := val[:n]
+	end := val[len(val)-n:]
+	middle := strings.Repeat("*", len(val)-2*n)
+	return start + middle + end
+}
+
+// MaskString 隐藏字符串中间的字符，只显示开头和结尾的字符，可指定收尾掩码长度，如果字符串长度小于等于 3*n[0]则使用等长掩码
+func MaskString(key string, val string, n ...int) Field {
+	keep := defaultMaskN
+	if len(n) != 0 {
+		keep = n[0]
+	}
+	return zap.String(key, maskN(val, keep))
+}
+
+// Password 使用等长掩码替代
+func Password(key string, val string) Field {
+
+	return zap.String(key, strings.Repeat("*", len(val)))
+}
 func String(key string, val string) Field {
 	return zap.String(key, val)
 }
