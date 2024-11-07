@@ -18,10 +18,7 @@ func maskN(val string, n int) string {
 	if len(val) <= 3*n {
 		return strings.Repeat("*", len(val))
 	}
-	start := val[:n]
-	end := val[len(val)-n:]
-	middle := strings.Repeat("*", len(val)-2*n)
-	return start + middle + end
+	return val[:n] + strings.Repeat("*", len(val)-2*n) + val[len(val)-n:]
 }
 
 // MaskString 隐藏字符串中间的字符，只显示开头和结尾的字符，可指定收尾掩码长度，如果字符串长度小于等于 3*n[0]则使用等长掩码
