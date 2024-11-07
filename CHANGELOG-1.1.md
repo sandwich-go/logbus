@@ -1,4 +1,12 @@
-### v1.1.21 🌈 (2024-10-26 16:43:55)
+### v1.1.22 🌈 (2024-11-07 12:15:42)
+
+#### 🚀  New Feature
+  * add MaskString and Password ([dfe3645](https://github.com/sandwich-go/logbus/commit/dfe3645de887c28912e4dea94dffbeb5039dee2e)) (<small>[hui.wang](hui.wang@centurygame.com)@2024-11-07 12:15:42 &#43;0800 &#43;0800</small>)
+
+#### 🤖  Tools
+  * **sem**: make changelog ([169ce39](https://github.com/sandwich-go/logbus/commit/169ce39409787f94ab23d9e3795f2d0a4e23fc6d)) (<small>[hui.wang](hui.wang@centurygame.com)@2024-10-26 16:44:24 &#43;0800 &#43;0800</small>)
+
+### v1.1.21 (2024-10-26 16:43:55)
 
 #### 🐛  Bug Fixed
   * InitAppModuleFilePath ([2f01709](https://github.com/sandwich-go/logbus/commit/2f017093c2eeae0a1d2e2c1c2ee7a08872e66008)) (<small>[hui.wang](hui.wang@centurygame.com)@2024-10-26 16:43:44 &#43;0800 &#43;0800</small>)
