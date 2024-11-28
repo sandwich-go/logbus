@@ -25,7 +25,7 @@ func initZapSetting() {
 		NameKey:       "logger",
 		StacktraceKey: "stacktrace",
 		LineEnding:    zapcore.DefaultLineEnding,
-		EncodeLevel:   traceLevelEncoder,
+		EncodeLevel:   trackLevelEncoder,
 		EncodeTime:    zapcore.ISO8601TimeEncoder,
 		EncodeCaller:  zapcore.ShortCallerEncoder,
 	}
