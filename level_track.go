@@ -6,7 +6,7 @@ import "go.uber.org/zap/zapcore"
 const TrackLevel = zapcore.DebugLevel - 1
 
 // TraceLevelName track 级使用的字符串名称
-const TraceLevelName = "track"
+var TraceLevelName = "track"
 
 // NewTraceLevelEnabler 构造level过滤器，默认TrackLevel不受level过滤限制，允许覆盖实现自定义逻辑
 var NewTraceLevelEnabler = func(level zapcore.Level) zapcore.LevelEnabler {
