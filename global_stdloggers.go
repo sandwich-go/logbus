@@ -77,7 +77,7 @@ func newNLoggerInstance(tagName string, fields ...zap.Field) *StdLogger {
 		writer = BufferedWriteSyncer
 	}
 
-	stdCore := zapcore.NewCore(encoder, writer, NewTraceLevelEnabler(Setting.LogLevel)).With(append([]zap.Field{zap.String(Tags, tagName)}, fields...))
+	stdCore := zapcore.NewCore(encoder, writer, NewTrackLevelEnabler(Setting.LogLevel)).With(append([]zap.Field{zap.String(Tags, tagName)}, fields...))
 	cores = append(cores, stdCore)
 
 	return &StdLogger{
