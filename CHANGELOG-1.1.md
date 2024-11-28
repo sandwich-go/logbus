@@ -1,4 +1,12 @@
-### v1.1.23 🌈 (2024-11-28 19:20:54)
+### v1.1.24 🌈 (2024-11-28 19:25:01)
+
+#### 🐛  Bug Fixed
+  * NewTrackLevelEnabler ([cb1f488](https://github.com/sandwich-go/logbus/commit/cb1f4881b185fff70c59dc28431807d5061d0fda)) (<small>[hui.wang](hui.wang@centurygame.com)@2024-11-28 19:25:01 &#43;0800 &#43;0800</small>)
+
+#### 🤖  Tools
+  * **sem**: make changelog ([f4f51e1](https://github.com/sandwich-go/logbus/commit/f4f51e168c7618703f675689d5c67d1d4aca05b4)) (<small>[hui.wang](hui.wang@centurygame.com)@2024-11-28 19:21:37 &#43;0800 &#43;0800</small>)
+
+### v1.1.23 (2024-11-28 19:20:54)
 
 #### 🐛  Bug Fixed
   * track not trace ([d21a10b](https://github.com/sandwich-go/logbus/commit/d21a10bda19448fa6d8c1a5c19584505bc79d6fd)) (<small>[hui.wang](hui.wang@centurygame.com)@2024-11-28 18:10:53 &#43;0800 &#43;0800</small>)
