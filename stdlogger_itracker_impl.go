@@ -13,7 +13,7 @@ func (s *StdLogger) PrintThingkingData(data thinkingdata.Data) {
 	if err != nil {
 		s.ErrorWithChannel(Setting.DefaultChannel, zap.String("PrintThingkingData", err.Error()))
 	}
-	s.WarnWithChannel(THINKINGDATA, zap.ByteString(MsgBody, bytes))
+	s.TrackWithChannel(THINKINGDATA, zap.ByteString(MsgBody, bytes))
 }
 
 func (s *StdLogger) PrintBigQuery(tableName zap.Field, fields ...zap.Field) {
@@ -22,5 +22,5 @@ func (s *StdLogger) PrintBigQuery(tableName zap.Field, fields ...zap.Field) {
 		s.ErrorWithChannel(Setting.DefaultChannel, zap.String("PrintBigQuery", err.Error()))
 	}
 	fields = append([]zap.Field{tableName, zap.ByteString(MsgBody, bytes)})
-	s.WarnWithChannel(BIGQUERY, fields...)
+	s.TrackWithChannel(BIGQUERY, fields...)
 }
