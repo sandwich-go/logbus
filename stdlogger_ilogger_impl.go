@@ -42,3 +42,7 @@ func (s *StdLogger) PanicWithChannel(c string, fields ...Field) {
 func (s *StdLogger) FatalWithChannel(c string, fields ...Field) {
 	s.z.Fatal(c, s.fields(fields)...)
 }
+
+func (s *StdLogger) TrackWithChannel(c string, fields ...Field) {
+	s.z.Log(TrackLevel, c, s.fields(fields)...)
+}
