@@ -1,4 +1,20 @@
-### v1.1.22 🌈 (2024-11-07 12:15:42)
+### v1.1.23 🌈 (2024-11-28 19:20:54)
+
+#### 🐛  Bug Fixed
+  * track not trace ([d21a10b](https://github.com/sandwich-go/logbus/commit/d21a10bda19448fa6d8c1a5c19584505bc79d6fd)) (<small>[hui.wang](hui.wang@centurygame.com)@2024-11-28 18:10:53 &#43;0800 &#43;0800</small>)
+
+#### 🚀  New Feature
+  * trace level ([ff7f384](https://github.com/sandwich-go/logbus/commit/ff7f3841cd54c37ec48f2133c5b09dfb5b06a629)) (<small>[hui.wang](hui.wang@centurygame.com)@2024-11-28 17:53:01 &#43;0800 &#43;0800</small>)
+  * tracka level ([ba8075d](https://github.com/sandwich-go/logbus/commit/ba8075d5db707ef8772345349b011293ba1b8827)) (<small>[hui.wang](hui.wang@centurygame.com)@2024-11-28 17:52:39 &#43;0800 &#43;0800</small>)
+
+#### 🤖  Tools
+  * **sem**: make changelog ([ccfa114](https://github.com/sandwich-go/logbus/commit/ccfa11449e1846317aaf935c6c91931d5a4f5cc7)) (<small>[hui.wang](hui.wang@centurygame.com)@2024-11-07 12:16:23 &#43;0800 &#43;0800</small>)
+
+#### 💪  Commit
+  * Merge pull request [#4](https://github.com/sandwich-go/4/issues/%!s(MISSING)) from sandwich-go/1.1/feat/track-level ([20e9e17](https://github.com/sandwich-go/logbus/commit/20e9e17d6800b95da5dc091e3a7d408aa13a1b5f)) (<small>[timestee](19310233&#43;timestee@users.noreply.github.com)@2024-11-28 19:20:54 &#43;0800 &#43;0800</small>)
+  * fix:简化代码 ([64d7a64](https://github.com/sandwich-go/logbus/commit/64d7a6473d952f4a2e1f53d6e02e031d79bfc888)) (<small>[hui.wang](hui.wang@centurygame.com)@2024-11-07 12:46:29 &#43;0800 &#43;0800</small>)
+
+### v1.1.22 (2024-11-07 12:15:42)
 
 #### 🚀  New Feature
   * add MaskString and Password ([dfe3645](https://github.com/sandwich-go/logbus/commit/dfe3645de887c28912e4dea94dffbeb5039dee2e)) (<small>[hui.wang](hui.wang@centurygame.com)@2024-11-07 12:15:42 &#43;0800 &#43;0800</small>)
