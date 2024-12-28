@@ -77,7 +77,11 @@ func FatalDepth(depth int, msg string, v ...Field) {
 	newGlobalGLogger.GFatalDepth(depth, msg, v...)
 }
 
-// GetZapLogger
+func DefaultLogger() NewILogger {
+	return newGlobalGLogger
+}
+
+// GetZapLogger 返回zap.Logger
 func GetZapLogger() *zap.Logger {
 	from, ok := newGlobalGLogger.(GLoggerVisitor)
 	if !ok {
