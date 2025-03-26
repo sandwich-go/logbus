@@ -1,4 +1,12 @@
-### v1.1.25 🌈 (2024-12-28 11:25:29)
+### v1.1.26 🌈 (2025-03-26 12:57:50)
+
+#### 🐛  Bug Fixed
+  * sync ([773eadb](https://github.com/sandwich-go/logbus/commit/773eadba235b8fbcf53753453d271797c4ab3710)) (<small>[hui.wang](hui.wang@centurygame.com)@2025-03-26 12:57:50 &#43;0800 &#43;0800</small>)
+
+#### 🤖  Tools
+  * **sem**: make changelog ([23b1d3c](https://github.com/sandwich-go/logbus/commit/23b1d3c69058c73d644d9ea3d61653d5ccc50b63)) (<small>[zhengyang.zhu](zhengyang.zhu@centurygame.com)@2024-12-28 11:25:46 &#43;0800 &#43;0800</small>)
+
+### v1.1.25 (2024-12-28 11:25:29)
 
 #### 🚀  New Feature
   * add DefaultLogger() ([7da61ba](https://github.com/sandwich-go/logbus/commit/7da61ba774290e096405d7195413bc334b61399f)) (<small>[zhengyang.zhu](zhengyang.zhu@centurygame.com)@2024-12-28 11:25:29 &#43;0800 &#43;0800</small>)
