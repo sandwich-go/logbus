@@ -187,3 +187,6 @@ func (s *GLogger) FatalWithChannel(c string, msg string, fields ...Field) {
 	fields = append(fields, String(MsgBody, msg))
 	s.stdLogger.FatalWithChannel(c, fields...)
 }
+func (s *GLogger) Sync() error {
+	return s.stdLogger.Sync()
+}

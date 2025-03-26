@@ -23,5 +23,7 @@ type NewILogger interface {
 	GErrorDepth(depth int, msg string, v ...Field)
 	GFatalDepth(depth int, msg string, v ...Field)
 
+	Sync() error
+
 	syncDepthLogger()
 }

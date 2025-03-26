@@ -2,10 +2,11 @@ package thinkingdata
 
 import (
 	"fmt"
-	"github.com/sandwich-go/boost/xpanic"
 	"os"
 	"strconv"
 	"time"
+
+	"github.com/sandwich-go/boost/xpanic"
 )
 
 const (
