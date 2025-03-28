@@ -1,4 +1,12 @@
-### v1.1.29 🌈 (2025-03-28 16:12:20)
+### v1.1.30 🌈 (2025-03-28 16:25:56)
+
+#### 🐛  Bug Fixed
+  * logbus_core_dup ([9897995](https://github.com/sandwich-go/logbus/commit/98979952b70cb8827d79085909fb982127bd978c)) (<small>[hui.wang](hui.wang@centurygame.com)@2025-03-28 16:25:56 &#43;0800 &#43;0800</small>)
+
+#### 🤖  Tools
+  * **sem**: make changelog ([368edec](https://github.com/sandwich-go/logbus/commit/368edeccd454002e0f4e8c9b90dc06c62f2bb5f0)) (<small>[hui.wang](hui.wang@centurygame.com)@2025-03-28 16:12:37 &#43;0800 &#43;0800</small>)
+
+### v1.1.29 (2025-03-28 16:12:20)
 
 #### 🐛  Bug Fixed
   * logbus_core_dup ([d646257](https://github.com/sandwich-go/logbus/commit/d6462574c79fc9748320c23529971b1286aa9ff7)) (<small>[hui.wang](hui.wang@centurygame.com)@2025-03-28 16:12:20 &#43;0800 &#43;0800</small>)
