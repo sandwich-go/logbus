@@ -5,9 +5,21 @@ import (
 	"sync"
 	"time"
 
+	"github.com/sandwich-go/boost/xconv"
+	"github.com/sandwich-go/boost/xos"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
+
+func init() {
+	v := xos.EnvGetCaseInsensitive("logbus_core_dup")
+	if v == "" {
+		return
+	}
+	dupSecond = time.Duration(xconv.Int32(v)) * time.Second
+}
+
+var dupSecond = time.Second
 
 type dupCore struct {
 	zapcore.Core
@@ -44,11 +56,11 @@ func (c *dupCore) isEqual(a, b lastLogEntry) bool {
 		af := a.fields[i]
 		bf := b.fields[i]
 
-		// 比较字段的基本属性
+		// Compare field basic properties
 		if af.Key != bf.Key || af.Type != bf.Type {
 			return false
 		}
-		// 根据类型比较值
+		// Compare values based on type
 		switch af.Type {
 		case zapcore.StringType:
 			if af.String != bf.String {
@@ -63,7 +75,7 @@ func (c *dupCore) isEqual(a, b lastLogEntry) bool {
 				return false
 			}
 		case zapcore.Float64Type, zapcore.Float32Type:
-			if af.Integer != bf.Integer { // zap 内部使用 Integer 存储浮点数
+			if af.Integer != bf.Integer { // zap uses Integer to store floats internally
 				return false
 			}
 		case zapcore.BoolType:
@@ -79,7 +91,7 @@ func (c *dupCore) isEqual(a, b lastLogEntry) bool {
 				return false
 			}
 		default:
-			// 对于复杂类型不做比较
+			// For complex types, don't compare
 			return false
 		}
 	}
@@ -96,11 +108,14 @@ func (c *dupCore) Write(ent zapcore.Entry, fields []zap.Field) error {
 		message: ent.Message,
 		time:    ent.Time,
 	}
-	if c.isEqual(c.lastEntry, current) {
+
+	// Check if the current entry is the same as the last one AND within 1 second
+	if c.isEqual(c.lastEntry, current) && ent.Time.Sub(c.lastEntry.timeLast) <= dupSecond {
 		c.repeatCount++
 		c.lastEntry.timeLast = ent.Time
 		return nil
 	}
+
 	var err error
 	if c.repeatCount > 0 {
 		repeatEntry := c.lastEntry
@@ -115,6 +130,7 @@ func (c *dupCore) Write(ent zapcore.Entry, fields []zap.Field) error {
 		c.repeatCount = 0
 	}
 	c.lastEntry = current
+	c.lastEntry.timeLast = ent.Time // Initialize timeLast for the new entry
 	return c.Core.Write(ent, fields)
 }
 
