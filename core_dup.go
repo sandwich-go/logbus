@@ -16,10 +16,10 @@ func init() {
 	if v == "" {
 		return
 	}
-	dupSecond = time.Duration(xconv.Int32(v)) * time.Second
+	dupDuration = time.Duration(xconv.Int32(v)) * time.Millisecond
 }
 
-var dupSecond = time.Second
+var dupDuration = time.Second
 
 type dupCore struct {
 	zapcore.Core
@@ -110,7 +110,7 @@ func (c *dupCore) Write(ent zapcore.Entry, fields []zap.Field) error {
 	}
 
 	// Check if the current entry is the same as the last one AND within 1 second
-	if c.isEqual(c.lastEntry, current) && ent.Time.Sub(c.lastEntry.timeLast) <= dupSecond {
+	if c.isEqual(c.lastEntry, current) && ent.Time.Sub(c.lastEntry.timeLast) <= dupDuration {
 		c.repeatCount++
 		c.lastEntry.timeLast = ent.Time
 		return nil
