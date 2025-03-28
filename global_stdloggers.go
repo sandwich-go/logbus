@@ -24,9 +24,7 @@ func initGlobalStdLoggers() {
 
 func NewScopeLogger(tagName string, fields ...zap.Field) NewILogger {
 	if refresh {
-		lg := &GLogger{
-			stdLogger: newNLoggerInstance(tagName, fields...),
-		}
+		lg := NewGLogger(newNLoggerInstance(tagName, fields...), "", false)
 		cacheGLogger = append(cacheGLogger, GLoggerCache{
 			tagName: tagName,
 			fields:  fields,
@@ -43,11 +41,7 @@ func NewScopeLogger(tagName string, fields ...zap.Field) NewILogger {
 	// 比 newGlobalGLogger 少一层调用
 	newStdLogger.z = newStdLogger.z.WithOptions(zap.AddCallerSkip(-1))
 
-	return &GLogger{
-		channelKey:   from.GetChannelKey(),
-		printAsError: from.GetPrintAsError(),
-		stdLogger:    newStdLogger,
-	}
+	return NewGLogger(newStdLogger, from.GetChannelKey(), from.GetPrintAsError())
 }
 
 // NewScopeLoggerWithFetchFunc 用于创建自定义 fetch FetchLogContext 的logger
@@ -55,6 +49,11 @@ func NewScopeLoggerWithFetchFunc(tagName string, fetch FetchLogContext, fields .
 	lg := NewScopeLogger(tagName, fields...)
 	lg.(*GLogger).stdLogger.fetch = fetch
 	return lg
+}
+
+// CoreWrapper 根据tag name对core进行一层封装
+var CoreWrapper = func(tagName string, core zapcore.Core) zapcore.Core {
+	return core
 }
 
 func newNLoggerInstance(tagName string, fields ...zap.Field) *StdLogger {
@@ -78,13 +77,12 @@ func newNLoggerInstance(tagName string, fields ...zap.Field) *StdLogger {
 	}
 
 	stdCore := zapcore.NewCore(encoder, writer, NewTrackLevelEnabler(Setting.LogLevel)).With(append([]zap.Field{zap.String(Tags, tagName)}, fields...))
-	cores = append(cores, stdCore)
+	cores = append(cores, CoreWrapper(tagName, stdCore))
 
-	return &StdLogger{
-		z: gBasicZLogger.WithOptions(zap.WrapCore(func(c zapcore.Core) zapcore.Core {
-			return zapcore.NewTee(cores...)
-		})),
-	}
+	s := newStdLogger(gBasicZLogger.WithOptions(zap.WrapCore(func(c zapcore.Core) zapcore.Core {
+		return zapcore.NewTee(cores...)
+	})), nil)
+	return s
 }
 
 // refreshEarlyLogger 用于刷新在Init() 之前创建的logger

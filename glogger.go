@@ -7,6 +7,16 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
+func NewGLogger(stdLogger *StdLogger, channelKey string, printAsError bool) *GLogger {
+	g := &GLogger{
+		stdLogger:    stdLogger,
+		channelKey:   channelKey,
+		printAsError: printAsError,
+	}
+	PushGLogger(g)
+	return g
+}
+
 // GLogger 全局对象的类型定义
 type GLogger struct {
 	channelKey   string
@@ -101,10 +111,7 @@ func (s *GLogger) getDepthLogger(depth int) *StdLogger {
 	if lg, ok := s.depthLogger.Load(depth); ok {
 		return lg.(*StdLogger)
 	}
-	cloneLogger := &StdLogger{
-		fetch: s.stdLogger.fetch,
-		z:     s.stdLogger.WithOptions(zap.AddCallerSkip(depth)),
-	}
+	cloneLogger := newStdLogger(s.stdLogger.WithOptions(zap.AddCallerSkip(depth)), s.stdLogger.fetch)
 	s.depthLogger.Store(depth, cloneLogger)
 	return cloneLogger
 }

@@ -16,11 +16,5 @@ func SetGlobalGLogger(logger *StdLogger, channelKey string, printAsError bool, a
 		channelKey = Setting.DefaultChannel
 	}
 
-	newGlobalGLogger = &GLogger{
-		channelKey: channelKey,
-		stdLogger: &StdLogger{
-			z: logger.WithOptions(zap.AddCallerSkip(addCallerSkip)),
-		},
-		printAsError: printAsError,
-	}
+	newGlobalGLogger = NewGLogger(newStdLogger(logger.WithOptions(zap.AddCallerSkip(addCallerSkip)), nil), channelKey, printAsError)
 }

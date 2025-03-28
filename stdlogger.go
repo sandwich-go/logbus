@@ -26,3 +26,11 @@ func (s *StdLogger) Sync() error {
 func (s *StdLogger) getZapLogger() *zap.Logger {
 	return s.z
 }
+
+func newStdLogger(z *zap.Logger, fetch FetchLogContext) *StdLogger {
+	s := &StdLogger{
+		fetch: fetch,
+		z:     z,
+	}
+	return s
+}
