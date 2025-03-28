@@ -1,6 +1,7 @@
 package logbus
 
 import (
+	"github.com/sandwich-go/boost/xos"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -77,7 +78,11 @@ func newNLoggerInstance(tagName string, fields ...zap.Field) *StdLogger {
 	}
 
 	stdCore := zapcore.NewCore(encoder, writer, NewTrackLevelEnabler(Setting.LogLevel)).With(append([]zap.Field{zap.String(Tags, tagName)}, fields...))
-	cores = append(cores, CoreWrapper(tagName, stdCore))
+	stdCore = CoreWrapper(tagName, stdCore)
+	if xos.EnvGetCaseInsensitive("logbus_core_dup") != "" {
+		stdCore = NewDupCore(stdCore)
+	}
+	cores = append(cores, stdCore)
 
 	s := newStdLogger(gBasicZLogger.WithOptions(zap.WrapCore(func(c zapcore.Core) zapcore.Core {
 		return zapcore.NewTee(cores...)
