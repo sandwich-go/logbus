@@ -17,10 +17,11 @@ type dupCore struct {
 }
 
 type lastLogEntry struct {
-	fields  []zap.Field
-	level   zapcore.Level
-	message string
-	time    time.Time
+	fields   []zap.Field
+	level    zapcore.Level
+	message  string
+	time     time.Time
+	timeLast time.Time
 }
 
 func NewDupCore(core zapcore.Core) zapcore.Core {
@@ -97,6 +98,7 @@ func (c *dupCore) Write(ent zapcore.Entry, fields []zap.Field) error {
 	}
 	if c.isEqual(c.lastEntry, current) {
 		c.repeatCount++
+		c.lastEntry.timeLast = ent.Time
 		return nil
 	}
 	var err error
@@ -107,7 +109,7 @@ func (c *dupCore) Write(ent zapcore.Entry, fields []zap.Field) error {
 			Message: "[Repeated " + strconv.Itoa(c.repeatCount) + " times] " + repeatEntry.message,
 			Time:    repeatEntry.time,
 		}
-		if err = c.Core.Write(newEntry, repeatEntry.fields); err != nil {
+		if err = c.Core.Write(newEntry, append(repeatEntry.fields, zap.Time("logbus_dup_end_time", c.lastEntry.timeLast))); err != nil {
 			return err
 		}
 		c.repeatCount = 0
@@ -124,7 +126,7 @@ func (c *dupCore) Sync() error {
 			Message: "[Repeated " + strconv.Itoa(c.repeatCount) + " times] " + c.lastEntry.message,
 			Time:    c.lastEntry.time,
 		}
-		_ = c.Core.Write(ent, c.lastEntry.fields)
+		_ = c.Core.Write(ent, append(c.lastEntry.fields, zap.Time("logbus_dup_end_time", c.lastEntry.timeLast)))
 		c.repeatCount = 0
 	}
 	c.mu.Unlock()
