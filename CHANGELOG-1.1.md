@@ -1,4 +1,12 @@
-### v1.1.27 🌈 (2025-03-28 15:39:16)
+### v1.1.28 🌈 (2025-03-28 16:04:51)
+
+#### 🐛  Bug Fixed
+  * cache logger instance ([8bffddd](https://github.com/sandwich-go/logbus/commit/8bffddd4df9aa79d9ead8e2931225a8f64a7688b)) (<small>[hui.wang](hui.wang@centurygame.com)@2025-03-28 16:04:51 &#43;0800 &#43;0800</small>)
+
+#### 🤖  Tools
+  * **sem**: make changelog ([085fdb7](https://github.com/sandwich-go/logbus/commit/085fdb702afdeb761e8124db990fe3842687277e)) (<small>[hui.wang](hui.wang@centurygame.com)@2025-03-28 15:39:43 &#43;0800 &#43;0800</small>)
+
+### v1.1.27 (2025-03-28 15:39:16)
 
 #### 🐛  Bug Fixed
   * cache logger instance ([4a3f99e](https://github.com/sandwich-go/logbus/commit/4a3f99ea98121945248218a9ea8e5ed2f3b1cdec)) (<small>[hui.wang](hui.wang@centurygame.com)@2025-03-28 15:39:16 &#43;0800 &#43;0800</small>)
