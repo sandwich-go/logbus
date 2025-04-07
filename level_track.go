@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	TrackLevelColorGreen = 32
+	TrackLevelColorGreen uint8 = 32
 )
 
 // TrackLevel track level支持自定义的数据级日志，如bi、thinking data
@@ -20,7 +20,7 @@ var trackLevelNameColored = trackLevelName
 // SetTrackLevelName 更新track level使用的字符串名称
 func SetTrackLevelName(name string) {
 	trackLevelName = name
-	trackLevelNameColored = fmt.Sprintf("\x1b[%dm%s\x1b[0m", uint8(TrackLevelColorGreen), trackLevelName)
+	trackLevelNameColored = fmt.Sprintf("\x1b[%dm%s\x1b[0m", TrackLevelColorGreen, trackLevelName)
 }
 
 func init() {
