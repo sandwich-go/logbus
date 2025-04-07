@@ -25,7 +25,7 @@ func initBasics(c *Conf) {
 
 	// init EncodeConfig
 	if c.Dev {
-		EncodeConfig.EncodeLevel = zapcore.LowercaseColorLevelEncoder
+		EncodeConfig.EncodeLevel = trackLevelEncoderWithColor
 		EncodeConfig.CallerKey = "caller"
 		EncodeConfig.EncodeDuration = zapcore.StringDurationEncoder
 		if err := debug.InitAppModuleFilePath(); err == nil {
