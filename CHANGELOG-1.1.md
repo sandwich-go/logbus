@@ -1,4 +1,12 @@
-### v1.1.33 🌈 (2025-04-07 18:34:59)
+### v1.1.34 🌈 (2025-04-13 12:41:54)
+
+#### 🤖  Tools
+  * **sem**: make changelog ([2279e0f](https://github.com/sandwich-go/logbus/commit/2279e0fbe1577b9cda915a918dbbe72cd0eb063d)) (<small>[hui.wang](hui.wang@centurygame.com)@2025-04-13 12:17:24 &#43;0800 &#43;0800</small>)
+
+#### 💪  Commit
+  * 可读性调整,test存在bug dsync_test.go   Line 112:  Expected: '2'  Actual:   '1' ([25b29f3](https://github.com/sandwich-go/logbus/commit/25b29f3572a3daed1099785e047c9a109d9f6c53)) (<small>[hui.wang](hui.wang@centurygame.com)@2025-04-13 12:41:54 &#43;0800 &#43;0800</small>)
+
+### v1.1.33 (2025-04-07 18:34:59)
 
 #### 🚀  New Feature
   * track level color ([467dad4](https://github.com/sandwich-go/logbus/commit/467dad4d819637eb36dc770656b1d6ff3e088ab0)) (<small>[hui.wang](hui.wang@centurygame.com)@2025-04-07 18:34:59 &#43;0800 &#43;0800</small>)
