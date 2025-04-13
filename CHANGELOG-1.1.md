@@ -1,4 +1,12 @@
-### v1.1.32 🌈 (2025-04-07 18:30:27)
+### v1.1.33 🌈 (2025-04-07 18:34:59)
+
+#### 🚀  New Feature
+  * track level color ([467dad4](https://github.com/sandwich-go/logbus/commit/467dad4d819637eb36dc770656b1d6ff3e088ab0)) (<small>[hui.wang](hui.wang@centurygame.com)@2025-04-07 18:34:59 &#43;0800 &#43;0800</small>)
+
+#### 🤖  Tools
+  * **sem**: make changelog ([f0ea413](https://github.com/sandwich-go/logbus/commit/f0ea41380f73d8717010acd798e4c906ca93acd3)) (<small>[hui.wang](hui.wang@centurygame.com)@2025-04-07 18:30:41 &#43;0800 &#43;0800</small>)
+
+### v1.1.32 (2025-04-07 18:30:27)
 
 #### 🚀  New Feature
   * track level color ([d1319b7](https://github.com/sandwich-go/logbus/commit/d1319b7c26403f736dbd844b92d553c786410db3)) (<small>[hui.wang](hui.wang@centurygame.com)@2025-04-07 18:30:27 &#43;0800 &#43;0800</small>)
