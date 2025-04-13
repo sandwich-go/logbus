@@ -2,16 +2,19 @@ package logbus
 
 import (
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
 	"github.com/sandwich-go/boost/xconv"
 	"github.com/sandwich-go/boost/xos"
+	"github.com/sandwich-go/boost/xslice"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
 
 func init() {
+	dupIgnoreFields = strings.Split(xos.EnvGetCaseInsensitive("logbus_core_dup_ignores"), ",")
 	v := xos.EnvGetCaseInsensitive("logbus_core_dup")
 	if v == "" {
 		return
@@ -20,6 +23,7 @@ func init() {
 }
 
 var dupDuration = time.Second
+var dupIgnoreFields []string
 
 type dupCore struct {
 	zapcore.Core
@@ -55,6 +59,9 @@ func (c *dupCore) isEqual(a, b lastLogEntry) bool {
 	for i := range a.fields {
 		af := a.fields[i]
 		bf := b.fields[i]
+		if xslice.StringsContain(dupIgnoreFields, af.Key) {
+			continue
+		}
 
 		// Compare field basic properties
 		if af.Key != bf.Key || af.Type != bf.Type {
@@ -124,7 +131,9 @@ func (c *dupCore) Write(ent zapcore.Entry, fields []zap.Field) error {
 			Message: "[Repeated " + strconv.Itoa(c.repeatCount) + " times] " + repeatEntry.message,
 			Time:    repeatEntry.time,
 		}
-		if err = c.Core.Write(newEntry, append(repeatEntry.fields, zap.Time("logbus_dup_end_time", c.lastEntry.timeLast))); err != nil {
+		if err = c.Core.Write(newEntry, append(repeatEntry.fields,
+			zap.Strings("logbus_dup_ignores", dupIgnoreFields),
+			zap.Time("logbus_dup_end_time", c.lastEntry.timeLast))); err != nil {
 			return err
 		}
 		c.repeatCount = 0
@@ -142,7 +151,7 @@ func (c *dupCore) Sync() error {
 			Message: "[Repeated " + strconv.Itoa(c.repeatCount) + " times] " + c.lastEntry.message,
 			Time:    c.lastEntry.time,
 		}
-		_ = c.Core.Write(ent, append(c.lastEntry.fields, zap.Time("logbus_dup_end_time", c.lastEntry.timeLast)))
+		_ = c.Core.Write(ent, append(c.lastEntry.fields, zap.Strings("logbus_dup_ignores", dupIgnoreFields), zap.Time("logbus_dup_end_time", c.lastEntry.timeLast)))
 		c.repeatCount = 0
 	}
 	c.mu.Unlock()
