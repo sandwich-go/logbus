@@ -23,7 +23,7 @@ func Init(conf *Conf) {
 
 	// init monitor
 	// 本地启动多个服务时可以方便的屏蔽monitor
-	if xos.EnvGetCaseInsensitive("xxx_disable_lobgus_monitor") != "" {
+	if xos.EnvGetCaseInsensitive("logbus_disable_monitor") != "" {
 		conf.MonitorOutput = Noop
 	}
 	setDefaultMetricsReporter(conf.MonitorOutput,
