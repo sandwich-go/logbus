@@ -1,4 +1,12 @@
-### v1.1.34 🌈 (2025-04-13 12:41:54)
+### v1.1.35 🌈 (2025-04-21 17:00:53)
+
+#### 🐛  Bug Fixed
+  * logbus_disable_monitor ([fec89f9](https://github.com/sandwich-go/logbus/commit/fec89f9c509d10ca39efe006bbfc8128be84a9f6) , [166854e](https://github.com/sandwich-go/logbus/commit/166854e700e621f0da3c400db0bcfb3e1d9e11df)) (<small>[hui.wang](hui.wang@centurygame.com)@2025-04-21 17:00:53 &#43;0800 &#43;0800</small>)
+
+#### 🤖  Tools
+  * **sem**: make changelog ([360f40a](https://github.com/sandwich-go/logbus/commit/360f40a5fa6827afde130cf3f746f0931304ac16)) (<small>[hui.wang](hui.wang@centurygame.com)@2025-04-13 12:43:08 &#43;0800 &#43;0800</small>)
+
+### v1.1.34 (2025-04-13 12:41:54)
 
 #### 🤖  Tools
   * **sem**: make changelog ([2279e0f](https://github.com/sandwich-go/logbus/commit/2279e0fbe1577b9cda915a918dbbe72cd0eb063d)) (<small>[hui.wang](hui.wang@centurygame.com)@2025-04-13 12:17:24 &#43;0800 &#43;0800</small>)
