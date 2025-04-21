@@ -1,5 +1,7 @@
 package logbus
 
+import "github.com/sandwich-go/boost/xos"
+
 // refresh 用于刷新在Init() 之前创建的logger
 var refresh = true
 
@@ -20,6 +22,10 @@ func Init(conf *Conf) {
 	SetGlobalGLogger(gStdLogger, conf.DefaultChannel, conf.PrintAsError, 0)
 
 	// init monitor
+	// 本地启动多个服务时可以方便的屏蔽monitor
+	if xos.EnvGetCaseInsensitive("xxx_disable_lobgus_monitor") != "" {
+		conf.MonitorOutput = Noop
+	}
 	setDefaultMetricsReporter(conf.MonitorOutput,
 		conf.DefaultPrometheusListenAddress,
 		conf.DefaultPrometheusPath,
