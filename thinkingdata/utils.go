@@ -1,12 +1,11 @@
 package thinkingdata
 
-// from https://github.com/ThinkingDataAnalytics/go-sdk/blob/master/thinkingdata/utils.go
+// from https://github.com/ThinkingDataAnalytics/go-sdk/tree/master/src/thinkingdata
 
 import (
 	"errors"
 	"fmt"
 	"os"
-	"reflect"
 	"regexp"
 	"time"
 )
@@ -85,15 +84,9 @@ func formatProperties(d Data) (Data, error) {
 
 			//check value
 			switch v.(type) {
-			case bool:
-			case string:
-			case []string, []interface{}:
 			case time.Time: //only support time.Time
 				d.Properties[k] = v.(time.Time).Format(DATE_FORMAT)
 			default:
-				if isNotNumber(v) {
-					return emptyData, fmt.Errorf("Invalid property value %v. Supported types: numbers, string, time.Time, bool, []string", reflect.TypeOf(v))
-				}
 			}
 		}
 	}
