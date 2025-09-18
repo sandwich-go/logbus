@@ -5,6 +5,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/sandwich-go/boost/xerror"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -163,11 +164,16 @@ func O(key string, val zapcore.ObjectMarshaler) Field {
 }
 
 func ErrorField(err error) Field {
+	if err == nil {
+		return zap.Skip()
+	}
+	if Setting.IgnoreLogicalError && xerror.Logic(err) {
+		return zap.String("error", err.Error()) // 逻辑错误不作为error输出
+	}
 	return zap.Error(err)
 }
-func E(err error) Field {
-	return zap.Error(err)
-}
+
+var E = ErrorField
 
 func Any(key string, value interface{}) Field {
 	return zap.Any(key, value)

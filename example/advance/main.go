@@ -57,6 +57,7 @@ func main() {
 	guildLogger := logbus.NewScopeLogger("Guild", zap.String("guildname", "guild1"))
 	playerLogger.Info("player gold", logbus.Int("money", 648))
 	guildLogger.Info("guild gold", logbus.Int("money", 6480))
+	logbus.Tracker()
 
 	// 增加全局域 非线程安全
 	logbus.AppendGlobalFields(logbus.String("playerid", "gtwefasfwad"))

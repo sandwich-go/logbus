@@ -40,7 +40,8 @@ type Conf struct {
 	MonitorTimingMaxAge time.Duration
 	EncodeCaller        zapcore.CallerEncoder
 	// glog
-	PrintAsError bool
+	PrintAsError       bool
+	IgnoreLogicalError bool
 }
 
 // NewConf new Conf
@@ -208,6 +209,13 @@ func WithPrintAsError(v bool) ConfOptionFunc {
 	}
 }
 
+// WithIgnoreLogicalError 忽略逻辑错误日志打印
+func WithIgnoreLogicalError(v bool) ConfOptionFunc {
+	return func(cc *Conf) {
+		cc.IgnoreLogicalError = v
+	}
+}
+
 // InstallConfWatchDog the installed func will called when NewConf  called
 func InstallConfWatchDog(dog func(cc *Conf)) { watchDogConf = dog }
 
@@ -235,6 +243,7 @@ func setConfDefaultValue(cc *Conf) {
 		WithMonitorTimingMaxAge(time.Minute),
 		WithEncodeCaller(nil),
 		WithPrintAsError(true),
+		WithIgnoreLogicalError(false),
 	} {
 		opt(cc)
 	}
@@ -266,6 +275,7 @@ func (cc *Conf) GetDefaultLabel() prometheus.Labels        { return cc.DefaultLa
 func (cc *Conf) GetMonitorTimingMaxAge() time.Duration     { return cc.MonitorTimingMaxAge }
 func (cc *Conf) GetEncodeCaller() zapcore.CallerEncoder    { return cc.EncodeCaller }
 func (cc *Conf) GetPrintAsError() bool                     { return cc.PrintAsError }
+func (cc *Conf) GetIgnoreLogicalError() bool               { return cc.IgnoreLogicalError }
 
 // ConfVisitor visitor interface for Conf
 type ConfVisitor interface {
@@ -287,6 +297,7 @@ type ConfVisitor interface {
 	GetMonitorTimingMaxAge() time.Duration
 	GetEncodeCaller() zapcore.CallerEncoder
 	GetPrintAsError() bool
+	GetIgnoreLogicalError() bool
 }
 
 // ConfInterface visitor + ApplyOption interface for Conf

@@ -41,7 +41,8 @@ func _ConfOptionDeclareWithDefault() interface{} {
 		"EncodeCaller":        zapcore.CallerEncoder(nil),             // @MethodComment(指定CallerEncoder)
 
 		// glog
-		"PrintAsError": true, //@MethodComment(glog输出field带error时，将日志级别提升到error)
+		"PrintAsError":       true, //@MethodComment(glog输出field带error时，将日志级别提升到error)
+		"IgnoreLogicalError": true, //@MethodComment(忽略逻辑错误, 逻辑错误使用StringField)
 	}
 }
 
