@@ -1,4 +1,27 @@
-### v1.1.35 🌈 (2025-04-21 17:00:53)
+### v1.1.39 🌈 (2025-09-18 11:02:23)
+
+#### 🛠  Refactor
+  * add IgnoreLogicalError ([66e1621](https://github.com/sandwich-go/logbus/commit/66e1621d8502c1cb4de4c010c6c8a3d9c0f186b6)) (<small>[daming.yang](daming.yang@centurygame.con)@2025-09-18 11:02:23 &#43;0800 &#43;0800</small>)
+
+### v1.1.38 (2025-07-28 17:05:17)
+
+#### 🛠  Refactor
+  * 移除tga对数据类型的限制 ([cc8e0da](https://github.com/sandwich-go/logbus/commit/cc8e0daeb6b8a5d47a636438d52003979894371a)) (<small>[zhengyang.zhu](zhengyang.zhu@centurygame.com)@2025-07-28 17:05:17 &#43;0800 &#43;0800</small>)
+
+### v1.1.37 (2025-06-27 12:51:57)
+
+#### 🚀  New Feature
+  * 增加 field 一些缩写 ([25d1da3](https://github.com/sandwich-go/logbus/commit/25d1da3c4698a40c3b4896d37b728e812ab68906)) (<small>[huangqing.zhu](huangqing.zhu@centurygame.com)@2025-06-27 12:51:57 &#43;0800 &#43;0800</small>)
+
+### v1.1.36 (2025-06-27 12:38:53)
+
+#### 🚀  New Feature
+  * 增加 field 一些缩写 ([f169864](https://github.com/sandwich-go/logbus/commit/f169864d51f0a7f9a51ce564b901baa1b988f018)) (<small>[huangqing.zhu](huangqing.zhu@centurygame.com)@2025-06-27 12:38:53 &#43;0800 &#43;0800</small>)
+
+#### 🤖  Tools
+  * **sem**: make changelog ([c8b5160](https://github.com/sandwich-go/logbus/commit/c8b516073d972bf2066949cce94e7ecb5d451f5f)) (<small>[hui.wang](hui.wang@centurygame.com)@2025-04-21 17:01:08 &#43;0800 &#43;0800</small>)
+
+### v1.1.35 (2025-04-21 17:00:53)
 
 #### 🐛  Bug Fixed
   * logbus_disable_monitor ([fec89f9](https://github.com/sandwich-go/logbus/commit/fec89f9c509d10ca39efe006bbfc8128be84a9f6) , [166854e](https://github.com/sandwich-go/logbus/commit/166854e700e621f0da3c400db0bcfb3e1d9e11df)) (<small>[hui.wang](hui.wang@centurygame.com)@2025-04-21 17:00:53 &#43;0800 &#43;0800</small>)
