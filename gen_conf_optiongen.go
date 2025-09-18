@@ -209,7 +209,7 @@ func WithPrintAsError(v bool) ConfOptionFunc {
 	}
 }
 
-// WithIgnoreLogicalError 忽略逻辑错误日志打印
+// WithIgnoreLogicalError 忽略逻辑错误, 逻辑错误使用StringField
 func WithIgnoreLogicalError(v bool) ConfOptionFunc {
 	return func(cc *Conf) {
 		cc.IgnoreLogicalError = v
@@ -243,7 +243,7 @@ func setConfDefaultValue(cc *Conf) {
 		WithMonitorTimingMaxAge(time.Minute),
 		WithEncodeCaller(nil),
 		WithPrintAsError(true),
-		WithIgnoreLogicalError(false),
+		WithIgnoreLogicalError(true),
 	} {
 		opt(cc)
 	}
