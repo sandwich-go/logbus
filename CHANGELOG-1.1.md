@@ -1,4 +1,12 @@
-### v1.1.39 🌈 (2025-09-18 11:02:23)
+### v1.1.40 🌈 (2025-09-18 15:28:26)
+
+#### 🛠  Refactor
+  * default ignore logic error ([f47b7d3](https://github.com/sandwich-go/logbus/commit/f47b7d303d99586ee20cd44744643c3975b44483)) (<small>[daming.yang](daming.yang@centurygame.con)@2025-09-18 15:28:26 &#43;0800 &#43;0800</small>)
+
+#### 🤖  Tools
+  * **sem**: make changelog ([603c955](https://github.com/sandwich-go/logbus/commit/603c9558767415b57de52a1ec9fcb292b8219434)) (<small>[daming.yang](daming.yang@centurygame.con)@2025-09-18 11:02:56 &#43;0800 &#43;0800</small>)
+
+### v1.1.39 (2025-09-18 11:02:23)
 
 #### 🛠  Refactor
   * add IgnoreLogicalError ([66e1621](https://github.com/sandwich-go/logbus/commit/66e1621d8502c1cb4de4c010c6c8a3d9c0f186b6)) (<small>[daming.yang](daming.yang@centurygame.con)@2025-09-18 11:02:23 &#43;0800 &#43;0800</small>)
