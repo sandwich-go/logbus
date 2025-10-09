@@ -1,11 +1,12 @@
 package logbus
 
 var (
-	THINKINGDATA = "thinkingdata"
-	SERVERLOG    = "server"
-	BIGQUERY     = "bigquery"
-	BI           = "bi"
-	Monitor      = "monitor"
+	THINKINGDATACENTRALIZATION = "thinkingdatacentralization" // 所有tga数据集中处理，再根据appid分类
+	THINKINGDATA               = "thinkingdata"
+	SERVERLOG                  = "server"
+	BIGQUERY                   = "bigquery"
+	BI                         = "bi"
+	Monitor                    = "monitor"
 )
 
 var (

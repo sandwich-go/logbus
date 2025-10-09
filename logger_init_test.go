@@ -30,7 +30,7 @@ func TestStdLogger(t *testing.T) {
 		Info("", Int("int", 111), String("str", "222"))
 		Warn("", Int("int", 111), String("str", "222"), Bool("b", true))
 		Error("", Int("int", 111), String("str", "222"), Bool("b", true), ErrorField(errors.New("this is a test error")))
-		//StdLogger().WithOptions(zap.AddCallerSkip(10)).Fatal("fatal", zap.Int("int", 111), zap.String("str", "222"), zap.Bool("b", true), zap.Error(nil))
+		// StdLogger().WithOptions(zap.AddCallerSkip(10)).Fatal("fatal", zap.Int("int", 111), zap.String("str", "222"), zap.Bool("b", true), zap.Error(nil))
 		So(gStdLogger.fetch, ShouldEqual, nil)
 	})
 }
@@ -70,11 +70,13 @@ func TestPrintComplexTag(t *testing.T) {
 			String("player_name", "zhang liu"), Int("level", 11), Bool("bool", true), Strings("strings", []string{"x", "y"}))
 		So(err, ShouldBeNil)
 	})
+
 	Convey("test only bigquery to stdout\n", t, func() {
 		err := Tracker(BIGQUERY).Track(String("$user_id", "111"), Time("$optime", time.Now()), String(bigquery.TableNameKey, "oplog"),
 			String("player_name", "zhang liu"), Int("level", 11), Bool("bool", true), Strings("strings", []string{"x", "y"}))
 		So(err, ShouldBeNil)
 	})
+
 	Convey("test bigquery and tga - UseRecord false to stdout\n", t, func() {
 		err := Tracker(BIGQUERY, THINKINGDATA).Track(String(thinkingdata.ACCOUNT, "111"), String(thinkingdata.TYPE, thinkingdata.TRACK),
 			String(thinkingdata.EVENT, "login"), String(thinkingdata.EVENT_ID, "ID1"),
@@ -82,6 +84,7 @@ func TestPrintComplexTag(t *testing.T) {
 			String("player_name", "zhang liu"), Int("level", 11), Bool("bool", true), Strings("strings", []string{"x", "y"}))
 		So(err, ShouldBeNil)
 	})
+
 	Convey("test tga", t, func() {
 		Convey("without event_id, should be fine", func() {
 			err := Tracker(THINKINGDATA).Track(String(thinkingdata.ACCOUNT, "111"), String(thinkingdata.TYPE, thinkingdata.TRACK),
@@ -89,12 +92,14 @@ func TestPrintComplexTag(t *testing.T) {
 				String("player_name", "zhang liu"), Int("level", 11), Bool("bool", true), Strings("strings", []string{"x", "y"}))
 			So(err, ShouldBeNil)
 		})
+
 		Convey("with legal event_id, should be fine", func() {
 			err := Tracker(THINKINGDATA).Track(String(thinkingdata.ACCOUNT, "111"), String(thinkingdata.TYPE, thinkingdata.TRACK),
 				String(thinkingdata.EVENT, "login"), String(thinkingdata.EVENT_ID, "ID1"),
 				String("player_name", "zhang liu"), Int("level", 11), Bool("bool", true), Strings("strings", []string{"x", "y"}))
 			So(err, ShouldBeNil)
 		})
+
 		Convey("with illegal event_id, should return error", func() {
 			err := Tracker(THINKINGDATA).Track(String(thinkingdata.ACCOUNT, "111"), String(thinkingdata.TYPE, thinkingdata.TRACK),
 				String(thinkingdata.EVENT, "login"), String(thinkingdata.EVENT_ID, "_dfa"),
@@ -109,6 +114,26 @@ func TestPrintComplexTag(t *testing.T) {
 			String("$user_id", "111"), Time("$optime", time.Now()), String(bigquery.TableNameKey, "oplog"),
 			String("player_name", "zhang liu"), Int("level", 11), Bool("bool", true), Strings("strings", []string{"x", "y"}))
 		So(err, ShouldBeNil)
+	})
+
+	// Test cases for THINKINGDATACENTRALIZATION tag
+	Convey("test tga data centralization", t, func() {
+		Convey("valid case with appid", func() {
+			// Adding `String("appid", "appid1")` as a proper test case
+			err := Tracker(THINKINGDATACENTRALIZATION).Track(String(thinkingdata.TAG_APPID, "appid1"), String(thinkingdata.ACCOUNT, "111"),
+				String(thinkingdata.TYPE, thinkingdata.TRACK), String(thinkingdata.EVENT, "login"),
+				String("player_name", "zhang liu"), Int("level", 11), Bool("bool", true), Strings("strings", []string{"x", "y"}))
+			So(err, ShouldBeNil)
+		})
+
+		Convey("missing appid should return error", func() {
+			// Intentionally omit `appid` to trigger error
+			err := Tracker(THINKINGDATACENTRALIZATION).Track(String(thinkingdata.ACCOUNT, "111"), String(thinkingdata.TYPE, thinkingdata.TRACK),
+				String(thinkingdata.EVENT, "login"),
+				String("player_name", "zhang liu"), Int("level", 11), Bool("bool", true), Strings("strings", []string{"x", "y"}))
+			So(err, ShouldNotBeNil)
+			So(err.Error(), ShouldEqual, "tga appid must be assigned")
+		})
 	})
 }
 

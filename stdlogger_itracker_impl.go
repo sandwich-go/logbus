@@ -16,6 +16,14 @@ func (s *StdLogger) PrintThingkingData(data thinkingdata.Data) {
 	s.TrackWithChannel(THINKINGDATA, zap.ByteString(MsgBody, bytes))
 }
 
+func (s *StdLogger) PrintThinkingDataCentralization(tgaAppid string, data thinkingdata.Data) {
+	bytes, err := data.MarshalAsJsonV2()
+	if err != nil {
+		s.ErrorWithChannel(Setting.DefaultChannel, zap.String("PrintThinkingDataCentralization", err.Error()))
+	}
+	s.TrackWithChannel(THINKINGDATACENTRALIZATION, zap.String(thinkingdata.TAG_APPID, tgaAppid), zap.ByteString(MsgBody, bytes))
+}
+
 func (s *StdLogger) PrintBigQuery(tableName zap.Field, fields ...zap.Field) {
 	bytes, err := utils.Zap2Json(fields)
 	if err != nil {

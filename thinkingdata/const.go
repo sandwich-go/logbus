@@ -13,6 +13,8 @@ const (
 
 	SDK_VERSION = "1.2.0"
 	LIB_NAME    = "Golang"
+
+	TAG_APPID = "tag_appid"
 )
 
 const (
