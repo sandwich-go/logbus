@@ -1,7 +1,7 @@
 package logbus
 
 var (
-	THINKINGDATACENTRALIZATION = "thinkingdatacentralization" // 所有tga数据集中处理，再根据appid分类
+	THINKINGDATACENTRALIZATION = "tgac" // 所有tga数据集中处理，再根据appid分类
 	THINKINGDATA               = "thinkingdata"
 	SERVERLOG                  = "server"
 	BIGQUERY                   = "bigquery"
