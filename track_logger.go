@@ -47,7 +47,7 @@ func (t *TrackLogger) Track(fields ...Field) error {
 			tgaAppid := ""
 			for _, v := range fields {
 				if v.Key == thinkingdata.TAG_APPID {
-					tgaAppid = v.Key
+					tgaAppid = v.String
 					continue
 				}
 				v.AddTo(memoryEncoder)
