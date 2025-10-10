@@ -21,7 +21,7 @@ func (s *StdLogger) PrintThinkingDataCentralization(tgaAppid string, data thinki
 	if err != nil {
 		s.ErrorWithChannel(Setting.DefaultChannel, zap.String("PrintThinkingDataCentralization", err.Error()))
 	}
-	s.TrackWithChannel(THINKINGDATACENTRALIZATION, zap.String(thinkingdata.TAG_APPID, tgaAppid), zap.ByteString(MsgBody, bytes))
+	s.TrackWithChannel(THINKINGDATACENTRALIZATION, zap.String(thinkingdata.TGA_APPID, tgaAppid), zap.ByteString(MsgBody, bytes))
 }
 
 func (s *StdLogger) PrintBigQuery(tableName zap.Field, fields ...zap.Field) {

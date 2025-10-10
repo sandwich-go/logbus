@@ -46,7 +46,7 @@ func (t *TrackLogger) Track(fields ...Field) error {
 			memoryEncoder := zapcore.NewMapObjectEncoder()
 			tgaAppid := ""
 			for _, v := range fields {
-				if v.Key == thinkingdata.TAG_APPID {
+				if v.Key == thinkingdata.TGA_APPID {
 					tgaAppid = v.String
 					continue
 				}

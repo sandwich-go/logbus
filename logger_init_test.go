@@ -120,7 +120,7 @@ func TestPrintComplexTag(t *testing.T) {
 	Convey("test tga data centralization", t, func() {
 		Convey("valid case with appid", func() {
 			// Adding `String("appid", "appid1")` as a proper test case
-			err := Tracker(THINKINGDATACENTRALIZATION).Track(String(thinkingdata.TAG_APPID, "appid123"), String(thinkingdata.ACCOUNT, "111"),
+			err := Tracker(THINKINGDATACENTRALIZATION).Track(String(thinkingdata.TGA_APPID, "appid123"), String(thinkingdata.ACCOUNT, "111"),
 				String(thinkingdata.TYPE, thinkingdata.TRACK), String(thinkingdata.EVENT, "login"),
 				String("player_name", "zhang liu"), Int("level", 11), Bool("bool", true), Strings("strings", []string{"x", "y"}))
 			So(err, ShouldBeNil)
