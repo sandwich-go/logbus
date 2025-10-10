@@ -30,4 +30,5 @@ const (
 	FIRST_CHECK_ID = "#first_check_id"
 	IP             = "#ip"
 	UUID           = "#uuid"
+	APPID          = "#app_id"
 )

@@ -30,7 +30,7 @@ func TestStdLogger(t *testing.T) {
 		Info("", Int("int", 111), String("str", "222"))
 		Warn("", Int("int", 111), String("str", "222"), Bool("b", true))
 		Error("", Int("int", 111), String("str", "222"), Bool("b", true), ErrorField(errors.New("this is a test error")))
-		//StdLogger().WithOptions(zap.AddCallerSkip(10)).Fatal("fatal", zap.Int("int", 111), zap.String("str", "222"), zap.Bool("b", true), zap.Error(nil))
+		// StdLogger().WithOptions(zap.AddCallerSkip(10)).Fatal("fatal", zap.Int("int", 111), zap.String("str", "222"), zap.Bool("b", true), zap.Error(nil))
 		So(gStdLogger.fetch, ShouldEqual, nil)
 	})
 }
@@ -85,7 +85,7 @@ func TestPrintComplexTag(t *testing.T) {
 	Convey("test tga", t, func() {
 		Convey("without event_id, should be fine", func() {
 			err := Tracker(THINKINGDATA).Track(String(thinkingdata.ACCOUNT, "111"), String(thinkingdata.TYPE, thinkingdata.TRACK),
-				String(thinkingdata.EVENT, "login"),
+				String(thinkingdata.EVENT, "login"), String(thinkingdata.APPID, "appid123"),
 				String("player_name", "zhang liu"), Int("level", 11), Bool("bool", true), Strings("strings", []string{"x", "y"}))
 			So(err, ShouldBeNil)
 		})
@@ -97,7 +97,7 @@ func TestPrintComplexTag(t *testing.T) {
 		})
 		Convey("with illegal event_id, should return error", func() {
 			err := Tracker(THINKINGDATA).Track(String(thinkingdata.ACCOUNT, "111"), String(thinkingdata.TYPE, thinkingdata.TRACK),
-				String(thinkingdata.EVENT, "login"), String(thinkingdata.EVENT_ID, "_dfa"),
+				String(thinkingdata.EVENT, "login"), String(thinkingdata.EVENT_ID, "_dfa"), String(thinkingdata.APPID, "appid123"),
 				String("player_name", "zhang liu"), Int("level", 11), Bool("bool", true), Strings("strings", []string{"x", "y"}))
 			So(err, ShouldNotBeNil)
 		})
@@ -121,7 +121,7 @@ func TestTagLoggerThinkingData(t *testing.T) {
 		Convey("test thinkingdata Stdout\n", func() {
 			Init(NewConf(WithLogLevel(zap.DebugLevel)))
 			properties := map[string]interface{}{"#ip": "10.0.0.1", "player_name": "zhang san", "level": 7}
-			data, err := thinkingdata.Track("111", "", "login", "", properties)
+			data, err := thinkingdata.Track("111", "", "login", "", "", properties)
 			So(err, ShouldBeNil)
 			Info("", zap.Object("tga", data))
 		})

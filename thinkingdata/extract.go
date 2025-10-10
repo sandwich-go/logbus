@@ -42,20 +42,24 @@ func ExtractEncoder(memoryEncoder *zapcore.MapObjectEncoder) (Data, error) {
 			return emptyData, errors.New("the event name must start with a letter or number")
 		}
 	}
-
+	appid, ok3 := memoryEncoder.Fields[APPID]
+	if !ok3 {
+		appid = ""
+	}
 	delete(memoryEncoder.Fields, ACCOUNT)
 	delete(memoryEncoder.Fields, DISTINCT)
 	delete(memoryEncoder.Fields, TYPE)
 	delete(memoryEncoder.Fields, EVENT)
 	delete(memoryEncoder.Fields, EVENT_ID)
+	delete(memoryEncoder.Fields, APPID)
 	if hasEvent {
-		return Track(accountId.(string), distinctId.(string), eventName.(string), strEventID, memoryEncoder.Fields)
+		return Track(accountId.(string), distinctId.(string), eventName.(string), strEventID, appid.(string), memoryEncoder.Fields)
 	}
 	if ok1 {
 		if userType.(string) == TRACK {
 			return emptyData, errors.New("the event name must be provided")
 		}
-		return User(accountId.(string), distinctId.(string), userType.(string), memoryEncoder.Fields)
+		return User(accountId.(string), distinctId.(string), userType.(string), appid.(string), memoryEncoder.Fields)
 	}
 	return emptyData, errors.New("no #type or #event_name")
 }

@@ -21,6 +21,7 @@ type Data struct {
 	FirstCheckId string                 `json:"#first_check_id,omitempty"`
 	Ip           string                 `json:"#ip,omitempty"`
 	UUID         string                 `json:"#uuid,omitempty"`
+	Appid        string                 `json:"Appid,omitempty"`
 	Properties   map[string]interface{} `json:"properties"`
 }
 
@@ -47,6 +48,9 @@ func (d Data) MarshalLogObject(enc zapcore.ObjectEncoder) error {
 	}
 	if d.UUID != "" {
 		enc.AddString(UUID, d.UUID)
+	}
+	if d.Appid != "" {
+		enc.AddString(APPID, d.Appid)
 	}
 	return enc.AddObject("properties", zapencoder.StringInterfaceMap(d.Properties))
 }
@@ -75,6 +79,9 @@ func (d Data) MarshalAsJson() ([]byte, error) {
 	}
 	if d.UUID != "" {
 		fields = append(fields, zap.String(UUID, d.UUID))
+	}
+	if d.Appid != "" {
+		fields = append(fields, zap.String(APPID, d.Appid))
 	}
 	fields = append(fields, zap.Object("properties", zapencoder.StringInterfaceMap(d.Properties)))
 	return utils.Zap2Json(fields)
@@ -116,22 +123,26 @@ func (d Data) MarshalAsJsonV2() ([]byte, error) {
 		fields[index] = zap.String(UUID, d.UUID)
 		index++
 	}
+	if d.Appid != "" {
+		fields[index] = zap.String(APPID, d.Appid)
+		index++
+	}
 	fields[index] = zap.Object("properties", zapencoder.StringInterfaceMap(d.Properties))
 	index++
 	return utils.Zap2Json(fields[:index])
 }
 
-//var json = jsoniter.ConfigCompatibleWithStandardLibrary
-//func (d Data) MarshalAsJsonV2() ([]byte, error) {
+// var json = jsoniter.ConfigCompatibleWithStandardLibrary
+// func (d Data) MarshalAsJsonV2() ([]byte, error) {
 //	return json.Marshal(d)
-//}
-//goos: darwin
-//goarch: amd64
-//pkg: github.com/sandwich-go/logbus/thinkingdata
-//cpu: Intel(R) Core(TM) i7-8850H CPU @ 2.60GHz
-//BenchmarkMarshalAsJsonSmallData-12                191366              8187 ns/op            1857 B/op         13 allocs/op
-//BenchmarkMarshalAsJsonMediumData-12                23184             50199 ns/op           10217 B/op        106 allocs/op
-//BenchmarkMarshalAsJsonLargeData-12                  2731            428955 ns/op          129691 B/op       1014 allocs/op
-//BenchmarkMarshalAsJsonV2SmallData-12              176688              7281 ns/op            2162 B/op         20 allocs/op
-//BenchmarkMarshalAsJsonV2MediumData-12              23787             43624 ns/op           15203 B/op        113 allocs/op
-//BenchmarkMarshalAsJsonV2LargeData-12                3025            467641 ns/op          127922 B/op       1016 allocs/op
+// }
+// goos: darwin
+// goarch: amd64
+// pkg: github.com/sandwich-go/logbus/thinkingdata
+// cpu: Intel(R) Core(TM) i7-8850H CPU @ 2.60GHz
+// BenchmarkMarshalAsJsonSmallData-12                191366              8187 ns/op            1857 B/op         13 allocs/op
+// BenchmarkMarshalAsJsonMediumData-12                23184             50199 ns/op           10217 B/op        106 allocs/op
+// BenchmarkMarshalAsJsonLargeData-12                  2731            428955 ns/op          129691 B/op       1014 allocs/op
+// BenchmarkMarshalAsJsonV2SmallData-12              176688              7281 ns/op            2162 B/op         20 allocs/op
+// BenchmarkMarshalAsJsonV2MediumData-12              23787             43624 ns/op           15203 B/op        113 allocs/op
+// BenchmarkMarshalAsJsonV2LargeData-12                3025            467641 ns/op          127922 B/op       1016 allocs/op
