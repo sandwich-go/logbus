@@ -1,4 +1,12 @@
-### v1.1.42 🌈 (2025-12-08 15:12:41)
+### v1.1.43 🌈 (2025-12-08 15:14:26)
+
+#### 🚀  New Feature
+  * logbus.WithEnableTraceLevel ([333cdb2](https://github.com/sandwich-go/logbus/commit/333cdb208d5d462dbfcfe84bafb14fd8f85da8b0)) (<small>[zhengyang.zhu](zhengyang.zhu@centurygame.com)@2025-12-08 15:14:26 &#43;0800 &#43;0800</small>)
+
+#### 🤖  Tools
+  * **sem**: make changelog ([eedccf7](https://github.com/sandwich-go/logbus/commit/eedccf7e4eabcb73135aa8d57cf22140d592ec86)) (<small>[zhengyang.zhu](zhengyang.zhu@centurygame.com)@2025-12-08 15:13:06 &#43;0800 &#43;0800</small>)
+
+### v1.1.42 (2025-12-08 15:12:41)
 
 #### 💪  Commit
   * logbus.WithEnableTracLevel ([0044544](https://github.com/sandwich-go/logbus/commit/00445448f2a6f44e0fcf19490ae660572aa16c77)) (<small>[zhengyang.zhu](zhengyang.zhu@centurygame.com)@2025-12-08 15:12:41 &#43;0800 &#43;0800</small>)
