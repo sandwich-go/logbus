@@ -1,4 +1,17 @@
-### v1.1.40 🌈 (2025-09-18 15:28:26)
+### v1.1.42 🌈 (2025-12-08 15:12:41)
+
+#### 💪  Commit
+  * logbus.WithEnableTracLevel ([0044544](https://github.com/sandwich-go/logbus/commit/00445448f2a6f44e0fcf19490ae660572aa16c77)) (<small>[zhengyang.zhu](zhengyang.zhu@centurygame.com)@2025-12-08 15:12:41 &#43;0800 &#43;0800</small>)
+
+### v1.1.41 (2025-10-10 14:50:59)
+
+#### 🤖  Tools
+  * **sem**: make changelog ([977394f](https://github.com/sandwich-go/logbus/commit/977394f0e37100b5593584099602386c8ec12e59)) (<small>[daming.yang](daming.yang@centurygame.con)@2025-09-18 15:28:39 &#43;0800 &#43;0800</small>)
+
+#### 💪  Commit
+  * feat:tga add appid ([1ac3eb6](https://github.com/sandwich-go/logbus/commit/1ac3eb6175deb9fc16ce2c3399224bfe79f20e22)) (<small>[yang.wu](yang.wu@centurygame.com)@2025-10-10 14:50:59 &#43;0800 &#43;0800</small>)
+
+### v1.1.40 (2025-09-18 15:28:26)
 
 #### 🛠  Refactor
   * default ignore logic error ([f47b7d3](https://github.com/sandwich-go/logbus/commit/f47b7d303d99586ee20cd44744643c3975b44483)) (<small>[daming.yang](daming.yang@centurygame.con)@2025-09-18 15:28:26 &#43;0800 &#43;0800</small>)
