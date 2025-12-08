@@ -75,7 +75,7 @@ func main() {
 
 	logbus.Init(logbus.NewConf(
 		logbus.WithDev(true),
-		logbus.WithEnableTracLevel(false),
+		logbus.WithEnableTraceLevel(false),
 	),
 	)
 

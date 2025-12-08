@@ -39,7 +39,7 @@ type Conf struct {
 	DefaultLabel        prometheus.Labels
 	MonitorTimingMaxAge time.Duration
 	EncodeCaller        zapcore.CallerEncoder
-	EnableTracLevel     bool
+	EnableTraceLevel    bool
 	// glog
 	PrintAsError       bool
 	IgnoreLogicalError bool
@@ -203,10 +203,10 @@ func WithEncodeCaller(v zapcore.CallerEncoder) ConfOptionFunc {
 	}
 }
 
-// WithEnableTracLevel 允许track level log输出
-func WithEnableTracLevel(v bool) ConfOptionFunc {
+// WithEnableTraceLevel 允许track level log输出
+func WithEnableTraceLevel(v bool) ConfOptionFunc {
 	return func(cc *Conf) {
-		cc.EnableTracLevel = v
+		cc.EnableTraceLevel = v
 	}
 }
 
@@ -250,7 +250,7 @@ func setConfDefaultValue(cc *Conf) {
 		WithDefaultLabel(map[string]string{}),
 		WithMonitorTimingMaxAge(time.Minute),
 		WithEncodeCaller(nil),
-		WithEnableTracLevel(true),
+		WithEnableTraceLevel(true),
 		WithPrintAsError(true),
 		WithIgnoreLogicalError(true),
 	} {
@@ -283,7 +283,7 @@ func (cc *Conf) GetDefaultPercentiles() []float64          { return cc.DefaultPe
 func (cc *Conf) GetDefaultLabel() prometheus.Labels        { return cc.DefaultLabel }
 func (cc *Conf) GetMonitorTimingMaxAge() time.Duration     { return cc.MonitorTimingMaxAge }
 func (cc *Conf) GetEncodeCaller() zapcore.CallerEncoder    { return cc.EncodeCaller }
-func (cc *Conf) GetEnableTracLevel() bool                  { return cc.EnableTracLevel }
+func (cc *Conf) GetEnableTraceLevel() bool                 { return cc.EnableTraceLevel }
 func (cc *Conf) GetPrintAsError() bool                     { return cc.PrintAsError }
 func (cc *Conf) GetIgnoreLogicalError() bool               { return cc.IgnoreLogicalError }
 
@@ -306,7 +306,7 @@ type ConfVisitor interface {
 	GetDefaultLabel() prometheus.Labels
 	GetMonitorTimingMaxAge() time.Duration
 	GetEncodeCaller() zapcore.CallerEncoder
-	GetEnableTracLevel() bool
+	GetEnableTraceLevel() bool
 	GetPrintAsError() bool
 	GetIgnoreLogicalError() bool
 }
