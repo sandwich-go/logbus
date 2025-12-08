@@ -17,28 +17,29 @@ const TrackLevel = zapcore.DebugLevel - 1
 var trackLevelName = "track"
 var trackLevelNameColored = trackLevelName
 
-// SetTrackLevelName 更新track level使用的字符串名称
-func SetTrackLevelName(name string) {
+// setTrackLevelName 更新track level使用的字符串名称
+func setTrackLevelName(name string) {
 	trackLevelName = name
 	trackLevelNameColored = fmt.Sprintf("\x1b[%dm%s\x1b[0m", TrackLevelColorGreen, trackLevelName)
 }
 
 func init() {
-	SetTrackLevelName(trackLevelName)
+	setTrackLevelName(trackLevelName)
 }
 
-// NewTrackLevelEnabler 构造level过滤器，默认TrackLevel不受level过滤限制，允许覆盖实现自定义逻辑
-var NewTrackLevelEnabler = func(level zapcore.Level) zapcore.LevelEnabler {
-	return &trackLevelEnabler{Level: level}
+// newTrackLevelEnabler 构造level过滤器，默认TrackLevel不受level过滤限制，允许覆盖实现自定义逻辑
+var newTrackLevelEnabler = func(level zapcore.Level, enableTrack bool) zapcore.LevelEnabler {
+	return &trackLevelEnabler{Level: level, enableTrack: enableTrack}
 }
 
 type trackLevelEnabler struct {
 	zapcore.Level
+	enableTrack bool
 }
 
 // Enabled track级日志不允许屏蔽
 func (t *trackLevelEnabler) Enabled(level zapcore.Level) bool {
-	if level == TrackLevel {
+	if t.enableTrack && level == TrackLevel {
 		return true
 	}
 	return t.Level.Enabled(level)

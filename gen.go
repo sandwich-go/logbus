@@ -39,6 +39,7 @@ func _ConfOptionDeclareWithDefault() interface{} {
 		"DefaultLabel":        prometheus.Labels(map[string]string{}), //@MethodComment(监控额外添加的全局label，会在监控指标中显示)
 		"MonitorTimingMaxAge": time.Duration(time.Minute),             // @MethodComment(monitor.Timing数据的最大生命周期)
 		"EncodeCaller":        zapcore.CallerEncoder(nil),             // @MethodComment(指定CallerEncoder)
+		"EnableTracLevel":     true,                                   // @MethodComment(允许track level log输出)
 
 		// glog
 		"PrintAsError":       true, //@MethodComment(glog输出field带error时，将日志级别提升到error)

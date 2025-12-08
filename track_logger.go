@@ -9,25 +9,25 @@ import (
 )
 
 var ErrIgnore = xerror.NewText("ignore track log")
-var ErrTagNotImplement = xerror.NewText("tog not implement")
+var ErrTagNotImplement = xerror.NewText("tag not implement")
 
 // Tracker 获取ITracker来打印thinkingData和bigQuery日志
 func Tracker(tags ...string) ITracker {
-	return &TrackLogger{
+	return &trackLogger{
 		StdLogger: gStdLogger,
 		tags:      tags,
 	}
 }
 
-type TrackLogger struct {
+type trackLogger struct {
 	*StdLogger
 	tags []string
 }
 
-func (t *TrackLogger) Track(fields ...Field) error {
+func (t *trackLogger) Track(fields ...Field) error {
 	if ce := t.StdLogger.z.Check(TrackLevel, ""); ce == nil {
 		// 检查逻辑前置，不做无用功
-		return ErrIgnore
+		return nil
 	}
 	for _, tag := range t.tags {
 		switch tag {
@@ -54,10 +54,10 @@ func (t *TrackLogger) Track(fields ...Field) error {
 	return nil
 }
 
-func (t *TrackLogger) TrackWithTGAData(d thinkingdata.Data) error {
+func (t *trackLogger) TrackWithTGAData(d thinkingdata.Data) error {
 	if ce := t.StdLogger.z.Check(TrackLevel, ""); ce == nil {
 		// 检查逻辑前置，不做无用功
-		return ErrIgnore
+		return nil
 	}
 	t.StdLogger.PrintThingkingData(d)
 	return nil

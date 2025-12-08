@@ -3,6 +3,7 @@ package main
 import (
 	"time"
 
+	"github.com/sandwich-go/boost/xpanic"
 	"go.uber.org/zap"
 
 	"github.com/sandwich-go/logbus"
@@ -71,4 +72,15 @@ func main() {
 	logbus.ReservedGlobalFields = nil
 	logbus.SetGlobalFields(nil)
 	logbus.Info("clean log")
+
+	logbus.Init(logbus.NewConf(
+		logbus.WithDev(true),
+		logbus.WithEnableTracLevel(false),
+	),
+	)
+
+	err := logbus.Tracker(logbus.THINKINGDATA).Track(logbus.String(thinkingdata.ACCOUNT, "111"), logbus.String(thinkingdata.TYPE, thinkingdata.TRACK),
+		logbus.String(thinkingdata.EVENT_ID, "ID1"), logbus.String(thinkingdata.EVENT, "login"))
+	xpanic.WhenError(err)
+
 }

@@ -34,12 +34,27 @@ func TestPrometheusReporter(t *testing.T) {
 		metricFamily := reporter.newMetricFamily([]float64{0, 0.5, 0.75, 0.90, 0.95, 0.99, 1}, nil, time.Minute)
 		cnt := metricFamily.getCounter("testCounter", map[string]string{"test": "test", "counter": "test"})
 		So(cnt, ShouldNotBeNil)
-		So(len(metricFamily.counters), ShouldEqual, 1)
+		length := 0
+		metricFamily.counters.Range(func(key, value interface{}) bool {
+			length++
+			return true
+		})
+		So(length, ShouldEqual, 1)
 		gauges := metricFamily.getGauge("testGauge", map[string]string{"test": "test", "gauge": "test"})
 		So(gauges, ShouldNotBeNil)
-		So(len(metricFamily.gauges), ShouldEqual, 1)
+		length = 0
+		metricFamily.gauges.Range(func(key, value interface{}) bool {
+			length++
+			return true
+		})
+		So(length, ShouldEqual, 1)
 		timing := metricFamily.getTiming("testTiming", map[string]string{"test": "test", "timing": "test"})
 		So(timing, ShouldNotBeNil)
-		So(len(metricFamily.timings), ShouldEqual, 1)
+		length = 0
+		metricFamily.timings.Range(func(key, value interface{}) bool {
+			length++
+			return true
+		})
+		So(length, ShouldEqual, 1)
 	})
 }
