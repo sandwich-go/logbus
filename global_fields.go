@@ -12,6 +12,11 @@ import (
 var globalFields []zap.Field
 var cacheUserDefineFields []zap.Field
 
+// DynamicGlobalField 动态全局字段类型
+type DynamicGlobalField func() Field
+
+var dynamicGlobalFields []DynamicGlobalField
+
 func init() {
 	for _, key := range []string{"sys_env_name", "sys_stage", "sys_cd_service"} {
 		val := os.Getenv(key)
@@ -43,6 +48,34 @@ func SetGlobalFields(fields []Field) {
 func AppendGlobalFields(fields ...Field) {
 	cacheUserDefineFields = append(cacheUserDefineFields, fields...)
 	freshGlobal()
+}
+
+// SetDynamicGlobalFields 设置动态全局字段列表，会替换现有的动态字段
+// 注意：非线程安全，必须在初始化时调用, 考虑性能问题，不推荐生产环境使用
+func SetDynamicGlobalFields(fields ...DynamicGlobalField) {
+	dynamicGlobalFields = fields
+}
+
+// AppendDynamicGlobalFields 追加动态全局字段
+// 注意：非线程安全，必须在初始化时调用， 考虑性能问题，不推荐生产环境使用
+func AppendDynamicGlobalFields(fields ...DynamicGlobalField) {
+	dynamicGlobalFields = append(dynamicGlobalFields, fields...)
+}
+
+// GetDynamicGlobalFields 获取动态全局字段的值（调用函数获取当前值） unsafely
+func GetDynamicGlobalFields() []Field {
+	if len(dynamicGlobalFields) == 0 {
+		return nil
+	}
+	var fields []Field
+	for _, fn := range dynamicGlobalFields {
+		if fn != nil {
+			if field := fn(); field.Type != zap.Skip().Type {
+				fields = append(fields, field)
+			}
+		}
+	}
+	return fields
 }
 
 func freshGlobal() {

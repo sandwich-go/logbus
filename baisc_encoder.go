@@ -12,10 +12,15 @@ type glsEncoder struct {
 }
 
 func (g *glsEncoder) EncodeEntry(entry zapcore.Entry, fields []zapcore.Field) (*buffer.Buffer, error) {
-	var head []zapcore.Field
-	head = append(head, zap.String(LogId, xid.New().String())) // 日志规范要求必须有xid
-	if glsFields := GetGlobalFields(); glsFields != nil {
+	glsFields := GetGlobalFields()
+	var head = make([]zapcore.Field, 0, len(glsFields)+1+len(fields)) // 预分配空间，避免多次扩容
+	head = append(head, zap.String(LogId, xid.New().String()))        // 日志规范要求必须有xid
+	if len(glsFields) > 0 {
 		head = append(head, glsFields...)
+	}
+	// 添加动态全局字段
+	if dynamicFields := GetDynamicGlobalFields(); dynamicFields != nil {
+		head = append(head, dynamicFields...)
 	}
 	fields = append(head, fields...)
 
