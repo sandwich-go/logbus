@@ -14,6 +14,10 @@ func init() {
 // Init logBus初始化 会有两次调用。一次是init()，一次是手动调用Init的时候
 // 允许不手动Init的情况下使用默认配置调用logBus
 func Init(conf *Conf) {
+	// 环境变量控制 EnableTraceLevel
+	if v := xos.EnvGetCaseInsensitive("logbus_enable_trace_level"); v != "" {
+		conf.EnableTraceLevel = v == "1" || v == "true"
+	}
 	initBasics(conf)
 
 	initGlobalStdLoggers()
