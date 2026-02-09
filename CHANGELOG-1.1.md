@@ -1,4 +1,12 @@
-### v1.1.44 🌈 (2025-12-29 18:24:55)
+### v1.1.45 🌈 (2026-02-09 14:36:37)
+
+#### 🚀  New Feature
+  * logbus_enable_trace_level ([4903501](https://github.com/sandwich-go/logbus/commit/490350182bd2eb17797c58aac8af026a660cda65)) (<small>[zhengyang.zhu](zhengyang.zhu@centurygame.com)@2026-02-09 14:36:37 &#43;0800 &#43;0800</small>)
+
+#### 🤖  Tools
+  * **sem**: make changelog ([524d0e7](https://github.com/sandwich-go/logbus/commit/524d0e79f1a9720d7cb4a0fd52e5cd24cca25377)) (<small>[daming.yang](daming.yang@centurygame.com)@2025-12-29 18:25:10 &#43;0800 &#43;0800</small>)
+
+### v1.1.44 (2025-12-29 18:24:55)
 
 #### 🛠  Refactor
   * add DynamicGlobalField for debug ([bfb3514](https://github.com/sandwich-go/logbus/commit/bfb351478e9d21ce750fe154809d86f64f024e6b)) (<small>[daming.yang](daming.yang@centurygame.com)@2025-12-29 18:24:55 &#43;0800 &#43;0800</small>)
