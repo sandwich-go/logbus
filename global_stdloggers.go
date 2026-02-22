@@ -23,9 +23,11 @@ func initGlobalStdLoggers() {
 	gMonitorLogger = newNLoggerInstance(MonitorTag)
 }
 
-func NewScopeLogger(tagName string, fields ...zap.Field) NewILogger {
+// newScopeLoggerInternal 内部实现，printAsErrorWhenRefresh 为 refresh 时的 printAsError；
+// usePrintAsErrorFromVisitor 为 true 时在非 refresh 分支使用 from.GetPrintAsError()，否则使用 printAsErrorWhenRefresh。
+func newScopeLoggerInternal(tagName string, printAsErrorWhenRefresh bool, usePrintAsErrorFromVisitor bool, fields ...zap.Field) NewILogger {
 	if refresh {
-		lg := NewGLogger(newNLoggerInstance(tagName, fields...), "", false)
+		lg := NewGLogger(newNLoggerInstance(tagName, fields...), "", printAsErrorWhenRefresh)
 		cacheGLogger = append(cacheGLogger, GLoggerCache{
 			tagName: tagName,
 			fields:  fields,
@@ -42,7 +44,19 @@ func NewScopeLogger(tagName string, fields ...zap.Field) NewILogger {
 	// 比 newGlobalGLogger 少一层调用
 	newStdLogger.z = newStdLogger.z.WithOptions(zap.AddCallerSkip(-1))
 
-	return NewGLogger(newStdLogger, from.GetChannelKey(), from.GetPrintAsError())
+	printAsError := printAsErrorWhenRefresh
+	if usePrintAsErrorFromVisitor {
+		printAsError = from.GetPrintAsError()
+	}
+	return NewGLogger(newStdLogger, from.GetChannelKey(), printAsError)
+}
+
+func NewScopeLogger(tagName string, fields ...zap.Field) NewILogger {
+	return newScopeLoggerInternal(tagName, false, true, fields...)
+}
+
+func NewScopeLoggerPrintAsError(tagName string, fields ...zap.Field) NewILogger {
+	return newScopeLoggerInternal(tagName, true, false, fields...)
 }
 
 // NewScopeLoggerWithFetchFunc 用于创建自定义 fetch FetchLogContext 的logger
