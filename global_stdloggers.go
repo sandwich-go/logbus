@@ -42,7 +42,7 @@ func newScopeLoggerInternal(tagName string, printAsErrorWhenRefresh bool, usePri
 
 	newStdLogger := newNLoggerInstance(tagName, fields...)
 	// 比 newGlobalGLogger 少一层调用
-	newStdLogger.z = newStdLogger.z.WithOptions(zap.AddCallerSkip(-1))
+	newStdLogger.z = newStdLogger.z.WithOptions(zap.AddCallerSkip(-2))
 
 	printAsError := printAsErrorWhenRefresh
 	if usePrintAsErrorFromVisitor {
