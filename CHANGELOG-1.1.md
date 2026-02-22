@@ -1,4 +1,12 @@
-### v1.1.46 🌈 (2026-02-22 21:45:20)
+### v1.1.47 🌈 (2026-02-22 21:49:15)
+
+#### 🛠  Refactor
+  * newScopeLoggerInternal callerskip ([b6c2cb3](https://github.com/sandwich-go/logbus/commit/b6c2cb3cc83e49a2c6aa1e36747f95b2d411bd22)) (<small>[daming.yang](daming.yang@centurygame.com)@2026-02-22 21:49:15 &#43;0800 &#43;0800</small>)
+
+#### 🤖  Tools
+  * **sem**: make changelog ([e364676](https://github.com/sandwich-go/logbus/commit/e3646763a3ba728bf4160c5b7b20eda1da61b0c0)) (<small>[daming.yang](daming.yang@centurygame.com)@2026-02-22 21:45:38 &#43;0800 &#43;0800</small>)
+
+### v1.1.46 (2026-02-22 21:45:20)
 
 #### 🛠  Refactor
   * add NewScopeLoggerPrintAsError ([bd70d0f](https://github.com/sandwich-go/logbus/commit/bd70d0f0888e9d89432e2774dd87cc9e3d1d1d66)) (<small>[daming.yang](daming.yang@centurygame.com)@2026-02-22 21:45:20 &#43;0800 &#43;0800</small>)
