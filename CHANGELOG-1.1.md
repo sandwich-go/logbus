@@ -1,4 +1,12 @@
-### v1.1.45 🌈 (2026-02-09 14:36:37)
+### v1.1.46 🌈 (2026-02-22 21:45:20)
+
+#### 🛠  Refactor
+  * add NewScopeLoggerPrintAsError ([bd70d0f](https://github.com/sandwich-go/logbus/commit/bd70d0f0888e9d89432e2774dd87cc9e3d1d1d66)) (<small>[daming.yang](daming.yang@centurygame.com)@2026-02-22 21:45:20 &#43;0800 &#43;0800</small>)
+
+#### 🤖  Tools
+  * **sem**: make changelog ([2157749](https://github.com/sandwich-go/logbus/commit/2157749967e4e43b51707a72226cd9c960bacbc2)) (<small>[zhengyang.zhu](zhengyang.zhu@centurygame.com)@2026-02-09 14:37:13 &#43;0800 &#43;0800</small>)
+
+### v1.1.45 (2026-02-09 14:36:37)
 
 #### 🚀  New Feature
   * logbus_enable_trace_level ([4903501](https://github.com/sandwich-go/logbus/commit/490350182bd2eb17797c58aac8af026a660cda65)) (<small>[zhengyang.zhu](zhengyang.zhu@centurygame.com)@2026-02-09 14:36:37 &#43;0800 &#43;0800</small>)
