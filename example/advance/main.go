@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/sandwich-go/boost/xpanic"
+	bislg "github.com/sandwich-go/logbus/bi/slg"
 	"go.uber.org/zap"
 
 	"github.com/sandwich-go/logbus"
@@ -58,7 +59,6 @@ func main() {
 	guildLogger := logbus.NewScopeLogger("Guild", zap.String("guildname", "guild1"))
 	playerLogger.Info("player gold", logbus.Int("money", 648))
 	guildLogger.Info("guild gold", logbus.Int("money", 6480))
-	logbus.Tracker()
 
 	// 增加全局域 非线程安全
 	logbus.AppendGlobalFields(logbus.String("playerid", "gtwefasfwad"))
@@ -73,6 +73,17 @@ func main() {
 	logbus.SetGlobalFields(nil)
 	logbus.Info("clean log")
 
+	biTracker := logbus.NewTracker(logbus.WithTags(logbus.BI), logbus.WithBiAppID("gof.prod.global"))
+	bislg.MustInitialize(biTracker)
+	_ = bislg.TrackUserChatPrivate(1, 2, "hello world", &bislg.UserChatOpts{
+		IP:         "1.1.1.1",
+		FpID:       "1",
+		ServerID:   1,
+		GameUser:   "zhang san",
+		TotalPower: 100.123,
+		TransLang:  "zh",
+	})
+
 	logbus.Init(logbus.NewConf(
 		logbus.WithDev(true),
 		logbus.WithEnableTraceLevel(false),
@@ -82,5 +93,12 @@ func main() {
 	err := logbus.Tracker(logbus.THINKINGDATA).Track(logbus.String(thinkingdata.ACCOUNT, "111"), logbus.String(thinkingdata.TYPE, thinkingdata.TRACK),
 		logbus.String(thinkingdata.EVENT_ID, "ID1"), logbus.String(thinkingdata.EVENT, "login"))
 	xpanic.WhenError(err)
-
+	_ = bislg.TrackUserChatPrivate(3, 4, "hello world", &bislg.UserChatOpts{
+		IP:         "3.3.3.3",
+		FpID:       "3",
+		ServerID:   1,
+		GameUser:   "li si",
+		TotalPower: 99.21,
+		TransLang:  "zh",
+	})
 }

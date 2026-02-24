@@ -57,3 +57,11 @@ func init() {
 		}
 	})
 }
+
+//go:generate optionGen  --option_return_previous=false
+func TrackLoggerConfOptionDeclareWithDefault() interface{} {
+	return map[string]interface{}{
+		"tags":    []string(nil), // @MethodComment(打点日志标签，必须提供，至少一个标签)
+		"BiAppID": "",            //@MethodComment(bi appid, 比如 "gof.global.prod")
+	}
+}

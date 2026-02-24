@@ -1,10 +1,9 @@
 package logbus
 
 import (
+	"github.com/sandwich-go/logbus/bi"
 	"github.com/sandwich-go/logbus/utils"
-
 	"github.com/sandwich-go/logbus/thinkingdata"
-
 	"go.uber.org/zap"
 )
 
@@ -14,6 +13,14 @@ func (s *StdLogger) PrintThingkingData(data thinkingdata.Data) {
 		s.ErrorWithChannel(Setting.DefaultChannel, zap.String("PrintThingkingData", err.Error()))
 	}
 	s.TrackWithChannel(THINKINGDATA, zap.ByteString(MsgBody, bytes))
+}
+
+func (s *StdLogger) PrintBIData(data bi.Data) {
+	bytes, err := data.MarshalAsJson()
+	if err != nil {
+		s.ErrorWithChannel(Setting.DefaultChannel, zap.String("PrintBIData", err.Error()))
+	}
+	s.TrackWithChannel(BI, zap.ByteString(MsgBody, bytes))
 }
 
 func (s *StdLogger) PrintBigQuery(tableName zap.Field, fields ...zap.Field) {
