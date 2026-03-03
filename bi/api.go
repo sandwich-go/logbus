@@ -23,7 +23,7 @@ func Track(appID, roleID, event, fpid string, properties map[string]interface{})
 		Ts:         time.Now().UnixMilli(),
 		RoleID:     roleID,
 		Event:      event,
-		Fpid:       fpid,
+		FpID:       fpid,
 		Properties: properties,
 	}, nil
 }

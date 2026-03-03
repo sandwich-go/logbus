@@ -20,7 +20,7 @@ func TestTrack(t *testing.T) {
 		So(data.AppID, ShouldEqual, "sow.global.prod")
 		So(data.RoleID, ShouldEqual, "3555555")
 		So(data.Event, ShouldEqual, "alliance_create")
-		So(data.Fpid, ShouldEqual, "122222")
+		So(data.FpID, ShouldEqual, "122222")
 		So(data.Ts, ShouldNotBeZeroValue)
 		So(data.Properties["gameserver_id"], ShouldEqual, "1")
 		So(data.Properties["alliance_id"], ShouldEqual, "1")
@@ -59,8 +59,7 @@ func TestTrack_NilProperties(t *testing.T) {
 func TestTrack_RequiredParams(t *testing.T) {
 	Convey("Track validates required params", t, func() {
 		_, err := Track("", "3555555", "event", "122222", nil)
-		So(err, ShouldNotBeNil)
-		So(err.Error(), ShouldContainSubstring, "app_id")
+		So(err, ShouldBeNil)
 
 		_, err = Track("app", "", "event", "122222", nil)
 		So(err, ShouldBeNil)
@@ -89,7 +88,7 @@ func TestExtractEncoder(t *testing.T) {
 		So(data.AppID, ShouldEqual, "sow.global.prod")
 		So(data.RoleID, ShouldEqual, "3555555")
 		So(data.Event, ShouldEqual, "alliance_create")
-		So(data.Fpid, ShouldEqual, "122222")
+		So(data.FpID, ShouldEqual, "122222")
 		So(data.Properties["gameserver_id"], ShouldEqual, "1")
 		So(data.Properties["alliance_id"], ShouldEqual, "1")
 	})

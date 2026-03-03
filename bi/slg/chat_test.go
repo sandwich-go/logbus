@@ -83,17 +83,17 @@ func TestTrackUserChatOpts(t *testing.T) {
 			IP:         "1.2.3.4",
 			ServerID:   1,
 			GameUser:   "玩家A",
-			TotalPower: 10000,
+			TotalPower: 10000.1,
 			TransLang:  "zh",
 		}
 		So(TrackUserChatPrivate(1, 2, "hi", opts), ShouldBeNil)
 		data := ct.getData()
 		So(data, ShouldNotBeNil)
-		So(data.Fpid, ShouldEqual, "fp1")
+		So(data.FpID, ShouldEqual, "fp1")
 		So(data.Properties["ip"], ShouldEqual, "1.2.3.4")
 		So(data.Properties["server_id"], ShouldEqual, "1")
 		So(data.Properties["gameusername"], ShouldEqual, "玩家A")
-		So(data.Properties["total_power"], ShouldEqual, "10000.000000")
+		So(data.Properties["total_power"], ShouldEqual, "10000.1")
 		So(data.Properties["trans_lang"], ShouldEqual, "zh")
 	})
 }
