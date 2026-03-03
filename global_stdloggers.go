@@ -2,6 +2,7 @@ package logbus
 
 import (
 	"github.com/sandwich-go/boost/xos"
+	"github.com/sandwich-go/boost/xpanic"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -89,6 +90,10 @@ func newNLoggerInstance(tagName string, fields ...zap.Field) *StdLogger {
 	if Setting.BufferedStdout {
 		BufferedWriteSyncer.WS = Setting.WriteSyncer
 		writer = BufferedWriteSyncer
+	}
+	if !Setting.DisableTruncateWriteSyncer {
+		xpanic.WhenTrue(Setting.TruncateWriteSyncerOption == nil, "TruncateWriteSyncerOption cannot be nil when TruncateWriteSyncer is enabled")
+		writer = NewTruncateWriteSyncer(writer, Setting.TruncateWriteSyncerOption)
 	}
 
 	stdCore := zapcore.NewCore(encoder, writer, newTrackLevelEnabler(Setting.LogLevel, Setting.EnableTraceLevel)).With(append([]zap.Field{zap.String(Tags, tagName)}, fields...))

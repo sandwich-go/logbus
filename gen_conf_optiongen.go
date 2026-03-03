@@ -35,11 +35,13 @@ type Conf struct {
 	// This is the endpoint where the Prometheus metrics will be made available ("/metrics" is the default with Prometheus):
 	DefaultPrometheusPath string
 	// DefaultPercentiles is the default spread of percentiles/quantiles we maintain for timings / histogram metrics:
-	DefaultPercentiles  []float64
-	DefaultLabel        prometheus.Labels
-	MonitorTimingMaxAge time.Duration
-	EncodeCaller        zapcore.CallerEncoder
-	EnableTraceLevel    bool
+	DefaultPercentiles         []float64
+	DefaultLabel               prometheus.Labels
+	MonitorTimingMaxAge        time.Duration
+	EncodeCaller               zapcore.CallerEncoder
+	EnableTraceLevel           bool
+	TruncateWriteSyncerOption  *TruncateWriteSyncerOption
+	DisableTruncateWriteSyncer bool
 	// glog
 	PrintAsError       bool
 	IgnoreLogicalError bool
@@ -210,6 +212,20 @@ func WithEnableTraceLevel(v bool) ConfOptionFunc {
 	}
 }
 
+// WithTruncateWriteSyncerOption TruncateWriteSyncer的配置项，默认启用当日志超过一定长度时会被截断以避免占满磁盘
+func WithTruncateWriteSyncerOption(v *TruncateWriteSyncerOption) ConfOptionFunc {
+	return func(cc *Conf) {
+		cc.TruncateWriteSyncerOption = v
+	}
+}
+
+// WithDisableTruncateWriteSyncer 禁用TruncateWriteSyncer，默认启用，启用后当日志超过一定长度时会被截断以避免占满磁盘
+func WithDisableTruncateWriteSyncer(v bool) ConfOptionFunc {
+	return func(cc *Conf) {
+		cc.DisableTruncateWriteSyncer = v
+	}
+}
+
 // WithPrintAsError glog输出field带error时，将日志级别提升到error
 func WithPrintAsError(v bool) ConfOptionFunc {
 	return func(cc *Conf) {
@@ -251,6 +267,8 @@ func setConfDefaultValue(cc *Conf) {
 		WithMonitorTimingMaxAge(time.Minute),
 		WithEncodeCaller(nil),
 		WithEnableTraceLevel(true),
+		WithTruncateWriteSyncerOption(newDefaultTruncateWriteSyncerOption()),
+		WithDisableTruncateWriteSyncer(false),
 		WithPrintAsError(true),
 		WithIgnoreLogicalError(true),
 	} {
@@ -284,8 +302,12 @@ func (cc *Conf) GetDefaultLabel() prometheus.Labels        { return cc.DefaultLa
 func (cc *Conf) GetMonitorTimingMaxAge() time.Duration     { return cc.MonitorTimingMaxAge }
 func (cc *Conf) GetEncodeCaller() zapcore.CallerEncoder    { return cc.EncodeCaller }
 func (cc *Conf) GetEnableTraceLevel() bool                 { return cc.EnableTraceLevel }
-func (cc *Conf) GetPrintAsError() bool                     { return cc.PrintAsError }
-func (cc *Conf) GetIgnoreLogicalError() bool               { return cc.IgnoreLogicalError }
+func (cc *Conf) GetTruncateWriteSyncerOption() *TruncateWriteSyncerOption {
+	return cc.TruncateWriteSyncerOption
+}
+func (cc *Conf) GetDisableTruncateWriteSyncer() bool { return cc.DisableTruncateWriteSyncer }
+func (cc *Conf) GetPrintAsError() bool               { return cc.PrintAsError }
+func (cc *Conf) GetIgnoreLogicalError() bool         { return cc.IgnoreLogicalError }
 
 // ConfVisitor visitor interface for Conf
 type ConfVisitor interface {
@@ -307,6 +329,8 @@ type ConfVisitor interface {
 	GetMonitorTimingMaxAge() time.Duration
 	GetEncodeCaller() zapcore.CallerEncoder
 	GetEnableTraceLevel() bool
+	GetTruncateWriteSyncerOption() *TruncateWriteSyncerOption
+	GetDisableTruncateWriteSyncer() bool
 	GetPrintAsError() bool
 	GetIgnoreLogicalError() bool
 }

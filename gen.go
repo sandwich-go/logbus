@@ -35,11 +35,13 @@ func _ConfOptionDeclareWithDefault() interface{} {
 		// This is the endpoint where the Prometheus metrics will be made available ("/metrics" is the default with Prometheus):
 		"DefaultPrometheusPath": "/metrics", // @MethodComment(prometheus监控输出接口path)
 		// DefaultPercentiles is the default spread of percentiles/quantiles we maintain for timings / histogram metrics:
-		"DefaultPercentiles":  []float64{0.5, 0.75, 0.99, 1},          //@MethodComment(监控统计耗时的分位值，默认统计耗时的 50%, 75%, 99%, 100% 的分位数)
-		"DefaultLabel":        prometheus.Labels(map[string]string{}), //@MethodComment(监控额外添加的全局label，会在监控指标中显示)
-		"MonitorTimingMaxAge": time.Duration(time.Minute),             // @MethodComment(monitor.Timing数据的最大生命周期)
-		"EncodeCaller":        zapcore.CallerEncoder(nil),             // @MethodComment(指定CallerEncoder)
-		"EnableTraceLevel":    true,                                   // @MethodComment(允许track level log输出)
+		"DefaultPercentiles":         []float64{0.5, 0.75, 0.99, 1},                                       //@MethodComment(监控统计耗时的分位值，默认统计耗时的 50%, 75%, 99%, 100% 的分位数)
+		"DefaultLabel":               prometheus.Labels(map[string]string{}),                              //@MethodComment(监控额外添加的全局label，会在监控指标中显示)
+		"MonitorTimingMaxAge":        time.Duration(time.Minute),                                          // @MethodComment(monitor.Timing数据的最大生命周期)
+		"EncodeCaller":               zapcore.CallerEncoder(nil),                                          // @MethodComment(指定CallerEncoder)
+		"EnableTraceLevel":           true,                                                                // @MethodComment(允许track level log输出)
+		"TruncateWriteSyncerOption":  (*TruncateWriteSyncerOption)(newDefaultTruncateWriteSyncerOption()), // @MethodComment(TruncateWriteSyncer的配置项，默认启用当日志超过一定长度时会被截断以避免占满磁盘)
+		"DisableTruncateWriteSyncer": false,                                                               // @MethodComment(禁用TruncateWriteSyncer，默认启用，启用后当日志超过一定长度时会被截断以避免占满磁盘)
 
 		// glog
 		"PrintAsError":       true, //@MethodComment(glog输出field带error时，将日志级别提升到error)
@@ -63,5 +65,14 @@ func TrackLoggerConfOptionDeclareWithDefault() interface{} {
 	return map[string]interface{}{
 		"tags":    []string(nil), // @MethodComment(打点日志标签，必须提供，至少一个标签)
 		"BiAppID": "",            //@MethodComment(bi appid, 比如 "gof.global.prod")
+	}
+}
+
+//go:generate optionGen  --option_return_previous=false
+func TruncateWriteSyncerOptionOptionDeclareWithDefault() interface{} {
+	return map[string]interface{}{
+		"TruncateMaxSize": int(DefaultTruncateMaxSize),      // @MethodComment(超出长度限制时输出日志的标志字段，便于检索和过滤，默认800KB)
+		"MsgPrefixLen":    int(DefaultTruncateMsgPrefixLen), // @MethodComment(截断时保留的前缀长度，默认4KB)
+		"MsgSuffixLen":    int(DefaultTruncateMsgSuffixLen), // @MethodComment(截断时保留的后缀长度，默认4KB)
 	}
 }

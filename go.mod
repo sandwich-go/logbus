@@ -5,6 +5,7 @@ go 1.22.0
 toolchain go1.23.3
 
 require (
+	github.com/json-iterator/go v1.1.12
 	github.com/prometheus/client_golang v1.14.0
 	github.com/prometheus/procfs v0.8.0
 	github.com/rs/xid v1.5.0
@@ -26,6 +27,7 @@ require (
 	github.com/gopherjs/gopherjs v0.0.0-20181017120253-0766667cb4d1 // indirect
 	github.com/jtolds/gls v4.20.0+incompatible // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.1 // indirect
+	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/power-devops/perfstat v0.0.0-20210106213030-5aafc221ea8c // indirect
