@@ -6,6 +6,7 @@ import (
 
 	"github.com/json-iterator/go"
 	"github.com/sandwich-go/boost/xconv"
+	"github.com/sandwich-go/logbus/monitor"
 	"go.uber.org/zap/zapcore"
 )
 
@@ -16,6 +17,9 @@ const (
 	DefaultTruncateMaxSize      = 800 * 1024 // 800KB
 	DefaultTruncateMsgPrefixLen = 4 * 1024   // 4KB
 	DefaultTruncateMsgSuffixLen = 4 * 1024   // 4KB
+
+	// MetricLogTruncated 截断发生时递增的 counter 指标名
+	MetricLogTruncated = "logbus_log_truncated"
 )
 
 // json 使用 jsoniter 替代 encoding/json， marshal/unmarshal 性能更好
@@ -45,6 +49,7 @@ func (t *TruncateWriteSyncer) Write(p []byte) (n int, err error) {
 	if len(p) <= t.cc.TruncateMaxSize {
 		return t.ws.Write(p)
 	}
+	_ = monitor.Count(MetricLogTruncated, 1, map[string]string{})
 	truncated := t.buildTruncatedLog(p)
 	_, err = t.ws.Write(truncated)
 	if err != nil {
