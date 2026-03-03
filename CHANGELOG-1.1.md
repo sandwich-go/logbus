@@ -1,4 +1,12 @@
-### v1.1.48 🌈 (2026-03-03 12:32:00)
+### v1.1.49 🌈 (2026-03-03 14:08:55)
+
+#### 🛠  Refactor
+  * 日志截断增加监控 ([fd36352](https://github.com/sandwich-go/logbus/commit/fd36352df83ffdb76cca25d375f8d026188f9b50)) (<small>[daming.yang](daming.yang@centurygame.com)@2026-03-03 14:08:55 &#43;0800 &#43;0800</small>)
+
+#### 🤖  Tools
+  * **sem**: make changelog ([57173dc](https://github.com/sandwich-go/logbus/commit/57173dc3150cc3da7d46d336edc61b9eef2f8f84)) (<small>[daming.yang](daming.yang@centurygame.com)@2026-03-03 12:32:17 &#43;0800 &#43;0800</small>)
+
+### v1.1.48 (2026-03-03 12:32:00)
 
 #### 🛠  Refactor
   * 增加日志长度限制，默认800K，超过截断 ([6d849d2](https://github.com/sandwich-go/logbus/commit/6d849d2b6a3660eb646bab25b08cdc00cedae54c)) (<small>[daming.yang](daming.yang@centurygame.com)@2026-03-03 12:32:00 &#43;0800 &#43;0800</small>)
