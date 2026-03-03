@@ -1,4 +1,14 @@
-### v1.1.47 🌈 (2026-02-22 21:49:15)
+### v1.1.48 🌈 (2026-03-03 12:32:00)
+
+#### 🛠  Refactor
+  * 增加日志长度限制，默认800K，超过截断 ([6d849d2](https://github.com/sandwich-go/logbus/commit/6d849d2b6a3660eb646bab25b08cdc00cedae54c)) (<small>[daming.yang](daming.yang@centurygame.com)@2026-03-03 12:32:00 &#43;0800 &#43;0800</small>)
+  * bi add slg/chat ([8a0ce6d](https://github.com/sandwich-go/logbus/commit/8a0ce6dcd0775162143df81dd1c1e206e6605644)) (<small>[daming.yang](daming.yang@centurygame.com)@2026-03-03 10:57:31 &#43;0800 &#43;0800</small>)
+  * add bi/slg ([5e3fbfa](https://github.com/sandwich-go/logbus/commit/5e3fbfa8297e8b6b78fd973dad99a5b5c8c851ca)) (<small>[daming.yang](daming.yang@centurygame.com)@2026-02-24 16:24:30 &#43;0800 &#43;0800</small>)
+
+#### 🤖  Tools
+  * **sem**: make changelog ([ec986eb](https://github.com/sandwich-go/logbus/commit/ec986ebd23feb9dbafaa4e90e64cd7a5a77023b5)) (<small>[daming.yang](daming.yang@centurygame.com)@2026-02-22 21:49:30 &#43;0800 &#43;0800</small>)
+
+### v1.1.47 (2026-02-22 21:49:15)
 
 #### 🛠  Refactor
   * newScopeLoggerInternal callerskip ([b6c2cb3](https://github.com/sandwich-go/logbus/commit/b6c2cb3cc83e49a2c6aa1e36747f95b2d411bd22)) (<small>[daming.yang](daming.yang@centurygame.com)@2026-02-22 21:49:15 &#43;0800 &#43;0800</small>)
