@@ -1,4 +1,12 @@
-### v1.1.49 🌈 (2026-03-03 14:08:55)
+### v1.1.50 🌈 (2026-03-23 11:30:05)
+
+#### 🛠  Refactor
+  * appid ([57e005d](https://github.com/sandwich-go/logbus/commit/57e005d1c90a3068413cb49ce627b8517cdd0352)) (<small>[daming.yang](daming.yang@centurygame.com)@2026-03-23 11:30:05 &#43;0800 &#43;0800</small>)
+
+#### 🤖  Tools
+  * **sem**: make changelog ([011b0f8](https://github.com/sandwich-go/logbus/commit/011b0f8a4787f60409d23bd25c2dc51cbc2eea9e)) (<small>[daming.yang](daming.yang@centurygame.com)@2026-03-03 15:10:30 &#43;0800 &#43;0800</small>)
+
+### v1.1.49 (2026-03-03 14:08:55)
 
 #### 🛠  Refactor
   * 日志截断增加监控 ([fd36352](https://github.com/sandwich-go/logbus/commit/fd36352df83ffdb76cca25d375f8d026188f9b50)) (<small>[daming.yang](daming.yang@centurygame.com)@2026-03-03 14:08:55 &#43;0800 &#43;0800</small>)
