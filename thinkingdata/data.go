@@ -56,7 +56,7 @@ func (d Data) MarshalLogObject(enc zapcore.ObjectEncoder) error {
 }
 
 func (d Data) MarshalAsJson() ([]byte, error) {
-	var fields = make([]zap.Field, 0, 10)
+	var fields = make([]zap.Field, 0, 11)
 	if d.AccountId != "" {
 		fields = append(fields, zap.String(ACCOUNT, d.AccountId))
 	}
@@ -88,7 +88,7 @@ func (d Data) MarshalAsJson() ([]byte, error) {
 }
 
 func (d Data) MarshalAsJsonV2() ([]byte, error) {
-	var fields [10]zap.Field
+	var fields [11]zap.Field
 	index := 0
 
 	if d.AccountId != "" {

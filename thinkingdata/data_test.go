@@ -7,6 +7,21 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestMarshalAsJsonV2_AllFieldsNonEmpty(t *testing.T) {
+	data := initData(10)
+	data.Appid = "appid789"
+
+	jsonV1, err := data.MarshalAsJson()
+	require.NoError(t, err)
+
+	jsonV2, err := data.MarshalAsJsonV2()
+	require.NoError(t, err)
+
+	require.JSONEq(t, string(jsonV1), string(jsonV2))
+	require.Contains(t, string(jsonV2), `"#app_id":"appid789"`)
+	require.Contains(t, string(jsonV2), `"properties"`)
+}
+
 func BenchmarkMarshalAsJsonSmallData(b *testing.B) {
 	data := initData(10)
 
