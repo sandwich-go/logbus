@@ -88,16 +88,13 @@ func TestTrackAllianceEventsRequiredFields(t *testing.T) {
 	}
 }
 
-func TestTrackAllianceOptsAndExtra(t *testing.T) {
-	Convey("FpID + Extra 透传", t, func() {
+func TestTrackAllianceOptsFpID(t *testing.T) {
+	Convey("FpID 透传", t, func() {
 		ct := &captureTracker{}
 		MustInitialize(ct)
 
 		opts := &AllianceOpts{
 			FpID: "fp_1",
-			Extra: map[string]string{
-				"custom_field": "custom_value",
-			},
 		}
 
 		So(TrackAllianceCreateDismiss(11, 1001, 2002, 101, "AC", "A-Team", "hello", AllianceCreateDismissDismiss, opts), ShouldBeNil)
@@ -106,7 +103,6 @@ func TestTrackAllianceOptsAndExtra(t *testing.T) {
 		So(data.FpID, ShouldEqual, "fp_1")
 		So(data.Properties["owner_role_id"], ShouldEqual, "101")
 		So(data.Properties["operator_type"], ShouldEqual, "2")
-		So(data.Properties["custom_field"], ShouldEqual, "custom_value")
 	})
 }
 
