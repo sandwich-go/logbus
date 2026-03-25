@@ -1,7 +1,20 @@
-### v1.1.50 🌈 (2026-03-23 11:30:05)
+### v1.1.51 🌈 (2026-03-25 20:46:14)
+
+#### 🛠  Refactor
+  * 添加注释 ([3f4f7d5](https://github.com/sandwich-go/logbus/commit/3f4f7d551ea7120163849366ee55666ac466c3e9)) (<small>[daming.yang](daming.yang@centurygame.com)@2026-03-25 20:46:14 &#43;0800 &#43;0800</small>)
+  * 收敛可选参数，添加注释 ([192328e](https://github.com/sandwich-go/logbus/commit/192328e4618fc390a2d5f4d57dd65bd3f17ad7fd)) (<small>[daming.yang](daming.yang@centurygame.com)@2026-03-25 20:23:31 &#43;0800 &#43;0800</small>)
+
+#### 🤖  Tools
+  * **sem**: make changelog ([26288f8](https://github.com/sandwich-go/logbus/commit/26288f850adfac375d1414d73afc2ca9be1f58f5)) (<small>[daming.yang](daming.yang@centurygame.com)@2026-03-23 11:30:18 &#43;0800 &#43;0800</small>)
+
+#### 💪  Commit
+  * Merge branch '1.1/feat/bi-slg' into 1.1/release ([c12b330](https://github.com/sandwich-go/logbus/commit/c12b33076d18429b5abe95a3424928f8fd3a94f3)) (<small>[daming.yang](daming.yang@centurygame.com)@2026-03-25 20:11:12 &#43;0800 &#43;0800</small>)
+
+### v1.1.50 (2026-03-23 11:30:05)
 
 #### 🛠  Refactor
   * appid ([57e005d](https://github.com/sandwich-go/logbus/commit/57e005d1c90a3068413cb49ce627b8517cdd0352)) (<small>[daming.yang](daming.yang@centurygame.com)@2026-03-23 11:30:05 &#43;0800 &#43;0800</small>)
+  * bi slg ([8c1b67f](https://github.com/sandwich-go/logbus/commit/8c1b67f4f3d8b7c0b6d3cfc7ee257ed234acf8ec)) (<small>[daming.yang](daming.yang@centurygame.com)@2026-03-20 19:36:08 &#43;0800 &#43;0800</small>)
 
 #### 🤖  Tools
   * **sem**: make changelog ([011b0f8](https://github.com/sandwich-go/logbus/commit/011b0f8a4787f60409d23bd25c2dc51cbc2eea9e)) (<small>[daming.yang](daming.yang@centurygame.com)@2026-03-03 15:10:30 &#43;0800 &#43;0800</small>)
