@@ -27,40 +27,57 @@ const (
 type AllianceCreateDismissOperatorType int32
 
 const (
-	AllianceCreateDismissCreate      AllianceCreateDismissOperatorType = 1 // 创建
-	AllianceCreateDismissDismiss     AllianceCreateDismissOperatorType = 2 // 解散
-	AllianceCreateDismissAutoDismiss AllianceCreateDismissOperatorType = 3 // 不活跃自动解散
+	// AllianceCreateDismissCreate 表示创建联盟。
+	AllianceCreateDismissCreate AllianceCreateDismissOperatorType = 1
+	// AllianceCreateDismissDismiss 表示主动解散联盟。
+	AllianceCreateDismissDismiss AllianceCreateDismissOperatorType = 2
+	// AllianceCreateDismissAutoDismiss 表示因不活跃而自动解散联盟。
+	AllianceCreateDismissAutoDismiss AllianceCreateDismissOperatorType = 3
 )
 
 // AllianceUserEventOperatorType 联盟成员变动类型。
 type AllianceUserEventOperatorType int32
 
 const (
-	AllianceUserEventCreateAndJoin  AllianceUserEventOperatorType = 1
-	AllianceUserEventApplyJoin      AllianceUserEventOperatorType = 2
-	AllianceUserEventInviteJoin     AllianceUserEventOperatorType = 3
-	AllianceUserEventDirectJoin     AllianceUserEventOperatorType = 4
-	AllianceUserEventLeave          AllianceUserEventOperatorType = 5
-	AllianceUserEventKicked         AllianceUserEventOperatorType = 6
+	// AllianceUserEventCreateAndJoin 表示创建联盟并加入。
+	AllianceUserEventCreateAndJoin AllianceUserEventOperatorType = 1
+	// AllianceUserEventApplyJoin 表示申请后成功加入联盟。
+	AllianceUserEventApplyJoin AllianceUserEventOperatorType = 2
+	// AllianceUserEventInviteJoin 表示接受邀请后加入联盟。
+	AllianceUserEventInviteJoin AllianceUserEventOperatorType = 3
+	// AllianceUserEventDirectJoin 表示直接加入联盟。
+	AllianceUserEventDirectJoin AllianceUserEventOperatorType = 4
+	// AllianceUserEventLeave 表示主动退出联盟。
+	AllianceUserEventLeave AllianceUserEventOperatorType = 5
+	// AllianceUserEventKicked 表示被踢出联盟。
+	AllianceUserEventKicked AllianceUserEventOperatorType = 6
+	// AllianceUserEventDismissedLeave 表示联盟解散后离开联盟。
 	AllianceUserEventDismissedLeave AllianceUserEventOperatorType = 7
-	AllianceUserEventWhitelistJoin  AllianceUserEventOperatorType = 8
+	// AllianceUserEventWhitelistJoin 表示通过白名单直接加入联盟。
+	AllianceUserEventWhitelistJoin AllianceUserEventOperatorType = 8
 )
 
 // AllianceChangeLeaderOperatorType 盟主变更方式。
 type AllianceChangeLeaderOperatorType int32
 
 const (
+	// AllianceChangeLeaderInactiveReplace 表示盟主不活跃后被替代。
 	AllianceChangeLeaderInactiveReplace AllianceChangeLeaderOperatorType = 1
-	AllianceChangeLeaderTransfer        AllianceChangeLeaderOperatorType = 2
-	AllianceChangeLeaderGM              AllianceChangeLeaderOperatorType = 3
+	// AllianceChangeLeaderTransfer 表示盟主主动转让。
+	AllianceChangeLeaderTransfer AllianceChangeLeaderOperatorType = 2
+	// AllianceChangeLeaderGM 表示由 GM 后台操作变更盟主。
+	AllianceChangeLeaderGM AllianceChangeLeaderOperatorType = 3
 )
 
 // AllianceApplyOperatorType 联盟申请操作类型。
 type AllianceApplyOperatorType int32
 
 const (
-	AllianceApplySend   AllianceApplyOperatorType = 1
+	// AllianceApplySend 表示发起入盟申请。
+	AllianceApplySend AllianceApplyOperatorType = 1
+	// AllianceApplyAccept 表示同意入盟申请。
 	AllianceApplyAccept AllianceApplyOperatorType = 2
+	// AllianceApplyReject 表示拒绝入盟申请。
 	AllianceApplyReject AllianceApplyOperatorType = 3
 )
 
@@ -68,8 +85,11 @@ const (
 type AllianceInviteOperatorType int32
 
 const (
-	AllianceInviteSend   AllianceInviteOperatorType = 1
+	// AllianceInviteSend 表示发起联盟邀请。
+	AllianceInviteSend AllianceInviteOperatorType = 1
+	// AllianceInviteAccept 表示同意联盟邀请。
 	AllianceInviteAccept AllianceInviteOperatorType = 2
+	// AllianceInviteReject 表示拒绝联盟邀请。
 	AllianceInviteReject AllianceInviteOperatorType = 3
 )
 
@@ -77,13 +97,21 @@ const (
 type AllianceModifyOperatorType int32
 
 const (
-	AllianceModifyName                 AllianceModifyOperatorType = 1
-	AllianceModifyCode                 AllianceModifyOperatorType = 2
-	AllianceModifyDeclaration          AllianceModifyOperatorType = 3
-	AllianceModifyLanguage             AllianceModifyOperatorType = 4
-	AllianceModifyNoticePublish        AllianceModifyOperatorType = 5
-	AllianceModifyNoticeSchedule       AllianceModifyOperatorType = 6
-	AllianceModifyNoticeScheduleEdit   AllianceModifyOperatorType = 7
+	// AllianceModifyName 表示修改联盟名称。
+	AllianceModifyName AllianceModifyOperatorType = 1
+	// AllianceModifyCode 表示修改联盟简称。
+	AllianceModifyCode AllianceModifyOperatorType = 2
+	// AllianceModifyDeclaration 表示修改联盟宣言。
+	AllianceModifyDeclaration AllianceModifyOperatorType = 3
+	// AllianceModifyLanguage 表示修改联盟语言。
+	AllianceModifyLanguage AllianceModifyOperatorType = 4
+	// AllianceModifyNoticePublish 表示发布联盟公告。
+	AllianceModifyNoticePublish AllianceModifyOperatorType = 5
+	// AllianceModifyNoticeSchedule 表示预约发布联盟公告。
+	AllianceModifyNoticeSchedule AllianceModifyOperatorType = 6
+	// AllianceModifyNoticeScheduleEdit 表示编辑预约联盟公告。
+	AllianceModifyNoticeScheduleEdit AllianceModifyOperatorType = 7
+	// AllianceModifyNoticeScheduleCancel 表示取消预约联盟公告。
 	AllianceModifyNoticeScheduleCancel AllianceModifyOperatorType = 8
 )
 
@@ -91,7 +119,9 @@ const (
 type AllianceScienceResearchOperatorType int32
 
 const (
-	AllianceScienceResearchStart    AllianceScienceResearchOperatorType = 1
+	// AllianceScienceResearchStart 表示开始升级联盟科技。
+	AllianceScienceResearchStart AllianceScienceResearchOperatorType = 1
+	// AllianceScienceResearchComplete 表示联盟科技升级完成。
 	AllianceScienceResearchComplete AllianceScienceResearchOperatorType = 2
 )
 
@@ -99,8 +129,11 @@ const (
 type AllianceBuildingStatusOperatorType int32
 
 const (
-	AllianceBuildingStatusBuild    AllianceBuildingStatusOperatorType = 1
-	AllianceBuildingStatusRemove   AllianceBuildingStatusOperatorType = 2
+	// AllianceBuildingStatusBuild 表示建造联盟建筑。
+	AllianceBuildingStatusBuild AllianceBuildingStatusOperatorType = 1
+	// AllianceBuildingStatusRemove 表示移除联盟建筑。
+	AllianceBuildingStatusRemove AllianceBuildingStatusOperatorType = 2
+	// AllianceBuildingStatusGarrison 表示驻守联盟建筑。
 	AllianceBuildingStatusGarrison AllianceBuildingStatusOperatorType = 3
 )
 
@@ -108,8 +141,11 @@ const (
 type AllianceTabOperatorType int32
 
 const (
-	AllianceTabAdd    AllianceTabOperatorType = 1
+	// AllianceTabAdd 表示添加联盟标记。
+	AllianceTabAdd AllianceTabOperatorType = 1
+	// AllianceTabDelete 表示删除联盟标记。
 	AllianceTabDelete AllianceTabOperatorType = 2
+	// AllianceTabModify 表示修改联盟标记。
 	AllianceTabModify AllianceTabOperatorType = 3
 )
 
@@ -117,10 +153,14 @@ const (
 type AllianceRelocationType int32
 
 const (
+	// AllianceRelocationToAllianceArea 表示迁移到联盟领地内。
 	AllianceRelocationToAllianceArea AllianceRelocationType = 1
-	AllianceRelocationToLeader       AllianceRelocationType = 2
-	AllianceRelocationAdvanced       AllianceRelocationType = 3
-	AllianceRelocationRandom         AllianceRelocationType = 4
+	// AllianceRelocationToLeader 表示迁移到盟主附近。
+	AllianceRelocationToLeader AllianceRelocationType = 2
+	// AllianceRelocationAdvanced 表示高级迁城到指定位置。
+	AllianceRelocationAdvanced AllianceRelocationType = 3
+	// AllianceRelocationRandom 表示随机迁移到王国内其他位置。
+	AllianceRelocationRandom AllianceRelocationType = 4
 )
 
 // AllianceOpts 联盟模块打点可选属性。
