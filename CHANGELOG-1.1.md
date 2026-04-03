@@ -1,4 +1,12 @@
-### v1.1.51 🌈 (2026-03-25 20:46:14)
+### v1.1.52 🌈 (2026-04-03 14:28:39)
+
+#### 🛠  Refactor
+  * event track with type ([ca37f6b](https://github.com/sandwich-go/logbus/commit/ca37f6ba3c1fad370fb282a99e651c9be86b0a6f)) (<small>[daming.yang](daming.yang@centurygame.com)@2026-04-03 14:28:39 &#43;0800 &#43;0800</small>)
+
+#### 🤖  Tools
+  * **sem**: make changelog ([90d56e4](https://github.com/sandwich-go/logbus/commit/90d56e4da4e1fa0d7f08a466e55c8aa37bd780c6)) (<small>[daming.yang](daming.yang@centurygame.com)@2026-03-25 20:46:27 &#43;0800 &#43;0800</small>)
+
+### v1.1.51 (2026-03-25 20:46:14)
 
 #### 🛠  Refactor
   * 添加注释 ([3f4f7d5](https://github.com/sandwich-go/logbus/commit/3f4f7d551ea7120163849366ee55666ac466c3e9)) (<small>[daming.yang](daming.yang@centurygame.com)@2026-03-25 20:46:14 &#43;0800 &#43;0800</small>)
