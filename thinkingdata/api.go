@@ -12,10 +12,13 @@ func User(accountId, distinctId, dataType, appid string, properties map[string]i
 }
 
 func Track(accountId, distinctId, eventName, eventID, appid string, properties map[string]interface{}) (Data, error) {
+	return TrackWithType(TRACK, accountId, distinctId, eventName, eventID, appid, properties)
+}
+
+func TrackWithType(dataType, accountId, distinctId, eventName, eventID, appid string, properties map[string]interface{}) (Data, error) {
 	if len(eventName) == 0 {
 		return emptyData, errors.New("the event name must be provided")
 	}
-	dataType := TRACK
 	return add(accountId, distinctId, dataType, eventName, eventID, appid, properties)
 }
 

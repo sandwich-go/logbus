@@ -24,7 +24,7 @@ func ExtractEncoder(memoryEncoder *zapcore.MapObjectEncoder) (Data, error) {
 	if !ok1 && !ok2 {
 		return emptyData, errors.New("#account_id and #distinct_id not exist")
 	}
-	userType, ok1 := memoryEncoder.Fields[TYPE]
+	dataType, ok1 := memoryEncoder.Fields[TYPE]
 	eventName, hasEvent := memoryEncoder.Fields[EVENT]
 
 	// event_id
@@ -53,13 +53,13 @@ func ExtractEncoder(memoryEncoder *zapcore.MapObjectEncoder) (Data, error) {
 	delete(memoryEncoder.Fields, EVENT_ID)
 	delete(memoryEncoder.Fields, APPID)
 	if hasEvent {
-		return Track(accountId.(string), distinctId.(string), eventName.(string), strEventID, appid.(string), memoryEncoder.Fields)
+		return TrackWithType(dataType.(string), accountId.(string), distinctId.(string), eventName.(string), strEventID, appid.(string), memoryEncoder.Fields)
 	}
 	if ok1 {
-		if userType.(string) == TRACK {
+		if dataType.(string) == TRACK {
 			return emptyData, errors.New("the event name must be provided")
 		}
-		return User(accountId.(string), distinctId.(string), userType.(string), appid.(string), memoryEncoder.Fields)
+		return User(accountId.(string), distinctId.(string), dataType.(string), appid.(string), memoryEncoder.Fields)
 	}
 	return emptyData, errors.New("no #type or #event_name")
 }
