@@ -1,4 +1,12 @@
-### v1.1.52 🌈 (2026-04-03 14:28:39)
+### v1.1.53 🌈 (2026-04-06 10:59:27)
+
+#### 🛠  Refactor
+  * Add SetLogLevel ([b1eeab0](https://github.com/sandwich-go/logbus/commit/b1eeab065a5e07fc4f96d8776b20c03d639a6e1d)) (<small>[daming.yang](daming.yang@centurygame.com)@2026-04-06 10:59:27 &#43;0800 &#43;0800</small>)
+
+#### 🤖  Tools
+  * **sem**: make changelog ([47e592c](https://github.com/sandwich-go/logbus/commit/47e592cee3624157e85c9cf31debcf053bcff10c)) (<small>[daming.yang](daming.yang@centurygame.com)@2026-04-03 14:29:41 &#43;0800 &#43;0800</small>)
+
+### v1.1.52 (2026-04-03 14:28:39)
 
 #### 🛠  Refactor
   * event track with type ([ca37f6b](https://github.com/sandwich-go/logbus/commit/ca37f6ba3c1fad370fb282a99e651c9be86b0a6f)) (<small>[daming.yang](daming.yang@centurygame.com)@2026-04-03 14:28:39 &#43;0800 &#43;0800</small>)
