@@ -22,6 +22,8 @@ func initBasics(c *Conf) {
 	resetLogBus()
 	// init logBus global setting
 	Setting = c
+	runtimeLogLevel.SetLevel(c.LogLevel)
+	runtimeEnableTrackLevel.Store(c.EnableTraceLevel)
 
 	// init EncodeConfig
 	if c.Dev {
@@ -44,7 +46,7 @@ func initBasics(c *Conf) {
 
 	// init gBasicZLogger
 	var err error
-	ZapConf.Level = zap.NewAtomicLevelAt(c.LogLevel)
+	ZapConf.Level = runtimeLogLevel
 	ZapConf.EncoderConfig = EncodeConfig
 	if c.Dev {
 		ZapConf.Development = true

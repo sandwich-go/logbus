@@ -63,6 +63,9 @@ func MustInstallLogger() {
 // WithLogLevel 日志级别，默认 zap.DebugLevel
 func WithLogLevel(v zapcore.Level) ConfOption
 
+// SetLogLevel 运行中动态调整日志级别，会立即作用于全局 logger 和已创建的 scope logger
+func SetLogLevel(v zapcore.Level)
+
 // WithDev 是否输出带颜色的易读log，默认关闭
 func WithDev(v bool) ConfOption
 
@@ -106,3 +109,16 @@ func WithPrintAsError(v bool) ConfOption
 func WithWriteSyncer(v zapcore.WriteSyncer) ConfOption
 ```
 
+### 运行中调整日志级别
+
+```go
+logbus.Init(logbus.NewConf(
+    logbus.WithLogLevel(zap.InfoLevel),
+))
+
+logbus.Debug("before change") // 不输出
+
+logbus.SetLogLevel(zap.DebugLevel)
+
+logbus.Debug("after change") // 会输出
+```

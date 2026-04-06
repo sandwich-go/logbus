@@ -96,7 +96,7 @@ func newNLoggerInstance(tagName string, fields ...zap.Field) *StdLogger {
 		writer = NewTruncateWriteSyncer(writer, Setting.TruncateWriteSyncerOption)
 	}
 
-	stdCore := zapcore.NewCore(encoder, writer, newTrackLevelEnabler(Setting.LogLevel, Setting.EnableTraceLevel)).With(append([]zap.Field{zap.String(Tags, tagName)}, fields...))
+	stdCore := zapcore.NewCore(encoder, writer, newTrackLevelEnabler()).With(append([]zap.Field{zap.String(Tags, tagName)}, fields...))
 	stdCore = CoreWrapper(tagName, stdCore)
 	if xos.EnvGetCaseInsensitive("logbus_core_dup") != "" {
 		stdCore = NewDupCore(stdCore)
