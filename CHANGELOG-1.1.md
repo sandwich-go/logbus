@@ -1,4 +1,12 @@
-### v1.1.53 🌈 (2026-04-06 10:59:27)
+### v1.1.54 🌈 (2026-04-14 18:20:13)
+
+#### 🛠  Refactor
+  * **activity**: fetch日志插入在前面 ([a740c56](https://github.com/sandwich-go/logbus/commit/a740c56fc4cc719f5df7fb07cbc372e8f740ed8c)) (<small>[daming.yang](daming.yang@centurygame.com)@2026-04-14 18:20:13 &#43;0800 &#43;0800</small>)
+
+#### 🤖  Tools
+  * **sem**: make changelog ([d263681](https://github.com/sandwich-go/logbus/commit/d263681db89627dcb3fdc7a00b251cf36bb279d4)) (<small>[daming.yang](daming.yang@centurygame.com)@2026-04-06 10:59:43 &#43;0800 &#43;0800</small>)
+
+### v1.1.53 (2026-04-06 10:59:27)
 
 #### 🛠  Refactor
   * Add SetLogLevel ([b1eeab0](https://github.com/sandwich-go/logbus/commit/b1eeab065a5e07fc4f96d8776b20c03d639a6e1d)) (<small>[daming.yang](daming.yang@centurygame.com)@2026-04-06 10:59:27 &#43;0800 &#43;0800</small>)
