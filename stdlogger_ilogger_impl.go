@@ -12,7 +12,9 @@ func (s *StdLogger) fields(fields []Field) []Field {
 	if fRet == nil {
 		return fields
 	}
-	return append(fields, fRet...)
+	newFields := make([]Field, 0, len(fields)+len(fRet))
+	newFields = append(newFields, fRet...)
+	return append(newFields, fields...)
 }
 
 func (s *StdLogger) DebugWithChannel(c string, fields ...Field) {
