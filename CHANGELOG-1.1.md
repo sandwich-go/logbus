@@ -1,4 +1,12 @@
-### v1.1.54 🌈 (2026-04-14 18:20:13)
+### v1.1.55 🌈 (2026-04-15 16:16:32)
+
+#### 🐛  Bug Fixed
+  * **track**: type nil panic ([8c49b3b](https://github.com/sandwich-go/logbus/commit/8c49b3bcb3e61e1fb872d85cda5b2620e80e6c27)) (<small>[daming.yang](daming.yang@centurygame.com)@2026-04-15 16:16:32 &#43;0800 &#43;0800</small>)
+
+#### 🤖  Tools
+  * **sem**: make changelog ([fe75172](https://github.com/sandwich-go/logbus/commit/fe75172c00ff620ad00019a7419db167f9a9b74b)) (<small>[daming.yang](daming.yang@centurygame.com)@2026-04-14 18:20:43 &#43;0800 &#43;0800</small>)
+
+### v1.1.54 (2026-04-14 18:20:13)
 
 #### 🛠  Refactor
   * **activity**: fetch日志插入在前面 ([a740c56](https://github.com/sandwich-go/logbus/commit/a740c56fc4cc719f5df7fb07cbc372e8f740ed8c)) (<small>[daming.yang](daming.yang@centurygame.com)@2026-04-14 18:20:13 &#43;0800 &#43;0800</small>)
