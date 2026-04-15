@@ -53,6 +53,9 @@ func ExtractEncoder(memoryEncoder *zapcore.MapObjectEncoder) (Data, error) {
 	delete(memoryEncoder.Fields, EVENT_ID)
 	delete(memoryEncoder.Fields, APPID)
 	if hasEvent {
+		if !ok1 {
+			dataType = TRACK // 没传TYPE默认TRACK
+		}
 		return TrackWithType(dataType.(string), accountId.(string), distinctId.(string), eventName.(string), strEventID, appid.(string), memoryEncoder.Fields)
 	}
 	if ok1 {
