@@ -66,7 +66,7 @@ func (t *TruncateWriteSyncer) Sync() error {
 func (t *TruncateWriteSyncer) buildTruncatedLog(p []byte) []byte {
 	msg, extra := t.extractPartialMsgAndExtra(p)
 	out := map[string]interface{}{
-		LevelKey:        "error",
+		LevelKey:        "warn",
 		TruncateFlag:    true,
 		"partial_msg":   msg,
 		"original_size": len(p),
