@@ -15,3 +15,10 @@ func SetLogLevel(level zapcore.Level) {
 	Setting.LogLevel = level
 	runtimeLogLevel.SetLevel(level)
 }
+
+// GetLogLevel 返回当前运行时日志级别。
+func GetLogLevel() zapcore.Level {
+	runtimeLogLevelMu.Lock()
+	defer runtimeLogLevelMu.Unlock()
+	return runtimeLogLevel.Level()
+}
