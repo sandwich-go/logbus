@@ -20,6 +20,10 @@ func Init(conf *Conf) {
 	}
 	initBasics(conf)
 
+	// 必须先管理 track file writer 生命周期，再创建 logger 实例，
+	// 这样 newNLoggerInstance 才能引用到最新的全局单例 gTrackFileWriteSyncer。
+	initTrackFileWriteSyncer()
+
 	initGlobalStdLoggers()
 
 	// set logger used in glog

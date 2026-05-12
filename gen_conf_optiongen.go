@@ -42,6 +42,16 @@ type Conf struct {
 	EnableTraceLevel           bool
 	TruncateWriteSyncerOption  *TruncateWriteSyncerOption
 	DisableTruncateWriteSyncer bool
+	// TrackFileDir track 类日志写入的基础目录，TrackOutput 为 FileOnly 或 Both 时必须非空。
+	// 文件路径格式：{TrackFileDir}/{channel}_{time}.log
+	TrackFileDir string
+	// TrackFileRotation track 日志文件的时间切割粒度，支持 HourlyRotation（小时）和 MinuteRotation（分钟）
+	TrackFileRotation TrackRotation
+	// TrackOutput 控制 track 日志的输出目标：
+	//   TrackOutputStdout（默认）— 只写 stdout，与旧行为完全兼容
+	//   TrackOutputFile          — 只写文件，需配置 TrackFileDir
+	//   TrackOutputBoth          — 同时写 stdout 和文件，需配置 TrackFileDir
+	TrackOutput TrackOutput
 	// glog
 	PrintAsError       bool
 	IgnoreLogicalError bool
@@ -226,6 +236,27 @@ func WithDisableTruncateWriteSyncer(v bool) ConfOptionFunc {
 	}
 }
 
+// WithTrackFileDir track 日志写入的基础目录，TrackOutput 为 FileOnly/Both 时必须配置
+func WithTrackFileDir(v string) ConfOptionFunc {
+	return func(cc *Conf) {
+		cc.TrackFileDir = v
+	}
+}
+
+// WithTrackFileRotation track 日志时间切割粒度，默认按小时
+func WithTrackFileRotation(v TrackRotation) ConfOptionFunc {
+	return func(cc *Conf) {
+		cc.TrackFileRotation = v
+	}
+}
+
+// WithTrackOutput track 日志输出目标：TrackOutputStdout/TrackOutputFile/TrackOutputBoth
+func WithTrackOutput(v TrackOutput) ConfOptionFunc {
+	return func(cc *Conf) {
+		cc.TrackOutput = v
+	}
+}
+
 // WithPrintAsError glog输出field带error时，将日志级别提升到error
 func WithPrintAsError(v bool) ConfOptionFunc {
 	return func(cc *Conf) {
@@ -269,6 +300,9 @@ func setConfDefaultValue(cc *Conf) {
 		WithEnableTraceLevel(true),
 		WithTruncateWriteSyncerOption(newDefaultTruncateWriteSyncerOption()),
 		WithDisableTruncateWriteSyncer(false),
+		WithTrackFileDir(""),
+		WithTrackFileRotation(HourlyRotation),
+		WithTrackOutput(TrackOutputStdout),
 		WithPrintAsError(true),
 		WithIgnoreLogicalError(true),
 	} {
@@ -306,6 +340,9 @@ func (cc *Conf) GetTruncateWriteSyncerOption() *TruncateWriteSyncerOption {
 	return cc.TruncateWriteSyncerOption
 }
 func (cc *Conf) GetDisableTruncateWriteSyncer() bool { return cc.DisableTruncateWriteSyncer }
+func (cc *Conf) GetTrackFileDir() string             { return cc.TrackFileDir }
+func (cc *Conf) GetTrackFileRotation() TrackRotation { return cc.TrackFileRotation }
+func (cc *Conf) GetTrackOutput() TrackOutput         { return cc.TrackOutput }
 func (cc *Conf) GetPrintAsError() bool               { return cc.PrintAsError }
 func (cc *Conf) GetIgnoreLogicalError() bool         { return cc.IgnoreLogicalError }
 
@@ -331,6 +368,9 @@ type ConfVisitor interface {
 	GetEnableTraceLevel() bool
 	GetTruncateWriteSyncerOption() *TruncateWriteSyncerOption
 	GetDisableTruncateWriteSyncer() bool
+	GetTrackFileDir() string
+	GetTrackFileRotation() TrackRotation
+	GetTrackOutput() TrackOutput
 	GetPrintAsError() bool
 	GetIgnoreLogicalError() bool
 }

@@ -8,6 +8,10 @@ type TruncateWriteSyncerOption struct {
 	TruncateMaxSize int
 	MsgPrefixLen    int
 	MsgSuffixLen    int
+	// StripFields 日志超限时优先尝试剔除的字段路径列表（支持 "a.b.c" 嵌套路径），
+	// 剔除后若满足大小限制则直接写出，否则继续走摘要截断流程。
+	// 默认剔除 api_call.request_body 和 api_call.response_body。
+	StripFields []string
 }
 
 // NewTruncateWriteSyncerOption new TruncateWriteSyncerOption
@@ -63,6 +67,20 @@ func WithMsgSuffixLen(v int) TruncateWriteSyncerOptionOptionFunc {
 	}
 }
 
+// WithStripFields 日志超限时优先尝试剔除的字段路径列表，支持 a.b.c 嵌套路径
+func WithStripFields(v ...string) TruncateWriteSyncerOptionOptionFunc {
+	return func(cc *TruncateWriteSyncerOption) {
+		cc.StripFields = v
+	}
+}
+
+// AppendStripFields 日志超限时优先尝试剔除的字段路径列表，支持 a.b.c 嵌套路径
+func AppendStripFields(v ...string) TruncateWriteSyncerOptionOptionFunc {
+	return func(cc *TruncateWriteSyncerOption) {
+		cc.StripFields = append(cc.StripFields, v...)
+	}
+}
+
 // InstallTruncateWriteSyncerOptionWatchDog the installed func will called when NewTruncateWriteSyncerOption  called
 func InstallTruncateWriteSyncerOptionWatchDog(dog func(cc *TruncateWriteSyncerOption)) {
 	watchDogTruncateWriteSyncerOption = dog
@@ -77,6 +95,7 @@ func setTruncateWriteSyncerOptionDefaultValue(cc *TruncateWriteSyncerOption) {
 		WithTruncateMaxSize(DefaultTruncateMaxSize),
 		WithMsgPrefixLen(DefaultTruncateMsgPrefixLen),
 		WithMsgSuffixLen(DefaultTruncateMsgSuffixLen),
+		WithStripFields(DefaultStripFields()...),
 	} {
 		opt(cc)
 	}
@@ -90,15 +109,17 @@ func newDefaultTruncateWriteSyncerOption() *TruncateWriteSyncerOption {
 }
 
 // all getter func
-func (cc *TruncateWriteSyncerOption) GetTruncateMaxSize() int { return cc.TruncateMaxSize }
-func (cc *TruncateWriteSyncerOption) GetMsgPrefixLen() int    { return cc.MsgPrefixLen }
-func (cc *TruncateWriteSyncerOption) GetMsgSuffixLen() int    { return cc.MsgSuffixLen }
+func (cc *TruncateWriteSyncerOption) GetTruncateMaxSize() int  { return cc.TruncateMaxSize }
+func (cc *TruncateWriteSyncerOption) GetMsgPrefixLen() int     { return cc.MsgPrefixLen }
+func (cc *TruncateWriteSyncerOption) GetMsgSuffixLen() int     { return cc.MsgSuffixLen }
+func (cc *TruncateWriteSyncerOption) GetStripFields() []string { return cc.StripFields }
 
 // TruncateWriteSyncerOptionVisitor visitor interface for TruncateWriteSyncerOption
 type TruncateWriteSyncerOptionVisitor interface {
 	GetTruncateMaxSize() int
 	GetMsgPrefixLen() int
 	GetMsgSuffixLen() int
+	GetStripFields() []string
 }
 
 // TruncateWriteSyncerOptionInterface visitor + ApplyOption interface for TruncateWriteSyncerOption

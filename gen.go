@@ -41,7 +41,18 @@ func _ConfOptionDeclareWithDefault() interface{} {
 		"EncodeCaller":               zapcore.CallerEncoder(nil),                                          // @MethodComment(指定CallerEncoder)
 		"EnableTraceLevel":           true,                                                                // @MethodComment(允许track level log输出)
 		"TruncateWriteSyncerOption":  (*TruncateWriteSyncerOption)(newDefaultTruncateWriteSyncerOption()), // @MethodComment(TruncateWriteSyncer的配置项，默认启用当日志超过一定长度时会被截断以避免占满磁盘)
-		"DisableTruncateWriteSyncer": false,                                                               // @MethodComment(禁用TruncateWriteSyncer，默认启用，启用后当日志超过一定长度时会被截断以避免占满磁盘)
+		"DisableTruncateWriteSyncer": false, // @MethodComment(禁用TruncateWriteSyncer，默认启用，启用后当日志超过一定长度时会被截断以避免占满磁盘)
+
+		// TrackFileDir track 类日志写入的基础目录，TrackOutput 为 FileOnly 或 Both 时必须非空。
+		// 文件路径格式：{TrackFileDir}/{channel}_{time}.log
+		"TrackFileDir": string(""), // @MethodComment(track 日志写入的基础目录，TrackOutput 为 FileOnly/Both 时必须配置)
+		// TrackFileRotation track 日志文件的时间切割粒度，支持 HourlyRotation（小时）和 MinuteRotation（分钟）
+		"TrackFileRotation": TrackRotation(HourlyRotation), // @MethodComment(track 日志时间切割粒度，默认按小时)
+		// TrackOutput 控制 track 日志的输出目标：
+		//   TrackOutputStdout（默认）— 只写 stdout，与旧行为完全兼容
+		//   TrackOutputFile          — 只写文件，需配置 TrackFileDir
+		//   TrackOutputBoth          — 同时写 stdout 和文件，需配置 TrackFileDir
+		"TrackOutput": TrackOutput(TrackOutputStdout), // @MethodComment(track 日志输出目标：TrackOutputStdout/TrackOutputFile/TrackOutputBoth)
 
 		// glog
 		"PrintAsError":       true, //@MethodComment(glog输出field带error时，将日志级别提升到error)
@@ -56,6 +67,9 @@ func init() {
 		}
 		if cc.MonitorOutput != Prometheus && cc.MonitorOutput != Logbus && cc.MonitorOutput != Noop {
 			panic("MonitorOutput not match")
+		}
+		if (cc.TrackOutput == TrackOutputFile || cc.TrackOutput == TrackOutputBoth) && cc.TrackFileDir == "" {
+			panic("TrackFileDir must be set when TrackOutput is TrackOutputFile or TrackOutputBoth")
 		}
 	})
 }
@@ -74,5 +88,9 @@ func TruncateWriteSyncerOptionOptionDeclareWithDefault() interface{} {
 		"TruncateMaxSize": int(DefaultTruncateMaxSize),      // @MethodComment(超出长度限制时输出日志的标志字段，便于检索和过滤，默认800KB)
 		"MsgPrefixLen":    int(DefaultTruncateMsgPrefixLen), // @MethodComment(截断时保留的前缀长度，默认4KB)
 		"MsgSuffixLen":    int(DefaultTruncateMsgSuffixLen), // @MethodComment(截断时保留的后缀长度，默认4KB)
+		// StripFields 日志超限时优先尝试剔除的字段路径列表（支持 "a.b.c" 嵌套路径），
+		// 剔除后若满足大小限制则直接写出，否则继续走摘要截断流程。
+		// 默认剔除 api_call.request_body 和 api_call.response_body。
+		"StripFields": DefaultStripFields(), // @MethodComment(日志超限时优先尝试剔除的字段路径列表，支持 a.b.c 嵌套路径)
 	}
 }
