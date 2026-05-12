@@ -41,6 +41,9 @@ func Init(conf *Conf) {
 		refresh = false
 		refreshEarlyLogger()
 	}
+
+	// 自动启用 PMT 下发的动态日志级别：若 sys_conf_path_env 环境变量不存在则静默跳过。
+	enableDynamicLogLevel()
 }
 
 func resetLogBus() {

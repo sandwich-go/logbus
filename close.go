@@ -4,6 +4,7 @@ import "sync"
 
 // Close 程序结束时打印缓存中的所有日志 并清理资源
 func Close() {
+	closeDynamicLogLevel()
 	mutexLogger.RLock()
 	defer mutexLogger.RUnlock()
 	for _, v := range loggerExist {

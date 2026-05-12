@@ -1,0 +1,24 @@
+# bizops.yaml - PMT 下发到 $sys_conf_path_env 目录下的动态运维配置
+#
+# 使用说明：
+#   - env_config.log_level      : 环境级默认日志级别，作用于该环境下所有服务
+#   - service_config.<name>.log_level : 服务级覆盖，按 $sys_cd_service 环境变量匹配当前服务名
+#                                 字段级覆盖：服务节点中存在的字段覆盖 env_config 中对应字段，
+#                                 未声明的字段沿用 env_config 的默认值
+#
+# 合法 log_level 取值（zapcore.Level.UnmarshalText 支持的小写形式）：
+#   debug / info / warn / error / dpanic / panic / fatal
+#
+# PMT 修改此文件 → configmap 更新 → 容器内挂载文件 mtime 变化 → logbus 自动应用新级别
+
+env_config:
+  log_level: info
+
+service_config:
+  # 示例：service_a 临时调成 debug 抓日志排障
+  service_a:
+    log_level: debug
+
+  # 示例：service_b 压测期间降噪为 warn
+  service_b:
+    log_level: warn
