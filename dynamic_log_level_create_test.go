@@ -13,7 +13,7 @@ import (
 // 典型场景：K8s configmap 未绑定 / PMT 未下发 bizops.yaml，稍后下发。
 func TestEnableDynamicLogLevel_FileCreatedLater(t *testing.T) {
 	dir := t.TempDir()
-	confPath := filepath.Join(dir, logConfFile)
+	confPath := filepath.Join(dir, bizopsConfFile)
 
 	// 确保文件一开始不存在
 	if _, err := os.Stat(confPath); !os.IsNotExist(err) {

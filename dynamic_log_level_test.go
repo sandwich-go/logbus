@@ -25,7 +25,7 @@ func writeBizopsYAML(t *testing.T, path string, content string) {
 
 func TestEnableDynamicLogLevel_EnvOnly(t *testing.T) {
 	dir := t.TempDir()
-	confPath := filepath.Join(dir, logConfFile)
+	confPath := filepath.Join(dir, bizopsConfFile)
 	writeBizopsYAML(t, confPath, "env_config:\n  log_level: info\n")
 
 	t.Setenv(envKeyConfPathEnv, dir)
@@ -51,7 +51,7 @@ func TestEnableDynamicLogLevel_EnvOnly(t *testing.T) {
 
 func TestEnableDynamicLogLevel_ServiceOverridesEnv(t *testing.T) {
 	dir := t.TempDir()
-	confPath := filepath.Join(dir, logConfFile)
+	confPath := filepath.Join(dir, bizopsConfFile)
 	writeBizopsYAML(t, confPath, `env_config:
   log_level: info
 service_config:
@@ -83,7 +83,7 @@ service_config:
 func TestEnableDynamicLogLevel_ServiceFieldLevelOverride(t *testing.T) {
 	// 服务节点存在但未设置 log_level，应回落到 env 级。
 	dir := t.TempDir()
-	confPath := filepath.Join(dir, logConfFile)
+	confPath := filepath.Join(dir, bizopsConfFile)
 	writeBizopsYAML(t, confPath, `env_config:
   log_level: warn
 service_config:
@@ -120,7 +120,7 @@ func TestEnableDynamicLogLevel_NoEnv(t *testing.T) {
 
 func TestEnableDynamicLogLevel_InvalidLevel(t *testing.T) {
 	dir := t.TempDir()
-	confPath := filepath.Join(dir, logConfFile)
+	confPath := filepath.Join(dir, bizopsConfFile)
 	writeBizopsYAML(t, confPath, "env_config:\n  log_level: not-a-level\n")
 
 	t.Setenv(envKeyConfPathEnv, dir)
@@ -133,6 +133,28 @@ func TestEnableDynamicLogLevel_InvalidLevel(t *testing.T) {
 	// 非法 level 应被忽略，维持初始 info。
 	if got := GetLogLevel(); got != zap.InfoLevel {
 		t.Fatalf("expect level keep info on invalid input, got %s", got.String())
+	}
+}
+
+func TestEnableDynamicLogLevel_ReapplyAfterInit(t *testing.T) {
+	dir := t.TempDir()
+	confPath := filepath.Join(dir, bizopsConfFile)
+	writeBizopsYAML(t, confPath, "env_config:\n  log_level: debug\n")
+
+	t.Setenv(envKeyConfPathEnv, dir)
+	t.Setenv(envKeyCDService, "")
+
+	Init(NewConf(WithLogLevel(zap.WarnLevel)))
+	defer resetDynamicLogLevelForTest(t)
+	defer Close()
+
+	if got := GetLogLevel(); got != zap.DebugLevel {
+		t.Fatalf("expect first Init apply dynamic debug, got %s", got.String())
+	}
+
+	Init(NewConf(WithLogLevel(zap.WarnLevel)))
+	if got := GetLogLevel(); got != zap.DebugLevel {
+		t.Fatalf("expect repeated Init reapply dynamic debug, got %s", got.String())
 	}
 }
 

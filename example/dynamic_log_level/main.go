@@ -14,7 +14,10 @@
 package main
 
 import (
+	"context"
 	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/sandwich-go/logbus"
@@ -37,11 +40,18 @@ func main() {
 		logbus.Warn("sys_conf_path_env not set; dynamic log level is NOT enabled, set it and rerun to see effect")
 	}
 
+	// Ctrl+C / SIGTERM 优雅退出，确保 defer logbus.Close() 能跑到
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer stop()
+
 	ticker := time.NewTicker(time.Second)
 	defer ticker.Stop()
 
 	for i := 0; ; i++ {
 		select {
+		case <-ctx.Done():
+			logbus.Info("signal received, exiting")
+			return
 		case <-ticker.C:
 			logbus.Debug("debug tick", logbus.Int("i", i), logbus.String("current_level", logbus.GetLogLevel().String()))
 			logbus.Info("info tick", logbus.Int("i", i), logbus.String("current_level", logbus.GetLogLevel().String()))

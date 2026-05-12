@@ -2,6 +2,7 @@ package logbus
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -17,8 +18,8 @@ import (
 const (
 	envKeyConfPathEnv = "sys_conf_path_env"
 	envKeyCDService   = "sys_cd_service"
-	// logConfFile 配置文件名，放在 sys_conf_path_env 目录下。
-	logConfFile = "bizops.yaml"
+	// bizopsConfFile PMT 下发的业务运维配置文件名，放在 $sys_conf_path_env 目录下。
+	bizopsConfFile = "bizops.yaml"
 )
 
 // bizOpsConf 对应 bizops.yaml 的结构。
@@ -29,6 +30,9 @@ const (
 //	service_config:
 //	  svcA:
 //	    log_level: debug
+//
+// 不使用 xconf 解析：xconf 会把 yaml 内容中的 ${ENV_NAME} 自动替换为环境变量值，
+// 存在环境变量污染配置的风险；这里直接用 gopkg.in/yaml.v3 做纯解析，语义可控。
 type bizOpsConf struct {
 	EnvConfig     logLevelConf            `yaml:"env_config"`
 	ServiceConfig map[string]logLevelConf `yaml:"service_config"`
@@ -52,16 +56,18 @@ var (
 func enableDynamicLogLevel() {
 	dynamicLogLevelMu.Lock()
 	defer dynamicLogLevelMu.Unlock()
-	if dynamicLogLevelStarted {
-		return
-	}
 
 	confDir := strings.TrimSpace(os.Getenv(envKeyConfPathEnv))
 	if confDir == "" {
 		// 非 PMT 环境不启用，业务本地开发不受影响
 		return
 	}
-	confPath := filepath.Join(confDir, logConfFile)
+	confPath := filepath.Join(confDir, bizopsConfFile)
+	serviceName := strings.TrimSpace(os.Getenv(envKeyCDService))
+	if dynamicLogLevelStarted {
+		applyLogConfFromLoader(context.Background(), dynamicLogLevelLoader, confPath, serviceName)
+		return
+	}
 
 	// 强制使用 PollingMode：
 	//   1. 文件从无到有场景下 fsnotify 的 Add() 会直接失败，后续即便文件创建也不会触发事件；
@@ -79,18 +85,8 @@ func enableDynamicLogLevel() {
 		return
 	}
 
-	serviceName := strings.TrimSpace(os.Getenv(envKeyCDService))
-
 	ctx := context.Background()
-
-	// 初始读取：PollingMode 下读取失败会吞掉 err（见 xfile.GetImplement），
-	// 此时文件可能尚未下发，跳过即可；待文件出现后由 Watch 回调应用。
-	if data, gErr := loader.Get(ctx, confPath); gErr != nil {
-		WarnWithChannel(SERVERLOG, "logbus dynamic loglevel: read initial conf failed",
-			String("path", confPath), String("err", gErr.Error()))
-	} else if len(data) > 0 {
-		applyLogConfContent(confPath, data, serviceName)
-	}
+	applyLogConfFromLoader(ctx, loader, confPath, serviceName)
 
 	loader.Watch(ctx, confPath, func(_ string, path string, content []byte) error {
 		applyLogConfContent(path, content, serviceName)
@@ -104,8 +100,23 @@ func enableDynamicLogLevel() {
 		String("path", confPath), String("service", serviceName))
 }
 
+func applyLogConfFromLoader(ctx context.Context, loader kv.Loader, confPath, serviceName string) {
+	if loader == nil {
+		return
+	}
+	// 初始读取：PollingMode 下读取失败会吞掉 err（见 xfile.GetImplement），
+	// 此时文件可能尚未下发，跳过即可；待文件出现后由 Watch 回调应用。
+	if data, gErr := loader.Get(ctx, confPath); gErr != nil {
+		WarnWithChannel(SERVERLOG, "logbus dynamic loglevel: read initial conf failed",
+			String("path", confPath), String("err", gErr.Error()))
+	} else if len(data) > 0 {
+		applyLogConfContent(confPath, data, serviceName)
+	}
+}
+
 // closeDynamicLogLevel 关闭 loader，释放文件监听资源。
-// 使用 recover 兜底，避免上游 xconf/kv.Common.Close 在 Done 通道未初始化场景下 panic。
+// 使用 recover 兜底，避免上游 xconf/kv.Common.Close 在 Done 通道未初始化场景下 panic；
+// recover 发生时仍会打 warn，便于排查上游版本问题，不做默默吞没。
 func closeDynamicLogLevel() {
 	dynamicLogLevelMu.Lock()
 	defer dynamicLogLevelMu.Unlock()
@@ -116,12 +127,18 @@ func closeDynamicLogLevel() {
 	dynamicLogLevelLoader = nil
 	dynamicLogLevelStarted = false
 	func() {
-		defer func() { _ = recover() }()
+		defer func() {
+			if r := recover(); r != nil {
+				WarnWithChannel(SERVERLOG, "logbus dynamic loglevel: loader.Close panicked (recovered)",
+					String("reason", fmt.Sprintf("%v", r)))
+			}
+		}()
 		_ = loader.Close(context.Background())
 	}()
 }
 
 // applyLogConfContent 解析 yaml 内容并根据服务名决定最终 LogLevel。
+// 直接用 yaml.Unmarshal，不走 xconf（xconf 会做 ${ENV} 替换，可能污染配置）。
 func applyLogConfContent(path string, content []byte, serviceName string) {
 	if len(content) == 0 {
 		return
