@@ -15,7 +15,7 @@ func init() {
 // 允许不手动Init的情况下使用默认配置调用logBus
 //
 // 注意：当环境变量 sys_conf_path_env 存在时（PMT 部署环境），Init 末尾会启用动态日志级别：
-// 读取 $sys_conf_path_env/bizops.yaml 并 watch，yaml 中的 log_level 会覆盖 conf.LogLevel。
+// 读取 $sys_conf_path_env/ops_config.json 并 watch，json 中的 log_level 会覆盖 conf.LogLevel。
 // 即在 PMT 环境下，业务代码里 WithLogLevel(...) 传入的值会被 yaml 覆盖。本地开发环境
 // （未设置 sys_conf_path_env）不受影响，行为不变。
 func Init(conf *Conf) {

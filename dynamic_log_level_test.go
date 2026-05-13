@@ -16,17 +16,17 @@ func resetDynamicLogLevelForTest(t *testing.T) {
 	closeDynamicLogLevel()
 }
 
-func writeBizopsYAML(t *testing.T, path string, content string) {
+func writeOpsConfig(t *testing.T, path string, content string) {
 	t.Helper()
 	if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
-		t.Fatalf("write bizops.yaml failed: %v", err)
+		t.Fatalf("write %s failed: %v", bizopsConfFile, err)
 	}
 }
 
 func TestEnableDynamicLogLevel_EnvOnly(t *testing.T) {
 	dir := t.TempDir()
 	confPath := filepath.Join(dir, bizopsConfFile)
-	writeBizopsYAML(t, confPath, "env_config:\n  log_level: info\n")
+	writeOpsConfig(t, confPath, `{"env_config":{"log_level":"info"}}`)
 
 	t.Setenv(envKeyConfPathEnv, dir)
 	t.Setenv(envKeyCDService, "")
@@ -42,7 +42,7 @@ func TestEnableDynamicLogLevel_EnvOnly(t *testing.T) {
 	}
 
 	// 变更文件 -> warn
-	writeBizopsYAML(t, confPath, "env_config:\n  log_level: warn\n")
+	writeOpsConfig(t, confPath, `{"env_config":{"log_level":"warn"}}`)
 
 	if !waitLogLevel(zap.WarnLevel, 3*time.Second) {
 		t.Fatalf("expect level=warn after file change, got %s", GetLogLevel().String())
@@ -52,12 +52,12 @@ func TestEnableDynamicLogLevel_EnvOnly(t *testing.T) {
 func TestEnableDynamicLogLevel_ServiceOverridesEnv(t *testing.T) {
 	dir := t.TempDir()
 	confPath := filepath.Join(dir, bizopsConfFile)
-	writeBizopsYAML(t, confPath, `env_config:
-  log_level: info
-service_config:
-  svcA:
-    log_level: debug
-`)
+	writeOpsConfig(t, confPath, `{
+  "env_config": {"log_level": "info"},
+  "service_config": {
+    "svcA": {"log_level": "debug"}
+  }
+}`)
 
 	t.Setenv(envKeyConfPathEnv, dir)
 	t.Setenv(envKeyCDService, "svcA")
@@ -84,11 +84,10 @@ func TestEnableDynamicLogLevel_ServiceFieldLevelOverride(t *testing.T) {
 	// 服务节点存在但未设置 log_level，应回落到 env 级。
 	dir := t.TempDir()
 	confPath := filepath.Join(dir, bizopsConfFile)
-	writeBizopsYAML(t, confPath, `env_config:
-  log_level: warn
-service_config:
-  svcA: {}
-`)
+	writeOpsConfig(t, confPath, `{
+  "env_config": {"log_level": "warn"},
+  "service_config": {"svcA": {}}
+}`)
 	t.Setenv(envKeyConfPathEnv, dir)
 	t.Setenv(envKeyCDService, "svcA")
 
@@ -121,7 +120,7 @@ func TestEnableDynamicLogLevel_NoEnv(t *testing.T) {
 func TestEnableDynamicLogLevel_InvalidLevel(t *testing.T) {
 	dir := t.TempDir()
 	confPath := filepath.Join(dir, bizopsConfFile)
-	writeBizopsYAML(t, confPath, "env_config:\n  log_level: not-a-level\n")
+	writeOpsConfig(t, confPath, `{"env_config":{"log_level":"not-a-level"}}`)
 
 	t.Setenv(envKeyConfPathEnv, dir)
 	t.Setenv(envKeyCDService, "")
@@ -142,12 +141,10 @@ func TestEnableDynamicLogLevel_InvalidLevel(t *testing.T) {
 func TestEnableDynamicLogLevel_ServiceInvalidFallbackToEnv(t *testing.T) {
 	dir := t.TempDir()
 	confPath := filepath.Join(dir, bizopsConfFile)
-	writeBizopsYAML(t, confPath, `env_config:
-  log_level: debug
-service_config:
-  svcA:
-    log_level: not-a-level
-`)
+	writeOpsConfig(t, confPath, `{
+  "env_config": {"log_level": "debug"},
+  "service_config": {"svcA": {"log_level": "not-a-level"}}
+}`)
 	t.Setenv(envKeyConfPathEnv, dir)
 	t.Setenv(envKeyCDService, "svcA")
 
@@ -164,12 +161,10 @@ service_config:
 func TestEnableDynamicLogLevel_AllInvalid(t *testing.T) {
 	dir := t.TempDir()
 	confPath := filepath.Join(dir, bizopsConfFile)
-	writeBizopsYAML(t, confPath, `env_config:
-  log_level: bad-env
-service_config:
-  svcA:
-    log_level: bad-svc
-`)
+	writeOpsConfig(t, confPath, `{
+  "env_config": {"log_level": "bad-env"},
+  "service_config": {"svcA": {"log_level": "bad-svc"}}
+}`)
 	t.Setenv(envKeyConfPathEnv, dir)
 	t.Setenv(envKeyCDService, "svcA")
 
@@ -186,12 +181,10 @@ service_config:
 func TestEnableDynamicLogLevel_EnvInvalidServiceValid(t *testing.T) {
 	dir := t.TempDir()
 	confPath := filepath.Join(dir, bizopsConfFile)
-	writeBizopsYAML(t, confPath, `env_config:
-  log_level: bogus
-service_config:
-  svcA:
-    log_level: debug
-`)
+	writeOpsConfig(t, confPath, `{
+  "env_config": {"log_level": "bogus"},
+  "service_config": {"svcA": {"log_level": "debug"}}
+}`)
 	t.Setenv(envKeyConfPathEnv, dir)
 	t.Setenv(envKeyCDService, "svcA")
 
@@ -207,7 +200,7 @@ service_config:
 func TestEnableDynamicLogLevel_ReapplyAfterInit(t *testing.T) {
 	dir := t.TempDir()
 	confPath := filepath.Join(dir, bizopsConfFile)
-	writeBizopsYAML(t, confPath, "env_config:\n  log_level: debug\n")
+	writeOpsConfig(t, confPath, `{"env_config":{"log_level":"debug"}}`)
 
 	t.Setenv(envKeyConfPathEnv, dir)
 	t.Setenv(envKeyCDService, "")

@@ -1,0 +1,24 @@
+{
+  "_comment": [
+    "ops_config.json - PMT 下发到 $sys_conf_path_env 目录下的动态运维配置",
+    "字段说明：",
+    "  env_config.log_level                 环境级默认日志级别，作用于该环境下所有服务",
+    "  service_config.<name>.log_level      服务级覆盖，按 $sys_cd_service 匹配当前服务",
+    "决策规则：service 级合法值优先；service 缺失/非法时回退到 env_config",
+    "合法 log_level 取值：debug / info / warn / error / dpanic / panic / fatal",
+    "PMT 修改此文件 → configmap 更新 → 容器内挂载文件 mtime 变化 → logbus 自动应用新级别"
+  ],
+
+  "env_config": {
+    "log_level": "info"
+  },
+
+  "service_config": {
+    "service_a": {
+      "log_level": "debug"
+    },
+    "service_b": {
+      "log_level": "warn"
+    }
+  }
+}

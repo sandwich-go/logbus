@@ -10,7 +10,7 @@ import (
 )
 
 // TestEnableDynamicLogLevel_FileCreatedLater 验证 Init 时文件不存在，之后被创建能否生效。
-// 典型场景：K8s configmap 未绑定 / PMT 未下发 bizops.yaml，稍后下发。
+// 典型场景：K8s configmap 未绑定 / PMT 未下发 ops_config.json，稍后下发。
 func TestEnableDynamicLogLevel_FileCreatedLater(t *testing.T) {
 	dir := t.TempDir()
 	confPath := filepath.Join(dir, bizopsConfFile)
@@ -34,7 +34,7 @@ func TestEnableDynamicLogLevel_FileCreatedLater(t *testing.T) {
 
 	// 稍后创建文件
 	time.Sleep(200 * time.Millisecond)
-	if err := os.WriteFile(confPath, []byte("env_config:\n  log_level: debug\n"), 0o644); err != nil {
+	if err := os.WriteFile(confPath, []byte(`{"env_config":{"log_level":"debug"}}`), 0o644); err != nil {
 		t.Fatalf("write file failed: %v", err)
 	}
 

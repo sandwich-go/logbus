@@ -2,6 +2,7 @@ package logbus
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -11,7 +12,6 @@ import (
 	"github.com/sandwich-go/xconf-providers/xfile"
 	"github.com/sandwich-go/xconf/kv"
 	"go.uber.org/zap/zapcore"
-	"gopkg.in/yaml.v3"
 )
 
 // 环境变量 key，部署时默认注入的环境变量。
@@ -19,27 +19,27 @@ const (
 	envKeyConfPathEnv = "sys_conf_path_env"
 	envKeyCDService   = "sys_cd_service"
 	// bizopsConfFile PMT 下发的业务运维配置文件名，放在 $sys_conf_path_env 目录下。
-	bizopsConfFile = "bizops.yaml"
+	bizopsConfFile = "ops_config.json"
 )
 
-// bizOpsConf 对应 bizops.yaml 的结构。
+// bizOpsConf 对应 ops_config.json 的结构。
 // 字段级覆盖：service_config[<currentService>] 中存在的字段覆盖 env_config 中的对应字段。
 //
-//	env_config:
-//	  log_level: info
-//	service_config:
-//	  svcA:
-//	    log_level: debug
+//	{
+//	  "env_config": { "log_level": "info" },
+//	  "service_config": {
+//	    "svcA": { "log_level": "debug" }
+//	  }
+//	}
 //
-// 不使用 xconf 解析：xconf 会把 yaml 内容中的 ${ENV_NAME} 自动替换为环境变量值，
-// 存在环境变量污染配置的风险；这里直接用 gopkg.in/yaml.v3 做纯解析，语义可控。
+// 使用标准库 encoding/json 做纯解析，避免引入 yaml/xconf 等可能做环境变量替换的逻辑。
 type bizOpsConf struct {
-	EnvConfig     logLevelConf            `yaml:"env_config"`
-	ServiceConfig map[string]logLevelConf `yaml:"service_config"`
+	EnvConfig     logLevelConf            `json:"env_config"`
+	ServiceConfig map[string]logLevelConf `json:"service_config"`
 }
 
 type logLevelConf struct {
-	LogLevel string `yaml:"log_level"`
+	LogLevel string `json:"log_level"`
 }
 
 var (
@@ -137,8 +137,8 @@ func closeDynamicLogLevel() {
 	}()
 }
 
-// applyLogConfContent 解析 yaml 内容并根据服务名决定最终 LogLevel。
-// 直接用 yaml.Unmarshal，不走 xconf（xconf 会做 ${ENV} 替换，可能污染配置）。
+// applyLogConfContent 解析 json 内容并根据服务名决定最终 LogLevel。
+// 使用标准库 encoding/json，不走 xconf（xconf 会做 ${ENV} 替换，可能污染配置）。
 //
 // 决策规则（按优先级从高到低，前一个解析失败/为空则尝试下一个）：
 //  1. service_config[<serviceName>].log_level
@@ -151,8 +151,8 @@ func applyLogConfContent(path string, content []byte, serviceName string) {
 		return
 	}
 	var cfg bizOpsConf
-	if err := yaml.Unmarshal(content, &cfg); err != nil {
-		WarnWithChannel(SERVERLOG, "logbus dynamic loglevel: unmarshal yaml failed",
+	if err := json.Unmarshal(content, &cfg); err != nil {
+		WarnWithChannel(SERVERLOG, "logbus dynamic loglevel: unmarshal json failed",
 			String("path", path), String("err", err.Error()))
 		return
 	}
