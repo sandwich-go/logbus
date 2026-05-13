@@ -139,6 +139,13 @@ func closeDynamicLogLevel() {
 
 // applyLogConfContent 解析 yaml 内容并根据服务名决定最终 LogLevel。
 // 直接用 yaml.Unmarshal，不走 xconf（xconf 会做 ${ENV} 替换，可能污染配置）。
+//
+// 决策规则（按优先级从高到低，前一个解析失败/为空则尝试下一个）：
+//  1. service_config[<serviceName>].log_level
+//  2. env_config.log_level
+//
+// 全部为空 → 静默返回（保持当前 level 不动）。
+// 候选项非法仅打 warning 不影响其它候选项继续尝试，避免 service 写错连累 env 的合法配置。
 func applyLogConfContent(path string, content []byte, serviceName string) {
 	if len(content) == 0 {
 		return
@@ -150,29 +157,39 @@ func applyLogConfContent(path string, content []byte, serviceName string) {
 		return
 	}
 
-	// 字段级覆盖：service_config[<serviceName>].log_level > env_config.log_level
-	levelStr := cfg.EnvConfig.LogLevel
+	type candidate struct {
+		from  string // 用于日志，标识来源
+		value string
+	}
+	candidates := make([]candidate, 0, 2)
 	if serviceName != "" {
-		if sc, ok := cfg.ServiceConfig[serviceName]; ok && sc.LogLevel != "" {
-			levelStr = sc.LogLevel
+		if sc, ok := cfg.ServiceConfig[serviceName]; ok && strings.TrimSpace(sc.LogLevel) != "" {
+			candidates = append(candidates, candidate{from: "service_config." + serviceName, value: sc.LogLevel})
 		}
 	}
-	levelStr = strings.TrimSpace(levelStr)
-	if levelStr == "" {
+	if strings.TrimSpace(cfg.EnvConfig.LogLevel) != "" {
+		candidates = append(candidates, candidate{from: "env_config", value: cfg.EnvConfig.LogLevel})
+	}
+	if len(candidates) == 0 {
 		return
 	}
 
-	var level zapcore.Level
-	if err := level.UnmarshalText([]byte(strings.ToLower(levelStr))); err != nil {
-		WarnWithChannel(SERVERLOG, "logbus dynamic loglevel: invalid log_level",
-			String("path", path), String("level", levelStr), String("err", err.Error()))
+	for _, c := range candidates {
+		var level zapcore.Level
+		if err := level.UnmarshalText([]byte(strings.ToLower(strings.TrimSpace(c.value)))); err != nil {
+			WarnWithChannel(SERVERLOG, "logbus dynamic loglevel: invalid log_level, try next candidate",
+				String("path", path), String("from", c.from), String("level", c.value), String("err", err.Error()))
+			continue
+		}
+		if cur := GetLogLevel(); cur == level {
+			return
+		}
+		SetLogLevel(level)
+		InfoWithChannel(SERVERLOG, "logbus dynamic loglevel updated",
+			String("path", path), String("from", c.from), String("service", serviceName), String("level", level.String()))
 		return
 	}
-
-	if cur := GetLogLevel(); cur == level {
-		return
-	}
-	SetLogLevel(level)
-	InfoWithChannel(SERVERLOG, "logbus dynamic loglevel updated",
-		String("path", path), String("service", serviceName), String("level", level.String()))
+	// 所有候选项均非法
+	WarnWithChannel(SERVERLOG, "logbus dynamic loglevel: all candidates invalid, keep current level",
+		String("path", path), String("service", serviceName), String("current_level", GetLogLevel().String()))
 }

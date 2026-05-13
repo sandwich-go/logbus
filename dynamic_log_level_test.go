@@ -136,6 +136,74 @@ func TestEnableDynamicLogLevel_InvalidLevel(t *testing.T) {
 	}
 }
 
+// TestEnableDynamicLogLevel_ServiceInvalidFallbackToEnv 验证 service 配置非法时回退到 env 级别。
+// 场景：env_config.log_level=debug 合法；service_config.svcA.log_level=abc 非法。
+// 期望：service_a 不被卡住，能用上 env 的 debug。
+func TestEnableDynamicLogLevel_ServiceInvalidFallbackToEnv(t *testing.T) {
+	dir := t.TempDir()
+	confPath := filepath.Join(dir, bizopsConfFile)
+	writeBizopsYAML(t, confPath, `env_config:
+  log_level: debug
+service_config:
+  svcA:
+    log_level: not-a-level
+`)
+	t.Setenv(envKeyConfPathEnv, dir)
+	t.Setenv(envKeyCDService, "svcA")
+
+	Init(NewConf(WithLogLevel(zap.WarnLevel)))
+	defer resetDynamicLogLevelForTest(t)
+	defer Close()
+
+	if got := GetLogLevel(); got != zap.DebugLevel {
+		t.Fatalf("expect fallback to env debug when service invalid, got %s", got.String())
+	}
+}
+
+// TestEnableDynamicLogLevel_AllInvalid 验证 service 与 env 均非法时保持原 level 不变。
+func TestEnableDynamicLogLevel_AllInvalid(t *testing.T) {
+	dir := t.TempDir()
+	confPath := filepath.Join(dir, bizopsConfFile)
+	writeBizopsYAML(t, confPath, `env_config:
+  log_level: bad-env
+service_config:
+  svcA:
+    log_level: bad-svc
+`)
+	t.Setenv(envKeyConfPathEnv, dir)
+	t.Setenv(envKeyCDService, "svcA")
+
+	Init(NewConf(WithLogLevel(zap.InfoLevel)))
+	defer resetDynamicLogLevelForTest(t)
+	defer Close()
+
+	if got := GetLogLevel(); got != zap.InfoLevel {
+		t.Fatalf("expect keep init info when all candidates invalid, got %s", got.String())
+	}
+}
+
+// TestEnableDynamicLogLevel_EnvInvalidServiceValid 验证 env 非法 + service 合法时 service 生效。
+func TestEnableDynamicLogLevel_EnvInvalidServiceValid(t *testing.T) {
+	dir := t.TempDir()
+	confPath := filepath.Join(dir, bizopsConfFile)
+	writeBizopsYAML(t, confPath, `env_config:
+  log_level: bogus
+service_config:
+  svcA:
+    log_level: debug
+`)
+	t.Setenv(envKeyConfPathEnv, dir)
+	t.Setenv(envKeyCDService, "svcA")
+
+	Init(NewConf(WithLogLevel(zap.WarnLevel)))
+	defer resetDynamicLogLevelForTest(t)
+	defer Close()
+
+	if got := GetLogLevel(); got != zap.DebugLevel {
+		t.Fatalf("expect service debug when env invalid, got %s", got.String())
+	}
+}
+
 func TestEnableDynamicLogLevel_ReapplyAfterInit(t *testing.T) {
 	dir := t.TempDir()
 	confPath := filepath.Join(dir, bizopsConfFile)
