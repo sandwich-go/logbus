@@ -1,4 +1,12 @@
-### v1.1.57 🌈 (2026-05-13 13:30:37)
+### v1.1.58 🌈 (2026-05-21 17:55:29)
+
+#### 🤖  Tools
+  * **sem**: make changelog ([03d2f70](https://github.com/sandwich-go/logbus/commit/03d2f70b1efe53ce9e76ac0410a391d43ce59bad)) (<small>[daming.yang](daming.yang@centurygame.com)@2026-05-18 13:11:47 &#43;0800 &#43;0800</small>)
+
+#### 💪  Commit
+  * feat:从context中提取traceId ([c09c750](https://github.com/sandwich-go/logbus/commit/c09c750026750ee53f65150b6528a61cb73ae0c5)) (<small>[ruisheng.wang](ruisheng.wang@ddhd.cn)@2026-05-21 17:55:29 &#43;0800 &#43;0800</small>)
+
+### v1.1.57 (2026-05-13 13:30:37)
 
 #### 🐛  Bug Fixed
   * **loglevel**: service 配置非法时回退到 env_config ([b5b9614](https://github.com/sandwich-go/logbus/commit/b5b96146abc6352e5017b9528f062a8f32139595)) (<small>[daming.yang](daming.yang@centurygame.com)@2026-05-13 13:18:54 &#43;0800 &#43;0800</small>)
