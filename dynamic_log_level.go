@@ -115,8 +115,13 @@ func applyLogConfFromLoader(ctx context.Context, loader kv.Loader, confPath, ser
 }
 
 // closeDynamicLogLevel 关闭 loader，释放文件监听资源。
-// 使用 recover 兜底，避免上游 xconf/kv.Common.Close 在 Done 通道未初始化场景下 panic；
-// recover 发生时仍会打 warn，便于排查上游版本问题，不做默默吞没。
+//
+// 历史背景：xconf <= v0.3.28 的 kv.Common.Done 在 New 时未 make，
+// Close 中 close(c.Done) 会 panic: close of nil channel。
+// 该缺陷在 xconf v0.3.29 已修复（New 中 make Done + Close 用 sync.Once 幂等）。
+//
+// 防御性保留 recover：避免日后再有上游回归或第三方实现 kv.Loader 时
+// Close 抛 panic 直接打挂调用方进程；正常路径不会被触发，仅在 debug 级日志记录。
 func closeDynamicLogLevel() {
 	dynamicLogLevelMu.Lock()
 	defer dynamicLogLevelMu.Unlock()
@@ -129,7 +134,7 @@ func closeDynamicLogLevel() {
 	func() {
 		defer func() {
 			if r := recover(); r != nil {
-				WarnWithChannel(SERVERLOG, "logbus dynamic loglevel: loader.Close panicked (recovered)",
+				DebugWithChannel(SERVERLOG, "logbus dynamic loglevel: loader.Close panicked (recovered, defensive)",
 					String("reason", fmt.Sprintf("%v", r)))
 			}
 		}()

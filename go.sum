@@ -225,8 +225,8 @@ github.com/sandwich-go/boost v1.3.82 h1:fh9bXGQ/fAAPEIn3V6taxjYAaSAELxDWT9U2bBeQ
 github.com/sandwich-go/boost v1.3.82/go.mod h1:/UFh2ofj+Qxlysk+jPzg0/XAXesc3xFi/7y01mfpFCQ=
 github.com/sandwich-go/mapstructure v1.6.0 h1:FwXGUFVBAkN8CUws4jmV4+Nmg7fEKq/KeQTPZl5agSc=
 github.com/sandwich-go/mapstructure v1.6.0/go.mod h1:F47FfLZAp8P5fA56KOdW5+Eks8qaa4yfpf49SVSiJ0U=
-github.com/sandwich-go/xconf v0.3.27 h1:WyBWIeKsYAjgVKnnT3VdQkFA8KkdOvNDxv0pzrpX0d0=
-github.com/sandwich-go/xconf v0.3.27/go.mod h1:7zC+fpeiJe74nzcbpdpmpDNRYJqU+qqNFkevD3XOUVo=
+github.com/sandwich-go/xconf v0.3.29 h1:ARFKPyUgk3gqev/17j1cFLUm+MUOsKh7FH1MEFW2IDM=
+github.com/sandwich-go/xconf v0.3.29/go.mod h1:7zC+fpeiJe74nzcbpdpmpDNRYJqU+qqNFkevD3XOUVo=
 github.com/sandwich-go/xconf-providers v0.1.6 h1:iI+eOOhg2kjdS/UIltyLiNOSlN+Y+O/GEpdoomCo+yo=
 github.com/sandwich-go/xconf-providers v0.1.6/go.mod h1:WOIaDqw9L3+PjNhp/Rtf4EIajO9jTTfNjjNCVCimiuA=
 github.com/sandwich-go/zapgen v0.0.0-20220915080429-843fca246b24 h1:KuOgs9R0jfvnloQciDboOubyg8lYO6gbN7odZmrdw+g=

@@ -197,6 +197,32 @@ func TestEnableDynamicLogLevel_EnvInvalidServiceValid(t *testing.T) {
 	}
 }
 
+// TestCloseDynamicLogLevel_NoPanicOnNilDone 回归 xconf <= v0.3.28 缺陷：
+// kv.Common.Done 在 New 时未 make，Close 中 close(c.Done) 直接 panic。
+// xconf v0.3.29 已修复（New 中 make Done + Close 用 sync.Once 幂等）。
+// 用例验证：在 v0.3.29 之上，单次 Close 与重复 Close 都不会 panic。
+func TestCloseDynamicLogLevel_NoPanicOnNilDone(t *testing.T) {
+	dir := t.TempDir()
+	confPath := filepath.Join(dir, bizopsConfFile)
+	writeOpsConfig(t, confPath, `{"env_config":{"log_level":"info"}}`)
+	t.Setenv(envKeyConfPathEnv, dir)
+	t.Setenv(envKeyCDService, "")
+
+	Init(NewConf(WithLogLevel(zap.DebugLevel)))
+	if !dynamicLogLevelStarted {
+		t.Fatalf("dynamic loader should be started")
+	}
+
+	// 第一次 Close：原缺陷下会 panic（被 recover）。修复后应正常返回。
+	closeDynamicLogLevel()
+	if dynamicLogLevelStarted {
+		t.Fatalf("dynamic loader should be stopped after Close")
+	}
+
+	// 第二次 Close：幂等性验证，不应 panic。
+	closeDynamicLogLevel()
+}
+
 func TestEnableDynamicLogLevel_ReapplyAfterInit(t *testing.T) {
 	dir := t.TempDir()
 	confPath := filepath.Join(dir, bizopsConfFile)

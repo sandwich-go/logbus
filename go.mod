@@ -10,7 +10,7 @@ require (
 	github.com/prometheus/procfs v0.8.0
 	github.com/rs/xid v1.5.0
 	github.com/sandwich-go/boost v1.3.82
-	github.com/sandwich-go/xconf v0.3.27
+	github.com/sandwich-go/xconf v0.3.29
 	github.com/sandwich-go/xconf-providers v0.1.6
 	github.com/sandwich-go/zapgen v0.0.0-20220915080429-843fca246b24
 	github.com/shirou/gopsutil/v3 v3.22.10
