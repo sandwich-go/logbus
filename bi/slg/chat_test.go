@@ -85,6 +85,7 @@ func TestTrackUserChatOpts(t *testing.T) {
 			GameUser:   "玩家A",
 			TotalPower: 10000.1,
 			TransLang:  "zh",
+			TownLvl:    25,
 		}
 		So(TrackUserChatPrivate(1, 2, "hi", opts), ShouldBeNil)
 		data := ct.getData()
@@ -95,5 +96,6 @@ func TestTrackUserChatOpts(t *testing.T) {
 		So(data.Properties["gameusername"], ShouldEqual, "玩家A")
 		So(data.Properties["total_power"], ShouldEqual, "10000.1")
 		So(data.Properties["trans_lang"], ShouldEqual, "zh")
+		So(data.Properties["town_lvl"], ShouldEqual, "25")
 	})
 }

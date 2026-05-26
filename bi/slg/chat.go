@@ -34,6 +34,7 @@ type UserChatOpts struct {
 	GameUser   string  // 玩家昵称
 	TotalPower float64 // 玩家战力
 	TransLang  string  // 发送时使用的语言
+	TownLvl    int32   // 玩家主城等级
 }
 
 func (o *UserChatOpts) fpid() string {
@@ -52,6 +53,7 @@ func (o *UserChatOpts) toProperties(p map[string]interface{}) map[string]interfa
 	p["gameusername"] = o.GameUser
 	p["total_power"] = xconv.String(o.TotalPower)
 	p["trans_lang"] = o.TransLang
+	p["town_lvl"] = xconv.String(o.TownLvl)
 	return p
 }
 
