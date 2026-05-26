@@ -29,7 +29,13 @@ func initTrackFileWriteSyncer() {
 		gTrackFileWriteSyncer = nil
 	}
 	if Setting.TrackOutput == TrackOutputFile || Setting.TrackOutput == TrackOutputBoth {
-		gTrackFileWriteSyncer = NewTrackFileWriteSyncer(Setting.TrackFileDir, Setting.TrackFileRotation)
+		gTrackFileWriteSyncer = NewTrackFileWriteSyncerFromConfig(TrackFileWriteSyncerConfig{
+			BaseDir:          Setting.TrackFileDir,
+			ChannelAlias:     Setting.TrackChannelAlias,
+			Rotation:         Setting.TrackFileRotation,
+			KeepaliveEvery:   Setting.TrackKeepaliveInterval,
+			KeepaliveMessage: Setting.TrackKeepaliveMessage,
+		})
 	}
 }
 

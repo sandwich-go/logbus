@@ -43,15 +43,27 @@ type Conf struct {
 	TruncateWriteSyncerOption  *TruncateWriteSyncerOption
 	DisableTruncateWriteSyncer bool
 	// TrackFileDir track 类日志写入的基础目录，TrackOutput 为 FileOnly 或 Both 时必须非空。
-	// 文件路径格式：{TrackFileDir}/{channel}_{time}.log
+	// 文件路径格式（ops 规范）：{TrackFileDir}/{channel}/{yyyymmdd}/{channel}_{hostname}_{slot}.log
+	// 其中 hostname 由进程自动从 os.Hostname 获取；channel 段名可通过 TrackChannelAlias 重写
+	// （例如 thinkingdata 在 ops 规范中目录与文件前缀都用 tga）。
+	// PMT 发布环境（sys_cd_env 非空）下，logbus_track_file_dir 环变会强制覆写本字段。
 	TrackFileDir string
+	// TrackChannelAlias channel 名 → 落盘段名（目录段 + 文件名前缀）映射。例如 thinkingdata→tga。
+	// bigquery_xxx 形态的 channel 会按前缀 bigquery 命中 alias 后再拼回表名段。
+	TrackChannelAlias map[string]string
 	// TrackFileRotation track 日志文件的时间切割粒度，支持 HourlyRotation（小时）和 MinuteRotation（分钟）
 	TrackFileRotation TrackRotation
 	// TrackOutput 控制 track 日志的输出目标：
 	//   TrackOutputStdout（默认）— 只写 stdout，与旧行为完全兼容
 	//   TrackOutputFile          — 只写文件，需配置 TrackFileDir
 	//   TrackOutputBoth          — 同时写 stdout 和文件，需配置 TrackFileDir
+	// PMT 发布环境（sys_cd_env 非空）下，logbus_track_output 环变（值 stdout/file/both）会强制覆写本字段。
 	TrackOutput TrackOutput
+	// TrackKeepaliveInterval 心跳间隔；>0 时启用，每个 channel 的 worker 在闲置 interval 内
+	// 没有写入则补一条 keepalive 日志。<=0 表示禁用。
+	TrackKeepaliveInterval time.Duration
+	// TrackKeepaliveMessage 心跳触发时落盘的 msg 内容；可为空字符串。
+	TrackKeepaliveMessage string
 	// glog
 	PrintAsError       bool
 	IgnoreLogicalError bool
@@ -243,6 +255,13 @@ func WithTrackFileDir(v string) ConfOptionFunc {
 	}
 }
 
+// WithTrackChannelAlias channel 名到落盘段名映射，默认包含 thinkingdata→tga
+func WithTrackChannelAlias(v map[string]string) ConfOptionFunc {
+	return func(cc *Conf) {
+		cc.TrackChannelAlias = v
+	}
+}
+
 // WithTrackFileRotation track 日志时间切割粒度，默认按小时
 func WithTrackFileRotation(v TrackRotation) ConfOptionFunc {
 	return func(cc *Conf) {
@@ -254,6 +273,20 @@ func WithTrackFileRotation(v TrackRotation) ConfOptionFunc {
 func WithTrackOutput(v TrackOutput) ConfOptionFunc {
 	return func(cc *Conf) {
 		cc.TrackOutput = v
+	}
+}
+
+// WithTrackKeepaliveInterval track 心跳间隔，闲置超过该间隔时补写一条 keepalive 日志，<=0 禁用
+func WithTrackKeepaliveInterval(v time.Duration) ConfOptionFunc {
+	return func(cc *Conf) {
+		cc.TrackKeepaliveInterval = v
+	}
+}
+
+// WithTrackKeepaliveMessage track 心跳消息内容，默认空
+func WithTrackKeepaliveMessage(v string) ConfOptionFunc {
+	return func(cc *Conf) {
+		cc.TrackKeepaliveMessage = v
 	}
 }
 
@@ -300,9 +333,12 @@ func setConfDefaultValue(cc *Conf) {
 		WithEnableTraceLevel(true),
 		WithTruncateWriteSyncerOption(newDefaultTruncateWriteSyncerOption()),
 		WithDisableTruncateWriteSyncer(false),
-		WithTrackFileDir(""),
+		WithTrackFileDir("./tracklogs"),
+		WithTrackChannelAlias(map[string]string{"thinkingdata": "tga"}),
 		WithTrackFileRotation(HourlyRotation),
 		WithTrackOutput(TrackOutputStdout),
+		WithTrackKeepaliveInterval(time.Minute),
+		WithTrackKeepaliveMessage(""),
 		WithPrintAsError(true),
 		WithIgnoreLogicalError(true),
 	} {
@@ -339,12 +375,15 @@ func (cc *Conf) GetEnableTraceLevel() bool                 { return cc.EnableTra
 func (cc *Conf) GetTruncateWriteSyncerOption() *TruncateWriteSyncerOption {
 	return cc.TruncateWriteSyncerOption
 }
-func (cc *Conf) GetDisableTruncateWriteSyncer() bool { return cc.DisableTruncateWriteSyncer }
-func (cc *Conf) GetTrackFileDir() string             { return cc.TrackFileDir }
-func (cc *Conf) GetTrackFileRotation() TrackRotation { return cc.TrackFileRotation }
-func (cc *Conf) GetTrackOutput() TrackOutput         { return cc.TrackOutput }
-func (cc *Conf) GetPrintAsError() bool               { return cc.PrintAsError }
-func (cc *Conf) GetIgnoreLogicalError() bool         { return cc.IgnoreLogicalError }
+func (cc *Conf) GetDisableTruncateWriteSyncer() bool      { return cc.DisableTruncateWriteSyncer }
+func (cc *Conf) GetTrackFileDir() string                  { return cc.TrackFileDir }
+func (cc *Conf) GetTrackChannelAlias() map[string]string  { return cc.TrackChannelAlias }
+func (cc *Conf) GetTrackFileRotation() TrackRotation      { return cc.TrackFileRotation }
+func (cc *Conf) GetTrackOutput() TrackOutput              { return cc.TrackOutput }
+func (cc *Conf) GetTrackKeepaliveInterval() time.Duration { return cc.TrackKeepaliveInterval }
+func (cc *Conf) GetTrackKeepaliveMessage() string         { return cc.TrackKeepaliveMessage }
+func (cc *Conf) GetPrintAsError() bool                    { return cc.PrintAsError }
+func (cc *Conf) GetIgnoreLogicalError() bool              { return cc.IgnoreLogicalError }
 
 // ConfVisitor visitor interface for Conf
 type ConfVisitor interface {
@@ -369,8 +408,11 @@ type ConfVisitor interface {
 	GetTruncateWriteSyncerOption() *TruncateWriteSyncerOption
 	GetDisableTruncateWriteSyncer() bool
 	GetTrackFileDir() string
+	GetTrackChannelAlias() map[string]string
 	GetTrackFileRotation() TrackRotation
 	GetTrackOutput() TrackOutput
+	GetTrackKeepaliveInterval() time.Duration
+	GetTrackKeepaliveMessage() string
 	GetPrintAsError() bool
 	GetIgnoreLogicalError() bool
 }

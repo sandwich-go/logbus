@@ -68,9 +68,12 @@ type trackMsg struct {
 // trackWorker 是每个 channel 独享的写入 goroutine
 // 它持有一个文件句柄，串行完成文件切割与写入，无需与其他 channel 竞争。
 type trackWorker struct {
-	channel  string
-	baseDir  string
-	rotation TrackRotation
+	channel        string // sanitize 后的 channel 名（同时作为目录段与文件名前缀）
+	baseDir        string
+	hostName       string // 文件名 pod 段，自动取 hostname
+	rotation       TrackRotation
+	keepaliveEvery time.Duration // 0 表示禁用
+	keepaliveMsg   []byte        // 心跳写入 payload；可为空字符串
 
 	queue chan trackMsg   // 消息队列
 	sync  chan chan error // sync 请求：调用方传入一个 chan error，worker 写完队列后回复
@@ -85,50 +88,67 @@ type trackWorker struct {
 	lastErr    error
 }
 
-func newTrackWorker(channel, baseDir string, rotation TrackRotation, bufSize int) *trackWorker {
+func newTrackWorker(channel, baseDir, hostName string, rotation TrackRotation, bufSize int, keepaliveEvery time.Duration, keepaliveMsg []byte) *trackWorker {
 	w := &trackWorker{
-		channel:  channel,
-		baseDir:  baseDir,
-		rotation: rotation,
-		queue:    make(chan trackMsg, bufSize),
-		sync:     make(chan chan error, 1),
-		done:     make(chan struct{}),
+		channel:        channel,
+		baseDir:        baseDir,
+		hostName:       hostName,
+		rotation:       rotation,
+		keepaliveEvery: keepaliveEvery,
+		keepaliveMsg:   keepaliveMsg,
+		queue:          make(chan trackMsg, bufSize),
+		sync:           make(chan chan error, 1),
+		done:           make(chan struct{}),
 	}
 	go w.run()
 	return w
 }
 
 func (w *trackWorker) run() {
-	timer := time.NewTimer(defaultTrackBatchFlushInterval)
-	if !timer.Stop() {
-		<-timer.C
+	// flushTimer 控制 batch 攒到一定时间未满就 flush；按需启动
+	flushTimer := time.NewTimer(defaultTrackBatchFlushInterval)
+	if !flushTimer.Stop() {
+		<-flushTimer.C
 	}
-	var timerCh <-chan time.Time
-	startTimer := func() {
-		if timerCh != nil {
+	var flushTimerCh <-chan time.Time
+	startFlushTimer := func() {
+		if flushTimerCh != nil {
 			return
 		}
-		timer.Reset(defaultTrackBatchFlushInterval)
-		timerCh = timer.C
+		flushTimer.Reset(defaultTrackBatchFlushInterval)
+		flushTimerCh = flushTimer.C
 	}
-	stopTimer := func() {
-		if timerCh == nil {
+	stopFlushTimer := func() {
+		if flushTimerCh == nil {
 			return
 		}
-		if !timer.Stop() {
+		if !flushTimer.Stop() {
 			select {
-			case <-timer.C:
+			case <-flushTimer.C:
 			default:
 			}
 		}
-		timerCh = nil
+		flushTimerCh = nil
 	}
 	flushBatch := func() error {
-		stopTimer()
+		stopFlushTimer()
 		return w.flushBatch()
 	}
 
+	// keepaliveTicker：当配置 keepaliveEvery>0 时持续 tick；
+	// 每条真实写入会刷新 lastWriteAt，tick 触发时若距离 lastWriteAt 超过 keepaliveEvery 则写一条心跳。
+	var keepaliveCh <-chan time.Time
+	var keepaliveTicker *time.Ticker
+	lastWriteAt := time.Now()
+	if w.keepaliveEvery > 0 {
+		keepaliveTicker = time.NewTicker(w.keepaliveEvery)
+		keepaliveCh = keepaliveTicker.C
+	}
+
 	defer func() {
+		if keepaliveTicker != nil {
+			keepaliveTicker.Stop()
+		}
 		w.recordErr(flushBatch())
 		if w.file != nil {
 			w.recordErr(w.file.Sync())
@@ -145,11 +165,12 @@ func (w *trackWorker) run() {
 				// queue 已关闭，退出
 				return
 			}
+			lastWriteAt = time.Now()
 			wasEmpty := w.batchCount == 0
 			if w.appendBatch(msg.data) {
 				w.recordErr(flushBatch())
 			} else if wasEmpty {
-				startTimer()
+				startFlushTimer()
 			}
 
 		case replyCh, ok := <-w.sync:
@@ -178,9 +199,22 @@ func (w *trackWorker) run() {
 			w.lastErr = nil
 			replyCh <- syncErr
 
-		case <-timerCh:
-			timerCh = nil
+		case <-flushTimerCh:
+			flushTimerCh = nil
 			w.recordErr(w.flushBatch())
+
+		case now := <-keepaliveCh:
+			// 距离上次实际写入超过 keepaliveEvery 才写心跳，避免与正常写入叠加
+			if now.Sub(lastWriteAt) < w.keepaliveEvery {
+				continue
+			}
+			lastWriteAt = now
+			wasEmpty := w.batchCount == 0
+			if w.appendBatch(w.keepaliveMsg) {
+				w.recordErr(flushBatch())
+			} else if wasEmpty {
+				startFlushTimer()
+			}
 		}
 	}
 }
@@ -239,7 +273,7 @@ func (w *trackWorker) writeBatch(data []byte) error {
 			w.recordErr(w.file.Sync())
 			w.recordErr(w.file.Close())
 		}
-		f, err := openTrackFile(w.baseDir, w.channel, slot)
+		f, err := openTrackFile(w.baseDir, w.channel, w.hostName, slot, dateFromSlot(now))
 		if err != nil {
 			w.file = nil
 			return err
@@ -250,6 +284,9 @@ func (w *trackWorker) writeBatch(data []byte) error {
 	_, err := w.file.Write(data)
 	return err
 }
+
+// dateFromSlot 从当前时间生成日期子目录段（yyyymmdd），与 slot 解耦保证小时/分钟切割模式下日期一致
+func dateFromSlot(t time.Time) string { return t.Format("20060102") }
 
 // send 非阻塞投递，队列满时丢弃并记 metric
 func (w *trackWorker) send(msg trackMsg) {
@@ -284,11 +321,22 @@ func (w *trackWorker) stop() error {
 }
 
 // openTrackFile 打开（或追加）一个时间切片文件
-func openTrackFile(baseDir, channel, slot string) (*os.File, error) {
-	if err := os.MkdirAll(baseDir, 0o755); err != nil {
-		return nil, fmt.Errorf("trackFileWriter: mkdir %s: %w", baseDir, err)
+//
+// 路径布局（ops 规范）：
+//
+//	{baseDir}/{channel}/{date}/{channel}_{podName}_{slot}.log
+//
+// 其中 baseDir 已是“该 channel 对应的基础目录”（外层 TrackChannelDirs 覆盖完毕），
+// channel 既作为子目录段也作为文件名前缀；podName 来自配置或 HOSTNAME，
+// 缺省回退 "unknown" 由 sanitizeTrackFileComponent 兜底。
+func openTrackFile(baseDir, channel, podName, slot, date string) (*os.File, error) {
+	chSeg := sanitizeTrackFileComponent(channel)
+	podSeg := sanitizeTrackFileComponent(podName)
+	dir := filepath.Join(baseDir, chSeg, date)
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		return nil, fmt.Errorf("trackFileWriter: mkdir %s: %w", dir, err)
 	}
-	name := filepath.Join(baseDir, fmt.Sprintf("%s_%s.log", sanitizeTrackFileComponent(channel), slot))
+	name := filepath.Join(dir, fmt.Sprintf("%s_%s_%s.log", chSeg, podSeg, slot))
 	f, err := os.OpenFile(name, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0o644)
 	if err != nil {
 		return nil, fmt.Errorf("trackFileWriter: open %s: %w", name, err)
@@ -312,10 +360,33 @@ func sanitizeTrackFileComponent(s string) string {
 			b.WriteByte('_')
 		}
 	}
-	if b.Len() == 0 {
+	out := strings.TrimLeft(b.String(), ".") // 防止 "../" 输入留下以 . 开头的路径段
+	if out == "" {
 		return "unknown"
 	}
-	return b.String()
+	return out
+}
+
+// TrackFileWriteSyncerConfig 控制文件落盘行为，路径布局固定为：
+//
+//	{BaseDir}/{channel}/{yyyymmdd}/{channel}_{hostname}_{slot}.log
+//
+// 其中 channel 受 ChannelAlias 影响：例如代码侧 dd_meta_channel="thinkingdata" 但 ops
+// 期望目录与文件名前缀都用 "thinkdata"，可设 ChannelAlias["thinkingdata"]="thinkdata"。
+//
+//   - BaseDir：所有 channel 的根目录（已由调用方在 PMT 环境下从 logbus_track_file_dir 读取）
+//   - ChannelAlias：channel 名 → 落盘段名映射，未命中保留原 channel
+//   - Rotation：时间切割粒度
+//   - BufSize：每 channel 队列缓冲大小，默认 defaultTrackChannelBufSize
+//   - KeepaliveEvery：心跳间隔；<=0 表示禁用
+//   - KeepaliveMessage：心跳触发时落盘的 msg 字符串；可为空
+type TrackFileWriteSyncerConfig struct {
+	BaseDir          string
+	ChannelAlias     map[string]string
+	Rotation         TrackRotation
+	BufSize          int
+	KeepaliveEvery   time.Duration
+	KeepaliveMessage string
 }
 
 // TrackFileWriteSyncer 是一个 zapcore.WriteSyncer，它：
@@ -324,28 +395,81 @@ func sanitizeTrackFileComponent(s string) string {
 //  3. worker 串行完成文件切割与写入，彻底消除跨 channel 的锁竞争
 //  4. 写入调用方只做 JSON 解析 + 投递，不阻塞
 type TrackFileWriteSyncer struct {
-	mu       sync.RWMutex
-	baseDir  string
-	rotation TrackRotation
-	bufSize  int
-	workers  map[string]*trackWorker // key = channel，按需创建
+	mu               sync.RWMutex
+	baseDir          string
+	channelAlias     map[string]string
+	hostName         string
+	rotation         TrackRotation
+	bufSize          int
+	keepaliveEvery   time.Duration
+	keepaliveMessage []byte
+	workers          map[string]*trackWorker // key = 落盘段名（alias 后），按需创建
 
 	closed bool
 }
 
 // NewTrackFileWriteSyncer 创建 TrackFileWriteSyncer，使用默认缓冲大小
 func NewTrackFileWriteSyncer(baseDir string, rotation TrackRotation) *TrackFileWriteSyncer {
-	return NewTrackFileWriteSyncerWithBufSize(baseDir, rotation, defaultTrackChannelBufSize)
+	return NewTrackFileWriteSyncerFromConfig(TrackFileWriteSyncerConfig{
+		BaseDir:  baseDir,
+		Rotation: rotation,
+	})
 }
 
 // NewTrackFileWriteSyncerWithBufSize 创建 TrackFileWriteSyncer，可自定义每 channel 缓冲大小
 func NewTrackFileWriteSyncerWithBufSize(baseDir string, rotation TrackRotation, bufSize int) *TrackFileWriteSyncer {
-	return &TrackFileWriteSyncer{
-		baseDir:  baseDir,
-		rotation: rotation,
-		bufSize:  bufSize,
-		workers:  make(map[string]*trackWorker),
+	return NewTrackFileWriteSyncerFromConfig(TrackFileWriteSyncerConfig{
+		BaseDir:  baseDir,
+		Rotation: rotation,
+		BufSize:  bufSize,
+	})
+}
+
+// NewTrackFileWriteSyncerFromConfig 从完整配置创建 TrackFileWriteSyncer。
+// hostname 通过 os.Hostname 自动获取，失败时回退 unknown（由 sanitizeTrackFileComponent 兜底）。
+func NewTrackFileWriteSyncerFromConfig(cfg TrackFileWriteSyncerConfig) *TrackFileWriteSyncer {
+	bufSize := cfg.BufSize
+	if bufSize <= 0 {
+		bufSize = defaultTrackChannelBufSize
 	}
+	alias := make(map[string]string, len(cfg.ChannelAlias))
+	for k, v := range cfg.ChannelAlias {
+		if v == "" {
+			continue
+		}
+		alias[k] = v
+	}
+	host, _ := os.Hostname()
+	if host == "" {
+		host = os.Getenv("HOSTNAME")
+	}
+	return &TrackFileWriteSyncer{
+		baseDir:          cfg.BaseDir,
+		channelAlias:     alias,
+		hostName:         host,
+		rotation:         cfg.Rotation,
+		bufSize:           bufSize,
+		keepaliveEvery:    cfg.KeepaliveEvery,
+		keepaliveMessage:  []byte(cfg.KeepaliveMessage),
+		workers:           make(map[string]*trackWorker),
+	}
+}
+
+// applyAlias 将原始 channel 名（含 bigquery_xxx 表名后缀）映射为最终落盘段：
+//  1. 精确匹配 ChannelAlias[channel]
+//  2. 对 bigquery_xxx 形态，按前缀 bigquery 命中 alias 后再拼回表名段
+//  3. 都没命中保留原值
+func (w *TrackFileWriteSyncer) applyAlias(channel string) string {
+	if v, ok := w.channelAlias[channel]; ok {
+		return v
+	}
+	if idx := strings.IndexByte(channel, '_'); idx > 0 {
+		prefix := channel[:idx]
+		if v, ok := w.channelAlias[prefix]; ok {
+			return v + channel[idx:]
+		}
+	}
+	return channel
 }
 
 // Write 实现 io.Writer。
@@ -357,10 +481,12 @@ func (w *TrackFileWriteSyncer) Write(p []byte) (n int, err error) {
 		return len(p), nil
 	}
 
+	// 应用 alias 后再投递（worker key、文件路径都用映射后的名字）
+	finalChannel := w.applyAlias(channel)
 	// msg 可能引用 p 的内存（jsoniter.RawMessage 是 slice），需要复制
 	data := make([]byte, len(msg))
 	copy(data, msg)
-	w.send(channel, trackMsg{data: data})
+	w.send(finalChannel, trackMsg{data: data})
 	return len(p), nil
 }
 
@@ -427,7 +553,10 @@ func (w *TrackFileWriteSyncer) send(channel string, msg trackMsg) {
 	}
 	wk, ok := w.workers[channel]
 	if !ok {
-		wk = newTrackWorker(channel, w.baseDir, w.rotation, w.bufSize)
+		wk = newTrackWorker(
+			channel, w.baseDir, w.hostName, w.rotation, w.bufSize,
+			w.keepaliveEvery, w.keepaliveMessage,
+		)
 		w.workers[channel] = wk
 	}
 	wk.send(msg)

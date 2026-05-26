@@ -34,6 +34,32 @@ func readFileLines(path string) ([]string, error) {
 	return lines, nil
 }
 
+// expectedTrackFilePath 按 ops 规范拼出当前时间下的预期文件路径：
+//
+//	{baseDir}/{channel}/{yyyymmdd}/{channel}_{hostname}_{slot}.log
+//
+// channel 与 hostname 经 sanitizeTrackFileComponent 清洗，hostname 为空时
+// 由 sanitizeTrackFileComponent 兜底为 "unknown"。
+func expectedTrackFilePath(baseDir, channel, hostname string, rot TrackRotation, t time.Time) string {
+	chSeg := sanitizeTrackFileComponent(channel)
+	hostSeg := sanitizeTrackFileComponent(hostname)
+	slot := rot.timeSlot(t)
+	date := t.Format("20060102")
+	return filepath.Join(baseDir, chSeg, date, fmt.Sprintf("%s_%s_%s.log", chSeg, hostSeg, slot))
+}
+
+// runtimeHostName 返回当前进程实际使用的 hostname 段，与 NewTrackFileWriteSyncerFromConfig 一致：
+// 优先 os.Hostname，失败则 HOSTNAME env，再失败由 sanitizeTrackFileComponent 兜底 unknown。
+func runtimeHostName() string {
+	if v, err := os.Hostname(); err == nil && v != "" {
+		return v
+	}
+	if v := os.Getenv("HOSTNAME"); v != "" {
+		return v
+	}
+	return "unknown"
+}
+
 // ── extractChannelAndMsg 单元测试 ──────────────────────────────────────────
 
 func TestExtractChannelAndMsg_StringMsg(t *testing.T) {
@@ -104,8 +130,7 @@ func TestTrackFileWriteSyncer_WriteToFile(t *testing.T) {
 		So(ws.Sync(), ShouldBeNil)
 		So(ws.Close(), ShouldBeNil)
 
-		slot := HourlyRotation.timeSlot(time.Now())
-		fname := filepath.Join(dir, fmt.Sprintf("thinkingdata_%s.log", slot))
+		fname := expectedTrackFilePath(dir, "thinkingdata", runtimeHostName(), HourlyRotation, time.Now())
 		lines, readErr := readFileLines(fname)
 		So(readErr, ShouldBeNil)
 		So(lines, ShouldHaveLength, 1)
@@ -129,8 +154,7 @@ func TestTrackFileWriteSyncer_BigQueryTableNameInFileName(t *testing.T) {
 		So(ws.Sync(), ShouldBeNil)
 		So(ws.Close(), ShouldBeNil)
 
-		slot := HourlyRotation.timeSlot(time.Now())
-		fname := filepath.Join(dir, fmt.Sprintf("%s_oplog_%s.log", BIGQUERY, slot))
+		fname := expectedTrackFilePath(dir, BIGQUERY+"_oplog", runtimeHostName(), HourlyRotation, time.Now())
 		lines, readErr := readFileLines(fname)
 		So(readErr, ShouldBeNil)
 		So(lines, ShouldHaveLength, 1)
@@ -156,13 +180,12 @@ func TestTrackFileWriteSyncer_ChannelRouting(t *testing.T) {
 		So(ws.Sync(), ShouldBeNil)
 		So(ws.Close(), ShouldBeNil)
 
-		slot := HourlyRotation.timeSlot(time.Now())
 		for _, tc := range []struct{ channel, content string }{
 			{"thinkingdata", "tga_data"},
 			{"bi", "bi_data"},
 			{"bigquery", "bq_data"},
 		} {
-			fname := filepath.Join(dir, fmt.Sprintf("%s_%s.log", tc.channel, slot))
+			fname := expectedTrackFilePath(dir, tc.channel, runtimeHostName(), HourlyRotation, time.Now())
 			lines, readErr := readFileLines(fname)
 			So(readErr, ShouldBeNil)
 			So(lines, ShouldHaveLength, 1)
@@ -184,8 +207,11 @@ func TestTrackFileWriteSyncer_SanitizeChannelFileName(t *testing.T) {
 		So(ws.Sync(), ShouldBeNil)
 		So(ws.Close(), ShouldBeNil)
 
-		slot := HourlyRotation.timeSlot(time.Now())
-		fname := filepath.Join(dir, fmt.Sprintf("%s_%s.log", sanitizeTrackFileComponent(channel), slot))
+		fname := expectedTrackFilePath(dir, channel, runtimeHostName(), HourlyRotation, time.Now())
+		// 必须仍位于 baseDir 内（路径分隔符已被清洗）
+		rel, err := filepath.Rel(dir, fname)
+		So(err, ShouldBeNil)
+		So(strings.HasPrefix(rel, ".."), ShouldBeFalse)
 		lines, readErr := readFileLines(fname)
 		So(readErr, ShouldBeNil)
 		So(lines, ShouldHaveLength, 1)
@@ -298,8 +324,7 @@ func TestTrackFileWriteSyncer_ConcurrentWrite(t *testing.T) {
 		So(ws.Sync(), ShouldBeNil)
 		So(ws.Close(), ShouldBeNil)
 
-		slot := HourlyRotation.timeSlot(time.Now())
-		fname := filepath.Join(dir, fmt.Sprintf("thinkingdata_%s.log", slot))
+		fname := expectedTrackFilePath(dir, "thinkingdata", runtimeHostName(), HourlyRotation, time.Now())
 		lines, readErr := readFileLines(fname)
 		So(readErr, ShouldBeNil)
 		// 所有消息均落盘（队列足够大，无丢弃）
@@ -332,9 +357,8 @@ func TestTrackFileWriteSyncer_ConcurrentMultiChannel(t *testing.T) {
 		So(ws.Sync(), ShouldBeNil)
 		So(ws.Close(), ShouldBeNil)
 
-		slot := HourlyRotation.timeSlot(time.Now())
 		for _, ch := range channels {
-			fname := filepath.Join(dir, fmt.Sprintf("%s_%s.log", ch, slot))
+			fname := expectedTrackFilePath(dir, ch, runtimeHostName(), HourlyRotation, time.Now())
 			lines, readErr := readFileLines(fname)
 			So(readErr, ShouldBeNil)
 			So(len(lines), ShouldEqual, perChannel)
@@ -360,8 +384,7 @@ func TestTrackFileWriteSyncer_SyncFlushesQueue(t *testing.T) {
 
 		So(ws.Sync(), ShouldBeNil)
 
-		slot := HourlyRotation.timeSlot(time.Now())
-		fname := filepath.Join(dir, fmt.Sprintf("bi_%s.log", slot))
+		fname := expectedTrackFilePath(dir, "bi", runtimeHostName(), HourlyRotation, time.Now())
 		lines, readErr := readFileLines(fname)
 		So(readErr, ShouldBeNil)
 		So(len(lines), ShouldEqual, count)
@@ -380,8 +403,7 @@ func TestTrackFileWriteSyncer_BatchFlushByTimer(t *testing.T) {
 		_, err := ws.Write([]byte(raw))
 		So(err, ShouldBeNil)
 
-		slot := HourlyRotation.timeSlot(time.Now())
-		fname := filepath.Join(dir, fmt.Sprintf("bi_%s.log", slot))
+		fname := expectedTrackFilePath(dir, "bi", runtimeHostName(), HourlyRotation, time.Now())
 		var lines []string
 		deadline := time.Now().Add(500 * time.Millisecond)
 		for time.Now().Before(deadline) {
@@ -416,6 +438,174 @@ func TestTrackFileWriteSyncer_WriteAfterClose(t *testing.T) {
 		n, err := ws.Write([]byte(raw))
 		So(err, ShouldBeNil)
 		So(n, ShouldEqual, len(raw))
+	})
+}
+
+// ── 路径布局 / channel alias / keepalive ────────────────────────────────
+
+func TestTrackFileWriteSyncer_PathLayout(t *testing.T) {
+	Convey("路径布局符合 ops 规范 {base}/{channel}/{yyyymmdd}/{channel}_{hostname}_{slot}.log", t, func() {
+		dir := t.TempDir()
+		ws := NewTrackFileWriteSyncer(dir, HourlyRotation)
+
+		raw := fmt.Sprintf(`{"%s":"bi","%s":"layout_data"}`, Meta, MsgBody)
+		_, err := ws.Write([]byte(raw))
+		So(err, ShouldBeNil)
+		So(ws.Sync(), ShouldBeNil)
+		So(ws.Close(), ShouldBeNil)
+
+		expected := expectedTrackFilePath(dir, "bi", runtimeHostName(), HourlyRotation, time.Now())
+		_, statErr := os.Stat(expected)
+		So(statErr, ShouldBeNil)
+		lines, _ := readFileLines(expected)
+		So(lines, ShouldHaveLength, 1)
+		So(lines[0], ShouldEqual, "layout_data")
+	})
+}
+
+func TestTrackFileWriteSyncer_ChannelAlias(t *testing.T) {
+	Convey("ChannelAlias 重写目录段与文件名前缀", t, func() {
+		base := t.TempDir()
+		ws := NewTrackFileWriteSyncerFromConfig(TrackFileWriteSyncerConfig{
+			BaseDir:      base,
+			Rotation:     HourlyRotation,
+			ChannelAlias: map[string]string{"thinkingdata": "thinkdata"},
+		})
+
+		write := func(channel, extra, msg string) {
+			raw := fmt.Sprintf(`{"%s":"%s",%s"%s":"%s"}`, Meta, channel, extra, MsgBody, msg)
+			_, err := ws.Write([]byte(raw))
+			So(err, ShouldBeNil)
+		}
+
+		write("thinkingdata", ``, "tga_data")
+		write("bi", ``, "bi_data")
+		write(BIGQUERY, fmt.Sprintf(`"%s":"oplog",`, bigquery.TableNameKey), "bq_data")
+
+		So(ws.Sync(), ShouldBeNil)
+		So(ws.Close(), ShouldBeNil)
+
+		now := time.Now()
+		check := func(channel, content string) {
+			fname := expectedTrackFilePath(base, channel, runtimeHostName(), HourlyRotation, now)
+			lines, err := readFileLines(fname)
+			So(err, ShouldBeNil)
+			So(lines, ShouldHaveLength, 1)
+			So(lines[0], ShouldEqual, content)
+		}
+		// thinkingdata 被映射成 thinkdata
+		check("thinkdata", "tga_data")
+		// 其他 channel 未受影响
+		check("bi", "bi_data")
+		check(BIGQUERY+"_oplog", "bq_data")
+	})
+}
+
+func TestTrackFileWriteSyncer_HostnameAuto(t *testing.T) {
+	Convey("hostname 段自动取 os.Hostname", t, func() {
+		dir := t.TempDir()
+		ws := NewTrackFileWriteSyncer(dir, HourlyRotation)
+		raw := fmt.Sprintf(`{"%s":"bi","%s":"hn"}`, Meta, MsgBody)
+		_, err := ws.Write([]byte(raw))
+		So(err, ShouldBeNil)
+		So(ws.Sync(), ShouldBeNil)
+		So(ws.Close(), ShouldBeNil)
+
+		fname := expectedTrackFilePath(dir, "bi", runtimeHostName(), HourlyRotation, time.Now())
+		_, statErr := os.Stat(fname)
+		So(statErr, ShouldBeNil)
+	})
+}
+
+func TestTrackFileWriteSyncer_KeepaliveOnIdle(t *testing.T) {
+	Convey("KeepaliveEvery>0 时闲置超时会落一条 keepalive 日志", t, func() {
+		dir := t.TempDir()
+		interval := 50 * time.Millisecond
+		ws := NewTrackFileWriteSyncerFromConfig(TrackFileWriteSyncerConfig{
+			BaseDir:          dir,
+			Rotation:         HourlyRotation,
+			KeepaliveEvery:   interval,
+			KeepaliveMessage: `{"hb":1}`,
+		})
+
+		// 触发一次正常写入以创建 worker（未激活 channel 不会自动心跳）
+		raw := fmt.Sprintf(`{"%s":"bi","%s":"first"}`, Meta, MsgBody)
+		_, err := ws.Write([]byte(raw))
+		So(err, ShouldBeNil)
+		So(ws.Sync(), ShouldBeNil)
+
+		// 等待至少 2 个间隔，期望 worker 至少补一条心跳
+		time.Sleep(interval * 4)
+		So(ws.Sync(), ShouldBeNil)
+		So(ws.Close(), ShouldBeNil)
+
+		fname := expectedTrackFilePath(dir, "bi", runtimeHostName(), HourlyRotation, time.Now())
+		lines, readErr := readFileLines(fname)
+		So(readErr, ShouldBeNil)
+		So(len(lines), ShouldBeGreaterThanOrEqualTo, 2)
+		So(lines[0], ShouldEqual, "first")
+		// 后续行应为 keepalive payload
+		for _, line := range lines[1:] {
+			So(line, ShouldEqual, `{"hb":1}`)
+		}
+	})
+}
+
+func TestTrackFileWriteSyncer_KeepaliveDisabled(t *testing.T) {
+	Convey("KeepaliveEvery<=0 时不会有心跳输出", t, func() {
+		dir := t.TempDir()
+		ws := NewTrackFileWriteSyncerFromConfig(TrackFileWriteSyncerConfig{
+			BaseDir:        dir,
+			Rotation:       HourlyRotation,
+			KeepaliveEvery: 0, // 禁用
+		})
+
+		raw := fmt.Sprintf(`{"%s":"bi","%s":"only_one"}`, Meta, MsgBody)
+		_, err := ws.Write([]byte(raw))
+		So(err, ShouldBeNil)
+		So(ws.Sync(), ShouldBeNil)
+
+		time.Sleep(80 * time.Millisecond)
+		So(ws.Sync(), ShouldBeNil)
+		So(ws.Close(), ShouldBeNil)
+
+		fname := expectedTrackFilePath(dir, "bi", runtimeHostName(), HourlyRotation, time.Now())
+		lines, readErr := readFileLines(fname)
+		So(readErr, ShouldBeNil)
+		So(lines, ShouldHaveLength, 1)
+	})
+}
+
+func TestTrackFileWriteSyncer_KeepaliveResetByWrite(t *testing.T) {
+	Convey("正常写入会重置心跳计时，活跃 channel 不会触发心跳", t, func() {
+		dir := t.TempDir()
+		interval := 80 * time.Millisecond
+		ws := NewTrackFileWriteSyncerFromConfig(TrackFileWriteSyncerConfig{
+			BaseDir:          dir,
+			Rotation:         HourlyRotation,
+			KeepaliveEvery:   interval,
+			KeepaliveMessage: `KEEP`,
+		})
+
+		// 持续写入 ~3 个间隔，期间不应产生心跳
+		deadline := time.Now().Add(interval * 3)
+		count := 0
+		for time.Now().Before(deadline) {
+			raw := fmt.Sprintf(`{"%s":"bi","%s":"busy_%d"}`, Meta, MsgBody, count)
+			_, err := ws.Write([]byte(raw))
+			So(err, ShouldBeNil)
+			count++
+			time.Sleep(interval / 4)
+		}
+		So(ws.Sync(), ShouldBeNil)
+		So(ws.Close(), ShouldBeNil)
+
+		fname := expectedTrackFilePath(dir, "bi", runtimeHostName(), HourlyRotation, time.Now())
+		lines, readErr := readFileLines(fname)
+		So(readErr, ShouldBeNil)
+		for _, line := range lines {
+			So(line, ShouldNotEqual, "KEEP")
+		}
 	})
 }
 
