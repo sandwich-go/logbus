@@ -44,11 +44,12 @@ type Conf struct {
 	DisableTruncateWriteSyncer bool
 	// TrackFileDir track 类日志写入的基础目录，TrackOutput 为 FileOnly 或 Both 时必须非空。
 	// 文件路径格式（ops 规范）：{TrackFileDir}/{channel}/{yyyymmdd}/{channel}_{hostname}_{slot}.log
-	// 其中 hostname 由进程自动从 os.Hostname 获取；channel 段名可通过 TrackChannelAlias 重写
+	// 其中 hostname 由进程自动从 os.Hostname 获取；文件落盘 channel 段名可通过 TrackChannelAlias 重写
 	// （例如 thinkingdata 在 ops 规范中目录与文件前缀都用 tga）。
 	// PMT 发布环境（sys_cd_env 非空）下，logbus_track_file_dir 环变会强制覆写本字段。
 	TrackFileDir string
-	// TrackChannelAlias channel 名 → 落盘段名（目录段 + 文件名前缀）映射。例如 thinkingdata→tga。
+	// TrackChannelAlias 仅用于文件输出：原始 channel 名 → 落盘段名（目录段 + 文件名前缀）映射。例如 thinkingdata→tga。
+	// 不改变 dd_meta_channel，也不影响 stdout、业务路由或监控标签。
 	// bigquery_xxx 形态的 channel 会按前缀 bigquery 命中 alias 后再拼回表名段。
 	TrackChannelAlias map[string]string
 	// TrackFileRotation track 日志文件的时间切割粒度，支持 HourlyRotation（小时）和 MinuteRotation（分钟）
@@ -255,7 +256,7 @@ func WithTrackFileDir(v string) ConfOptionFunc {
 	}
 }
 
-// WithTrackChannelAlias channel 名到落盘段名映射，默认包含 thinkingdata→tga
+// WithTrackChannelAlias 文件输出时原始 channel 名到落盘段名映射，默认包含 thinkingdata→tga
 func WithTrackChannelAlias(v map[string]string) ConfOptionFunc {
 	return func(cc *Conf) {
 		cc.TrackChannelAlias = v

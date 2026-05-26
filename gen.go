@@ -47,13 +47,14 @@ func _ConfOptionDeclareWithDefault() interface{} {
 
 		// TrackFileDir track 类日志写入的基础目录，TrackOutput 为 FileOnly 或 Both 时必须非空。
 		// 文件路径格式（ops 规范）：{TrackFileDir}/{channel}/{yyyymmdd}/{channel}_{hostname}_{slot}.log
-		// 其中 hostname 由进程自动从 os.Hostname 获取；channel 段名可通过 TrackChannelAlias 重写
+		// 其中 hostname 由进程自动从 os.Hostname 获取；文件落盘 channel 段名可通过 TrackChannelAlias 重写
 		// （例如 thinkingdata 在 ops 规范中目录与文件前缀都用 tga）。
 		// PMT 发布环境（sys_cd_env 非空）下，logbus_track_file_dir 环变会强制覆写本字段。
 		"TrackFileDir": string("./tracklogs"), // @MethodComment(track 日志写入的基础目录，TrackOutput 为 FileOnly/Both 时必须配置)
-		// TrackChannelAlias channel 名 → 落盘段名（目录段 + 文件名前缀）映射。例如 thinkingdata→tga。
+		// TrackChannelAlias 仅用于文件输出：原始 channel 名 → 落盘段名（目录段 + 文件名前缀）映射。例如 thinkingdata→tga。
+		// 不改变 dd_meta_channel，也不影响 stdout、业务路由或监控标签。
 		// bigquery_xxx 形态的 channel 会按前缀 bigquery 命中 alias 后再拼回表名段。
-		"TrackChannelAlias": map[string]string{"thinkingdata": "tga"}, // @MethodComment(channel 名到落盘段名映射，默认包含 thinkingdata→tga)
+		"TrackChannelAlias": map[string]string{"thinkingdata": "tga"}, // @MethodComment(文件输出时原始 channel 名到落盘段名映射，默认包含 thinkingdata→tga)
 		// TrackFileRotation track 日志文件的时间切割粒度，支持 HourlyRotation（小时）和 MinuteRotation（分钟）
 		"TrackFileRotation": TrackRotation(HourlyRotation), // @MethodComment(track 日志时间切割粒度，默认按小时)
 		// TrackOutput 控制 track 日志的输出目标：
@@ -82,9 +83,9 @@ func init() {
 		if cc.MonitorOutput != Prometheus && cc.MonitorOutput != Logbus && cc.MonitorOutput != Noop {
 			panic("MonitorOutput not match")
 		}
-		// PMT 发布环境（sys_cd_env 非空）下：track 文件输出参数必须由环境变量 logbus_track_file_dir
-		// 与 logbus_track_output 提供，并强制覆写代码侧 Conf。缺失或非法时直接 panic 终止启动，
-		// 避免静默使用错误的目录或输出模式。
+		// PMT 发布环境（sys_cd_env 非空）下：若代码侧已显式进入非 stdout track 输出模式，
+		// track 文件输出参数必须由环境变量 logbus_track_file_dir 与 logbus_track_output 提供，
+		// 并强制覆写代码侧 Conf。缺失或非法时直接 panic 终止启动，避免静默使用错误的目录或输出模式。
 		if os.Getenv(envSysCdEnv) != "" {
 			applyPMTTrackEnvOverrides(cc)
 		}
@@ -117,10 +118,11 @@ func parseTrackOutputFromEnv(s string) (TrackOutput, bool) {
 }
 
 // applyPMTTrackEnvOverrides 在 PMT 环境（sys_cd_env 非空）下强制覆写 track 相关配置。
+// 若代码侧 TrackOutput 仍是默认 stdout，表示业务未启用文件输出，此时忽略 PMT track 文件环变。
 // 规则：
 //  1. logbus_track_output 必填；非法值 panic
-//  2. 若覆写后的 TrackOutput 需要写文件，则 logbus_track_file_dir 必须非空，否则 panic
-//  3. 即使 TrackOutput=stdout，logbus_track_file_dir 若非空也照单覆写
+//  2. 若 logbus_track_output=stdout，仅覆写 TrackOutput 并直接返回，不要求文件目录
+//  3. 若覆写后的 TrackOutput 需要写文件，则 logbus_track_file_dir 必须非空，否则 panic
 //  4. logbus_track_keepalive_interval 若设置，按 time.Duration 解析；负值或解析失败 panic；0 视为禁用
 //  5. logbus_track_keepalive_message 若设置（包括显式空串），整体覆写 TrackKeepaliveMessage
 func applyPMTTrackEnvOverrides(cc *Conf) {

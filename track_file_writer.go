@@ -371,11 +371,12 @@ func sanitizeTrackFileComponent(s string) string {
 //
 //	{BaseDir}/{channel}/{yyyymmdd}/{channel}_{hostname}_{slot}.log
 //
-// 其中 channel 受 ChannelAlias 影响：例如代码侧 dd_meta_channel="thinkingdata" 但 ops
-// 期望目录与文件名前缀都用 "thinkdata"，可设 ChannelAlias["thinkingdata"]="thinkdata"。
+// 其中 channel 是文件落盘段名，受 ChannelAlias 影响：例如代码侧 dd_meta_channel="thinkingdata" 但 ops
+// 期望目录与文件名前缀都用 "tga"，可设 ChannelAlias["thinkingdata"]="tga"。
+// ChannelAlias 仅影响文件路径和文件名前缀，不改变原始 dd_meta_channel 或其他输出目标。
 //
 //   - BaseDir：所有 channel 的根目录（已由调用方在 PMT 环境下从 logbus_track_file_dir 读取）
-//   - ChannelAlias：channel 名 → 落盘段名映射，未命中保留原 channel
+//   - ChannelAlias：原始 channel 名 → 文件落盘段名映射，未命中保留原 channel
 //   - Rotation：时间切割粒度
 //   - BufSize：每 channel 队列缓冲大小，默认 defaultTrackChannelBufSize
 //   - KeepaliveEvery：心跳间隔；<=0 表示禁用
@@ -403,7 +404,7 @@ type TrackFileWriteSyncer struct {
 	bufSize          int
 	keepaliveEvery   time.Duration
 	keepaliveMessage []byte
-	workers          map[string]*trackWorker // key = 落盘段名（alias 后），按需创建
+	workers          map[string]*trackWorker // key = 文件落盘段名（alias 后），按需创建
 
 	closed bool
 }
@@ -448,17 +449,19 @@ func NewTrackFileWriteSyncerFromConfig(cfg TrackFileWriteSyncerConfig) *TrackFil
 		channelAlias:     alias,
 		hostName:         host,
 		rotation:         cfg.Rotation,
-		bufSize:           bufSize,
-		keepaliveEvery:    cfg.KeepaliveEvery,
-		keepaliveMessage:  []byte(cfg.KeepaliveMessage),
-		workers:           make(map[string]*trackWorker),
+		bufSize:          bufSize,
+		keepaliveEvery:   cfg.KeepaliveEvery,
+		keepaliveMessage: []byte(cfg.KeepaliveMessage),
+		workers:          make(map[string]*trackWorker),
 	}
 }
 
-// applyAlias 将原始 channel 名（含 bigquery_xxx 表名后缀）映射为最终落盘段：
+// applyAlias 将原始 channel 名（含 bigquery_xxx 表名后缀）映射为最终文件落盘段：
 //  1. 精确匹配 ChannelAlias[channel]
 //  2. 对 bigquery_xxx 形态，按前缀 bigquery 命中 alias 后再拼回表名段
 //  3. 都没命中保留原值
+//
+// 该映射只用于文件目录段、文件名前缀和本 writer 的 worker key。
 func (w *TrackFileWriteSyncer) applyAlias(channel string) string {
 	if v, ok := w.channelAlias[channel]; ok {
 		return v
@@ -481,7 +484,7 @@ func (w *TrackFileWriteSyncer) Write(p []byte) (n int, err error) {
 		return len(p), nil
 	}
 
-	// 应用 alias 后再投递（worker key、文件路径都用映射后的名字）
+	// 计算文件落盘段名后再投递（worker key、文件路径都用映射后的名字）
 	finalChannel := w.applyAlias(channel)
 	// msg 可能引用 p 的内存（jsoniter.RawMessage 是 slice），需要复制
 	data := make([]byte, len(msg))
@@ -508,7 +511,8 @@ func (w *TrackFileWriteSyncer) Sync() error {
 	return lastErr
 }
 
-// SyncChannel 仅对指定 channel 的 worker 执行 sync，若该 worker 尚未创建则 no-op。
+// SyncChannel 仅对指定文件落盘段名的 worker 执行 sync，若该 worker 尚未创建则 no-op。
+// channel 参数应使用文件路径中的 channel 段；配置了 ChannelAlias 时，这里传 alias 后的落盘段名。
 // 主要供测试和按需 flush 场景使用。
 func (w *TrackFileWriteSyncer) SyncChannel(channel string) error {
 	w.mu.RLock()

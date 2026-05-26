@@ -36,7 +36,7 @@ func writeNormalLog(msg string) {
 // syncAndRead 等待 gStdLogger 所有 core（含 TrackFileWriteSyncer）flush 完成，
 // 然后读取 channel 对应的文件内容（非空行列表）。
 // 路径按 ops 规范：{dir}/{channel}/{yyyymmdd}/{channel}_{hostname}_{slot}.log
-// channel 自动应用全局配置的 ChannelAlias（例如 thinkingdata→thinkdata）。
+// channel 自动应用全局配置的文件落盘别名（例如 thinkingdata→tga），仅用于拼读文件路径。
 func syncAndRead(dir, channel string) ([]string, error) {
 	_ = gStdLogger.Sync() // 触发 Tee → TrackFileWriteSyncer.Sync() → worker drain+fsync
 	if alias, ok := Setting.TrackChannelAlias[channel]; ok && alias != "" {
@@ -246,12 +246,30 @@ func TestTrackOutput_PMTEnvOverrideAppliesValues(t *testing.T) {
 		t.Setenv("logbus_track_output", "file")
 		t.Setenv("logbus_track_file_dir", dir)
 
-		// 代码侧未传任何 track 配置，应被环变覆写为 File + dir
-		Init(NewConf())
+		// 代码侧显式启用文件输出时，PMT 环变覆写为 File + dir。
+		Init(NewConf(
+			WithTrackOutput(TrackOutputFile),
+			WithTrackFileDir("/tmp/should_be_overwritten"),
+		))
 		defer resetLogBus()
 
 		So(Setting.TrackOutput, ShouldEqual, TrackOutputFile)
 		So(Setting.TrackFileDir, ShouldEqual, dir)
+	})
+}
+
+func TestTrackOutput_PMTEnvIgnoredWhenCodeStdout(t *testing.T) {
+	Convey("PMT 环境下代码侧保持 stdout 时不启用文件输出", t, func() {
+		dir := t.TempDir()
+		t.Setenv("sys_cd_env", "prod")
+		t.Setenv("logbus_track_output", "file")
+		t.Setenv("logbus_track_file_dir", dir)
+
+		Init(NewConf())
+		defer resetLogBus()
+
+		So(Setting.TrackOutput, ShouldEqual, TrackOutputStdout)
+		So(Setting.TrackFileDir, ShouldEqual, "./tracklogs")
 	})
 }
 
@@ -262,7 +280,7 @@ func TestTrackOutput_PMTEnvOverrideRejectsBadOutput(t *testing.T) {
 	Convey("PMT 环境下 logbus_track_output 非法值时 Init panic", t, func() {
 		t.Setenv("sys_cd_env", "prod")
 		t.Setenv("logbus_track_output", "garbage")
-		So(func() { Init(NewConf()) }, ShouldPanic)
+		So(func() { Init(NewConf(WithTrackOutput(TrackOutputFile))) }, ShouldPanic)
 		t.Setenv("sys_cd_env", "")
 		Init(NewConf())
 		resetLogBus()
@@ -274,7 +292,7 @@ func TestTrackOutput_PMTEnvOverrideRequiresOutput(t *testing.T) {
 		t.Setenv("sys_cd_env", "prod")
 		// 显式确保 logbus_track_output 不存在
 		t.Setenv("logbus_track_output", "")
-		So(func() { Init(NewConf()) }, ShouldPanic)
+		So(func() { Init(NewConf(WithTrackOutput(TrackOutputFile))) }, ShouldPanic)
 		t.Setenv("sys_cd_env", "")
 		Init(NewConf())
 		resetLogBus()
@@ -286,7 +304,7 @@ func TestTrackOutput_PMTEnvOverrideRequiresDirWhenFile(t *testing.T) {
 		t.Setenv("sys_cd_env", "prod")
 		t.Setenv("logbus_track_output", "file")
 		t.Setenv("logbus_track_file_dir", "")
-		So(func() { Init(NewConf()) }, ShouldPanic)
+		So(func() { Init(NewConf(WithTrackOutput(TrackOutputFile))) }, ShouldPanic)
 		t.Setenv("sys_cd_env", "")
 		Init(NewConf())
 		resetLogBus()
@@ -316,6 +334,7 @@ func TestTrackOutput_PMTEnvOverrideKeepalive(t *testing.T) {
 
 		// 代码侧给的默认值都应被环变覆盖
 		Init(NewConf(
+			WithTrackOutput(TrackOutputFile),
 			WithTrackKeepaliveInterval(time.Minute),
 			WithTrackKeepaliveMessage("code-default"),
 		))
@@ -335,7 +354,10 @@ func TestTrackOutput_PMTEnvOverrideKeepaliveZeroDisables(t *testing.T) {
 		t.Setenv("logbus_track_keepalive_interval", "0")
 
 		// 即便代码侧默认 1 分钟，也应被覆盖为 0
-		Init(NewConf(WithTrackKeepaliveInterval(time.Minute)))
+		Init(NewConf(
+			WithTrackOutput(TrackOutputFile),
+			WithTrackKeepaliveInterval(time.Minute),
+		))
 		defer resetLogBus()
 		So(Setting.TrackKeepaliveInterval, ShouldEqual, time.Duration(0))
 	})
@@ -349,7 +371,10 @@ func TestTrackOutput_PMTEnvOverrideKeepaliveEmptyMessage(t *testing.T) {
 		t.Setenv("logbus_track_file_dir", dir)
 		t.Setenv("logbus_track_keepalive_message", "") // 显式空串
 
-		Init(NewConf(WithTrackKeepaliveMessage("code-default")))
+		Init(NewConf(
+			WithTrackOutput(TrackOutputFile),
+			WithTrackKeepaliveMessage("code-default"),
+		))
 		defer resetLogBus()
 		So(Setting.TrackKeepaliveMessage, ShouldEqual, "")
 	})
@@ -363,7 +388,7 @@ func TestTrackOutput_PMTEnvOverrideKeepaliveBadInterval(t *testing.T) {
 		t.Setenv("logbus_track_file_dir", dir)
 		t.Setenv("logbus_track_keepalive_interval", "not-a-duration")
 
-		So(func() { Init(NewConf()) }, ShouldPanic)
+		So(func() { Init(NewConf(WithTrackOutput(TrackOutputFile))) }, ShouldPanic)
 		t.Setenv("sys_cd_env", "")
 		Init(NewConf())
 		resetLogBus()
@@ -378,7 +403,7 @@ func TestTrackOutput_PMTEnvOverrideKeepaliveNegativeInterval(t *testing.T) {
 		t.Setenv("logbus_track_file_dir", dir)
 		t.Setenv("logbus_track_keepalive_interval", "-1s")
 
-		So(func() { Init(NewConf()) }, ShouldPanic)
+		So(func() { Init(NewConf(WithTrackOutput(TrackOutputFile))) }, ShouldPanic)
 		t.Setenv("sys_cd_env", "")
 		Init(NewConf())
 		resetLogBus()
