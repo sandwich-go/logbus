@@ -1,4 +1,20 @@
-### v1.1.58 🌈 (2026-05-21 17:55:29)
+### v1.1.60 🌈 (2026-06-04 15:11:26)
+
+#### 🚀  New Feature
+  * 补全上下文日志方法 ([ee505ed](https://github.com/sandwich-go/logbus/commit/ee505edac0e1d243bd337f9e82f5f5efa66b7bab)) (<small>[ruisheng.wang](ruisheng.wang@ddhd.cn)@2026-06-04 15:11:26 &#43;0800 &#43;0800</small>)
+
+### v1.1.59 (2026-05-26 18:09:47)
+
+#### 🐛  Bug Fixed
+  * **dynamic_log_level**: 升级 xconf 到 v0.3.29 修复 Close 触发 close of nil channel panic ([8e473f7](https://github.com/sandwich-go/logbus/commit/8e473f79139a891a02b09aac9be598870d5c146e)) (<small>[daming.yang](daming.yang@centurygame.com)@2026-05-26 18:09:47 &#43;0800 &#43;0800</small>)
+
+#### 🚀  New Feature
+  * **slg/chat**: UserChatOpts 增加 town_lvl 主城等级属性 ([8082e9d](https://github.com/sandwich-go/logbus/commit/8082e9d1894a025c76b31b77be01c21b99127867)) (<small>[daming.yang](daming.yang@centurygame.com)@2026-05-26 16:27:51 &#43;0800 &#43;0800</small>)
+
+#### 🤖  Tools
+  * **sem**: make changelog ([b90b22d](https://github.com/sandwich-go/logbus/commit/b90b22deec226d78429b8414f8371fe2411e06fb)) (<small>[ruisheng.wang](ruisheng.wang@ddhd.cn)@2026-05-22 17:17:39 &#43;0800 &#43;0800</small>)
+
+### v1.1.58 (2026-05-21 17:55:29)
 
 #### 🤖  Tools
   * **sem**: make changelog ([03d2f70](https://github.com/sandwich-go/logbus/commit/03d2f70b1efe53ce9e76ac0410a391d43ce59bad)) (<small>[daming.yang](daming.yang@centurygame.com)@2026-05-18 13:11:47 &#43;0800 &#43;0800</small>)
