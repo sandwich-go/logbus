@@ -1,6 +1,10 @@
 package logbus
 
-import "go.uber.org/zap"
+import (
+	"context"
+
+	"go.uber.org/zap"
+)
 
 // default logger provided
 var newGlobalGLogger NewILogger
@@ -21,12 +25,44 @@ func Error(msg string, v ...Field) {
 	newGlobalGLogger.Error(msg, v...)
 }
 
+func DPanic(msg string, v ...Field) {
+	newGlobalGLogger.DPanic(msg, v...)
+}
+
 func Panic(msg string, v ...Field) {
 	newGlobalGLogger.Panic(msg, v...)
 }
 
 func Fatal(msg string, v ...Field) {
 	newGlobalGLogger.Fatal(msg, v...)
+}
+
+func DebugWithContext(ctx context.Context, msg string, v ...Field) {
+	newGlobalGLogger.DebugWithContext(ctx, msg, v...)
+}
+
+func InfoWithContext(ctx context.Context, msg string, v ...Field) {
+	newGlobalGLogger.InfoWithContext(ctx, msg, v...)
+}
+
+func WarnWithContext(ctx context.Context, msg string, v ...Field) {
+	newGlobalGLogger.WarnWithContext(ctx, msg, v...)
+}
+
+func ErrorWithContext(ctx context.Context, msg string, v ...Field) {
+	newGlobalGLogger.ErrorWithContext(ctx, msg, v...)
+}
+
+func DPanicWithContext(ctx context.Context, msg string, v ...Field) {
+	newGlobalGLogger.DPanicWithContext(ctx, msg, v...)
+}
+
+func PanicWithContext(ctx context.Context, msg string, v ...Field) {
+	newGlobalGLogger.PanicWithContext(ctx, msg, v...)
+}
+
+func FatalWithContext(ctx context.Context, msg string, v ...Field) {
+	newGlobalGLogger.FatalWithContext(ctx, msg, v...)
 }
 
 // WithChannel
