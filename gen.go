@@ -17,7 +17,7 @@ type FetchLogContext func() []Field
 func _ConfOptionDeclareWithDefault() interface{} {
 	return map[string]interface{}{
 		// log
-		"LogLevel":        (zapcore.Level)(zap.DebugLevel), //@MethodComment(日志级别，默认 zap.DebugLevel)
+		"LogLevel":        (zapcore.Level)(zap.DebugLevel), //@MethodComment(日志级别，默认 zap.DebugLevel。注意：在 PMT 部署环境下（存在 sys_conf_path_env 环境变量时），该值会被 $sys_conf_path_env/ops_config.json 中的 log_level 覆盖）
 		"Dev":             false,                           // false 输出json格式， true 则输出带颜色的易读log @MethodComment(是否输出带颜色的易读log，默认关闭)
 		"DefaultChannel":  string(SERVERLOG),               // 默认的dd_meta_channel @MethodComment(设置默认的dd_meta_channel)
 		"DefaultTag":      string(DefaultTag),              // 默认打印的tag @MethodComment(设置默认的tag)

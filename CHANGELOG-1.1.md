@@ -1,4 +1,49 @@
-### v1.1.55 🌈 (2026-04-15 16:16:32)
+### v1.1.60 🌈 (2026-06-04 15:11:26)
+
+#### 🚀  New Feature
+  * 补全上下文日志方法 ([ee505ed](https://github.com/sandwich-go/logbus/commit/ee505edac0e1d243bd337f9e82f5f5efa66b7bab)) (<small>[ruisheng.wang](ruisheng.wang@ddhd.cn)@2026-06-04 15:11:26 &#43;0800 &#43;0800</small>)
+
+### v1.1.59 (2026-05-26 18:09:47)
+
+#### 🐛  Bug Fixed
+  * **dynamic_log_level**: 升级 xconf 到 v0.3.29 修复 Close 触发 close of nil channel panic ([8e473f7](https://github.com/sandwich-go/logbus/commit/8e473f79139a891a02b09aac9be598870d5c146e)) (<small>[daming.yang](daming.yang@centurygame.com)@2026-05-26 18:09:47 &#43;0800 &#43;0800</small>)
+
+#### 🚀  New Feature
+  * **slg/chat**: UserChatOpts 增加 town_lvl 主城等级属性 ([8082e9d](https://github.com/sandwich-go/logbus/commit/8082e9d1894a025c76b31b77be01c21b99127867)) (<small>[daming.yang](daming.yang@centurygame.com)@2026-05-26 16:27:51 &#43;0800 &#43;0800</small>)
+
+#### 🤖  Tools
+  * **sem**: make changelog ([b90b22d](https://github.com/sandwich-go/logbus/commit/b90b22deec226d78429b8414f8371fe2411e06fb)) (<small>[ruisheng.wang](ruisheng.wang@ddhd.cn)@2026-05-22 17:17:39 &#43;0800 &#43;0800</small>)
+
+### v1.1.58 (2026-05-21 17:55:29)
+
+#### 🤖  Tools
+  * **sem**: make changelog ([03d2f70](https://github.com/sandwich-go/logbus/commit/03d2f70b1efe53ce9e76ac0410a391d43ce59bad)) (<small>[daming.yang](daming.yang@centurygame.com)@2026-05-18 13:11:47 &#43;0800 &#43;0800</small>)
+
+#### 💪  Commit
+  * feat:从context中提取traceId ([c09c750](https://github.com/sandwich-go/logbus/commit/c09c750026750ee53f65150b6528a61cb73ae0c5)) (<small>[ruisheng.wang](ruisheng.wang@ddhd.cn)@2026-05-21 17:55:29 &#43;0800 &#43;0800</small>)
+
+### v1.1.57 (2026-05-13 13:30:37)
+
+#### 🐛  Bug Fixed
+  * **loglevel**: service 配置非法时回退到 env_config ([b5b9614](https://github.com/sandwich-go/logbus/commit/b5b96146abc6352e5017b9528f062a8f32139595)) (<small>[daming.yang](daming.yang@centurygame.com)@2026-05-13 13:18:54 &#43;0800 &#43;0800</small>)
+
+#### 🚀  New Feature
+  * **loglevel**: 基于 PMT 下发的 bizops.yaml 动态调整日志级别 ([89320c9](https://github.com/sandwich-go/logbus/commit/89320c91baf1daab77c614f16be89afea4833db6)) (<small>[daming.yang](daming.yang@centurygame.com)@2026-05-12 23:07:25 &#43;0800 &#43;0800</small>)
+
+#### 🛠  Refactor
+  * **loglevel**: 配置文件改为 ops_config.json ([d261afb](https://github.com/sandwich-go/logbus/commit/d261afb018b65ce9d6df2794c38aee4589a34155)) (<small>[daming.yang](daming.yang@centurygame.com)@2026-05-13 13:30:37 &#43;0800 &#43;0800</small>)
+  * **loglevel**: review 修正 ([6e15a74](https://github.com/sandwich-go/logbus/commit/6e15a74806c4c9bf715571de5a18e24207d347a5)) (<small>[daming.yang](daming.yang@centurygame.com)@2026-05-12 23:43:33 &#43;0800 &#43;0800</small>)
+
+### v1.1.56 (2026-05-06 19:50:04)
+
+#### 🛠  Refactor
+  * add get loglevel ([2789751](https://github.com/sandwich-go/logbus/commit/2789751fe01ac94af967a5e1deee086854a9771b)) (<small>[daming.yang](daming.yang@centurygame.com)@2026-05-06 19:50:04 &#43;0800 &#43;0800</small>)
+  * 日志超长改为warn日志 ([e70fbce](https://github.com/sandwich-go/logbus/commit/e70fbce500dce8babd8b2f26a3d7cb435c8f73ef)) (<small>[daming.yang](daming.yang@centurygame.com)@2026-04-17 11:32:52 &#43;0800 &#43;0800</small>)
+
+#### 🤖  Tools
+  * **sem**: make changelog ([9cccd3e](https://github.com/sandwich-go/logbus/commit/9cccd3e0dff98eae19c5274c73567cb64a6386d2)) (<small>[daming.yang](daming.yang@centurygame.com)@2026-04-15 16:16:50 &#43;0800 &#43;0800</small>)
+
+### v1.1.55 (2026-04-15 16:16:32)
 
 #### 🐛  Bug Fixed
   * **track**: type nil panic ([8c49b3b](https://github.com/sandwich-go/logbus/commit/8c49b3bcb3e61e1fb872d85cda5b2620e80e6c27)) (<small>[daming.yang](daming.yang@centurygame.com)@2026-04-15 16:16:32 &#43;0800 &#43;0800</small>)

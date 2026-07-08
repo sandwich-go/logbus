@@ -1,6 +1,7 @@
 package logbus
 
 import (
+	"context"
 	"sync"
 
 	"go.uber.org/zap"
@@ -70,6 +71,11 @@ func (s *GLogger) Debug(msg string, fields ...Field) {
 	s.stdLogger.DebugWithChannel(s.channelKey, fields...)
 }
 
+func (s *GLogger) DebugWithContext(ctx context.Context, msg string, fields ...Field) {
+	fields = append(fields, FromContext(ctx))
+	s.Debug(msg, fields...)
+}
+
 func (s *GLogger) Info(msg string, fields ...Field) {
 	fields = append(fields, String(MsgBody, msg))
 	if s.printAsError && s.printAsErr(fields...) {
@@ -77,6 +83,11 @@ func (s *GLogger) Info(msg string, fields ...Field) {
 		return
 	}
 	s.stdLogger.InfoWithChannel(s.channelKey, fields...)
+}
+
+func (s *GLogger) InfoWithContext(ctx context.Context, msg string, fields ...Field) {
+	fields = append(fields, FromContext(ctx))
+	s.Info(msg, fields...)
 }
 
 func (s *GLogger) Warn(msg string, fields ...Field) {
@@ -87,9 +98,20 @@ func (s *GLogger) Warn(msg string, fields ...Field) {
 	}
 	s.stdLogger.WarnWithChannel(s.channelKey, fields...)
 }
+
+func (s *GLogger) WarnWithContext(ctx context.Context, msg string, fields ...Field) {
+	fields = append(fields, FromContext(ctx))
+	s.Warn(msg, fields...)
+}
+
 func (s *GLogger) Error(msg string, fields ...Field) {
 	fields = append(fields, String(MsgBody, msg))
 	s.stdLogger.ErrorWithChannel(s.channelKey, fields...)
+}
+
+func (s *GLogger) ErrorWithContext(ctx context.Context, msg string, fields ...Field) {
+	fields = append(fields, FromContext(ctx))
+	s.Error(msg, fields...)
 }
 
 func (s *GLogger) DPanic(msg string, fields ...Field) {
@@ -97,14 +119,29 @@ func (s *GLogger) DPanic(msg string, fields ...Field) {
 	s.stdLogger.DPanicWithChannel(s.channelKey, fields...)
 }
 
+func (s *GLogger) DPanicWithContext(ctx context.Context, msg string, fields ...Field) {
+	fields = append(fields, FromContext(ctx))
+	s.DPanic(msg, fields...)
+}
+
 func (s *GLogger) Panic(msg string, fields ...Field) {
 	fields = append(fields, String(MsgBody, msg))
 	s.stdLogger.PanicWithChannel(s.channelKey, fields...)
 }
 
+func (s *GLogger) PanicWithContext(ctx context.Context, msg string, fields ...Field) {
+	fields = append(fields, FromContext(ctx))
+	s.Panic(msg, fields...)
+}
+
 func (s *GLogger) Fatal(msg string, fields ...Field) {
 	fields = append(fields, String(MsgBody, msg))
 	s.stdLogger.FatalWithChannel(s.channelKey, fields...)
+}
+
+func (s *GLogger) FatalWithContext(ctx context.Context, msg string, fields ...Field) {
+	fields = append(fields, FromContext(ctx))
+	s.Fatal(msg, fields...)
 }
 
 func (s *GLogger) getDepthLogger(depth int) *StdLogger {

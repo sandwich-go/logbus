@@ -15,7 +15,7 @@ import (
 // Conf should use NewConf to initialize it
 type Conf struct {
 	// log
-	LogLevel        zapcore.Level
+	LogLevel        zapcore.Level   //@MethodComment(日志级别，默认 zap.DebugLevel。注意：在 PMT 部署环境下（存在 sys_conf_path_env 环境变量时），该值会被 $sys_conf_path_env/ops_config.json 中的 log_level 覆盖）
 	Dev             bool            // false 输出json格式， true 则输出带颜色的易读log
 	DefaultChannel  string          // 默认的dd_meta_channel
 	DefaultTag      string          // 默认打印的tag
@@ -102,7 +102,7 @@ func (f ConfOptionFunc) Apply(cc *Conf) {
 	f(cc)
 }
 
-// WithLogLevel 日志级别，默认 zap.DebugLevel
+// WithLogLevel option func for filed LogLevel
 func WithLogLevel(v zapcore.Level) ConfOptionFunc {
 	return func(cc *Conf) {
 		cc.LogLevel = v
