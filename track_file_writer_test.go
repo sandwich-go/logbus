@@ -612,24 +612,49 @@ func TestTrackFileWriteSyncer_KeepaliveResetByWrite(t *testing.T) {
 // ── LevelEnabler 单元测试 ──────────────────────────────────────────────────
 
 func TestTrackOnlyLevelEnabler(t *testing.T) {
-	Convey("trackOnlyLevelEnabler 只允许 TrackLevel", t, func() {
+	Convey("trackOnlyLevelEnabler 只在当前启用文件输出时允许 TrackLevel", t, func() {
 		e := trackOnlyLevelEnabler{}
+		oldOutput := Setting.TrackOutput
+		oldWriter := gTrackFileWriteSyncer
+		defer func() {
+			Setting.TrackOutput = oldOutput
+			gTrackFileWriteSyncer = oldWriter
+			runtimeEnableTrackLevel.Store(true)
+		}()
+
+		Setting.TrackOutput = TrackOutputFile
+		gTrackFileWriteSyncer = &TrackFileWriteSyncer{}
 		runtimeEnableTrackLevel.Store(true)
 		So(e.Enabled(TrackLevel), ShouldBeTrue)
 		So(e.Enabled(0), ShouldBeFalse) // DebugLevel
 		So(e.Enabled(1), ShouldBeFalse) // InfoLevel
 
+		Setting.TrackOutput = TrackOutputStdout
+		So(e.Enabled(TrackLevel), ShouldBeFalse)
+
+		Setting.TrackOutput = TrackOutputFile
+		gTrackFileWriteSyncer = nil
+		So(e.Enabled(TrackLevel), ShouldBeFalse)
+
+		gTrackFileWriteSyncer = &TrackFileWriteSyncer{}
 		runtimeEnableTrackLevel.Store(false)
 		So(e.Enabled(TrackLevel), ShouldBeFalse)
-		runtimeEnableTrackLevel.Store(true) // 恢复
 	})
 }
 
-func TestExcludeTrackLevelEnabler(t *testing.T) {
-	Convey("excludeTrackLevelEnabler 排除 TrackLevel，其他 level 透传", t, func() {
+func TestTrackStdoutLevelEnabler(t *testing.T) {
+	Convey("trackStdoutLevelEnabler 按当前 TrackOutput 路由 TrackLevel", t, func() {
 		base := newTrackLevelEnabler()
-		e := &excludeTrackLevelEnabler{wrapped: base}
+		e := &trackStdoutLevelEnabler{wrapped: base}
+		oldOutput := Setting.TrackOutput
+		defer func() { Setting.TrackOutput = oldOutput }()
+
+		Setting.TrackOutput = TrackOutputFile
 		So(e.Enabled(TrackLevel), ShouldBeFalse)
+		Setting.TrackOutput = TrackOutputStdout
+		So(e.Enabled(TrackLevel), ShouldBeTrue)
+		Setting.TrackOutput = TrackOutputBoth
+		So(e.Enabled(TrackLevel), ShouldBeTrue)
 		So(e.Enabled(0), ShouldBeTrue) // DebugLevel 在 runtimeLogLevel=Debug 下通过
 	})
 }

@@ -16,7 +16,8 @@ func Close() {
 	// Close 之后写入会被静默丢弃（TrackFileWriteSyncer.Write 内部已处理 closed 状态），
 	// 保持与过往 Close 行为一致：进程收尾阶段不再新增写入。
 	if gTrackFileWriteSyncer != nil {
-		_ = gTrackFileWriteSyncer.Close()
+		_ = gTrackFileWriteSyncerProxy.Close()
+		gTrackFileWriteSyncer = nil
 	}
 }
 

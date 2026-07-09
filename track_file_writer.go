@@ -613,20 +613,72 @@ func trackFileChannel(raw map[string]jsoniter.RawMessage, channel string) string
 // 确保实现 zapcore.WriteSyncer
 var _ zapcore.WriteSyncer = (*TrackFileWriteSyncer)(nil)
 
+// trackFileWriteSyncerProxy 是所有 track file core 捕获的稳定 WriteSyncer。
+// Init 重建具体 TrackFileWriteSyncer 时只切换代理目标，避免旧 logger 持有已关闭 writer 后静默丢日志。
+type trackFileWriteSyncerProxy struct {
+	mu      sync.RWMutex
+	current *TrackFileWriteSyncer
+}
+
+func (p *trackFileWriteSyncerProxy) setCurrent(next *TrackFileWriteSyncer) (old *TrackFileWriteSyncer) {
+	p.mu.Lock()
+	old = p.current
+	p.current = next
+	p.mu.Unlock()
+	return old
+}
+
+func (p *trackFileWriteSyncerProxy) Write(b []byte) (int, error) {
+	p.mu.RLock()
+	current := p.current
+	if current == nil {
+		p.mu.RUnlock()
+		return len(b), nil
+	}
+	n, err := current.Write(b)
+	p.mu.RUnlock()
+	return n, err
+}
+
+func (p *trackFileWriteSyncerProxy) Sync() error {
+	p.mu.RLock()
+	current := p.current
+	if current == nil {
+		p.mu.RUnlock()
+		return nil
+	}
+	err := current.Sync()
+	p.mu.RUnlock()
+	return err
+}
+
+func (p *trackFileWriteSyncerProxy) Close() error {
+	old := p.setCurrent(nil)
+	if old == nil {
+		return nil
+	}
+	return old.Close()
+}
+
+var _ zapcore.WriteSyncer = (*trackFileWriteSyncerProxy)(nil)
+
 // trackOnlyLevelEnabler 只允许 TrackLevel 通过（用于文件写入 core）
 type trackOnlyLevelEnabler struct{}
 
 func (trackOnlyLevelEnabler) Enabled(level zapcore.Level) bool {
-	return runtimeEnableTrackLevel.Load() && level == TrackLevel
+	if level != TrackLevel || !runtimeEnableTrackLevel.Load() {
+		return false
+	}
+	return gTrackFileWriteSyncer != nil && (Setting.TrackOutput == TrackOutputFile || Setting.TrackOutput == TrackOutputBoth)
 }
 
-// excludeTrackLevelEnabler 将 TrackLevel 从 wrapped enabler 中排除（用于 stdout core）
-type excludeTrackLevelEnabler struct {
+// trackStdoutLevelEnabler 按当前 TrackOutput 控制 stdout core 是否接收 TrackLevel。
+type trackStdoutLevelEnabler struct {
 	wrapped zapcore.LevelEnabler
 }
 
-func (e *excludeTrackLevelEnabler) Enabled(level zapcore.Level) bool {
-	if level == TrackLevel {
+func (e *trackStdoutLevelEnabler) Enabled(level zapcore.Level) bool {
+	if level == TrackLevel && Setting.TrackOutput == TrackOutputFile {
 		return false
 	}
 	return e.wrapped.Enabled(level)

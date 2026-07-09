@@ -443,11 +443,10 @@ func TestTrackOutput_ScopeLoggersShareSameWriter(t *testing.T) {
 			wg.Add(1)
 			go func(scopeIdx int, logger NewILogger) {
 				defer wg.Done()
-				_ = logger // ScopeLogger 的 Track 入口走 gStdLogger，这里保持真实写入路径
 				for j := 0; j < perScope; j++ {
 					// 使用不同的 msg payload，便于后续验证完整性
 					payload := fmt.Sprintf("scope_%d_line_%d", scopeIdx, j)
-					gStdLogger.TrackWithChannel(THINKINGDATA, String(MsgBody, payload))
+					logger.(*GLogger).GetStdLogger().TrackWithChannel(THINKINGDATA, String(MsgBody, payload))
 				}
 			}(si, lg)
 		}
@@ -461,6 +460,78 @@ func TestTrackOutput_ScopeLoggersShareSameWriter(t *testing.T) {
 			So(line, ShouldStartWith, "scope_")
 			So(line, ShouldContainSubstring, "_line_")
 		}
+	})
+}
+
+// TestTrackOutput_OldScopeLoggerWritesAfterReinit 覆盖热切换同源问题：
+// 旧 ScopeLogger 的 file core 捕获的是稳定代理，二次 Init 重建具体 writer 后，
+// 旧 logger 继续写 track 时必须进入新的 writer，而不是写入已关闭旧 writer 后静默丢弃。
+func TestTrackOutput_OldScopeLoggerWritesAfterReinit(t *testing.T) {
+	Convey("旧 ScopeLogger 在二次 Init 后继续写 track 不丢失", t, func() {
+		firstDir := t.TempDir()
+		_, cleanup := initWithBuf(
+			WithTrackOutput(TrackOutputFile),
+			WithTrackFileDir(firstDir),
+		)
+		defer cleanup()
+
+		oldScope := NewScopeLogger("old_scope")
+		oldStd := oldScope.(*GLogger).GetStdLogger()
+		oldGlobal := gStdLogger
+
+		oldStd.TrackWithChannel(BI, String(MsgBody, "before_reinit_scope"))
+		oldGlobal.TrackWithChannel(BI, String(MsgBody, "before_reinit_global"))
+		So(oldStd.Sync(), ShouldBeNil)
+
+		firstLines, err := syncAndRead(firstDir, BI)
+		So(err, ShouldBeNil)
+		So(firstLines, ShouldContain, "before_reinit_scope")
+		So(firstLines, ShouldContain, "before_reinit_global")
+
+		secondDir := t.TempDir()
+		Init(NewConf(
+			WithWriteSyncer(zapcore.AddSync(&bytes.Buffer{})),
+			WithTrackOutput(TrackOutputFile),
+			WithTrackFileDir(secondDir),
+		))
+
+		oldStd.TrackWithChannel(BI, String(MsgBody, "after_reinit_scope"))
+		oldGlobal.TrackWithChannel(BI, String(MsgBody, "after_reinit_global"))
+		So(oldStd.Sync(), ShouldBeNil)
+		So(oldGlobal.Sync(), ShouldBeNil)
+
+		secondLines, err := syncAndRead(secondDir, BI)
+		So(err, ShouldBeNil)
+		So(secondLines, ShouldContain, "after_reinit_scope")
+		So(secondLines, ShouldContain, "after_reinit_global")
+	})
+}
+
+func TestTrackOutput_OldStdoutLoggerWritesFileAfterReinit(t *testing.T) {
+	Convey("stdout 模式创建的旧 ScopeLogger 在二次 Init 到 file 后可写文件", t, func() {
+		buf, cleanup := initWithBuf(WithTrackOutput(TrackOutputStdout))
+		defer cleanup()
+
+		oldScope := NewScopeLogger("old_stdout_scope")
+		oldStd := oldScope.(*GLogger).GetStdLogger()
+		oldStd.TrackWithChannel(BI, String(MsgBody, "before_file_mode"))
+		So(oldStd.Sync(), ShouldBeNil)
+		So(buf.String(), ShouldContainSubstring, "before_file_mode")
+
+		secondDir := t.TempDir()
+		Init(NewConf(
+			WithWriteSyncer(zapcore.AddSync(&bytes.Buffer{})),
+			WithTrackOutput(TrackOutputFile),
+			WithTrackFileDir(secondDir),
+		))
+
+		oldStd.TrackWithChannel(BI, String(MsgBody, "after_file_mode"))
+		So(oldStd.Sync(), ShouldBeNil)
+		So(buf.String(), ShouldNotContainSubstring, "after_file_mode")
+
+		lines, err := syncAndRead(secondDir, BI)
+		So(err, ShouldBeNil)
+		So(lines, ShouldContain, "after_file_mode")
 	})
 }
 

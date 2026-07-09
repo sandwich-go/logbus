@@ -15,27 +15,31 @@ var (
 	// gTrackFileWriteSyncer 全局单例，TrackOutputFile/Both 模式下所有 core 共用。
 	// 由 initTrackFileWriteSyncer 根据 Conf 创建/重建，避免多实例并发写同一文件导致行交错、
 	// 以及 ScopeLogger 反复创建造成 goroutine/文件句柄泄漏。
-	gTrackFileWriteSyncer *TrackFileWriteSyncer
+	gTrackFileWriteSyncer      *TrackFileWriteSyncer
+	gTrackFileWriteSyncerProxy trackFileWriteSyncerProxy
 )
 
 // initTrackFileWriteSyncer 在每次 Init 时调用：
-//  1. 关闭上一次创建的 writer（goroutine + file handle 释放）
-//  2. 按当前 Conf 创建新 writer（如果启用了文件模式）
+//  1. 按当前 Conf 创建新 writer（如果启用了文件模式）
+//  2. 切换稳定代理目标，让旧 logger/core 后续写入也路由到最新 writer
+//  3. 关闭上一次创建的 writer（goroutine + file handle 释放）
 //
-// 必须在 initGlobalStdLoggers 之前调用，保证 newNLoggerInstance 能读到最新实例。
+// 必须在 initGlobalStdLoggers 之前调用，保证 newNLoggerInstance 能判断当前是否启用了文件 core。
 func initTrackFileWriteSyncer() {
-	if gTrackFileWriteSyncer != nil {
-		_ = gTrackFileWriteSyncer.Close()
-		gTrackFileWriteSyncer = nil
-	}
+	var next *TrackFileWriteSyncer
 	if Setting.TrackOutput == TrackOutputFile || Setting.TrackOutput == TrackOutputBoth {
-		gTrackFileWriteSyncer = NewTrackFileWriteSyncerFromConfig(TrackFileWriteSyncerConfig{
+		next = NewTrackFileWriteSyncerFromConfig(TrackFileWriteSyncerConfig{
 			BaseDir:          Setting.TrackFileDir,
 			ChannelAlias:     Setting.TrackChannelAlias,
 			Rotation:         Setting.TrackFileRotation,
 			KeepaliveEvery:   Setting.TrackKeepaliveInterval,
 			KeepaliveMessage: Setting.TrackKeepaliveMessage,
 		})
+	}
+	old := gTrackFileWriteSyncerProxy.setCurrent(next)
+	gTrackFileWriteSyncer = next
+	if old != nil {
+		_ = old.Close()
 	}
 }
 
@@ -123,26 +127,18 @@ func newNLoggerInstance(tagName string, fields ...zap.Field) *StdLogger {
 		return core.With(append([]zap.Field{zap.String(Tags, tagName)}, fields...))
 	}
 
-	// stdout core 的 LevelEnabler：
-	//   TrackOutputFile  → 排除 TrackLevel（track 不写 stdout）
-	//   其他模式         → 保持原有行为（track 可写 stdout）
-	stdLevelEnabler := newTrackLevelEnabler()
-	if Setting.TrackOutput == TrackOutputFile {
-		stdLevelEnabler = &excludeTrackLevelEnabler{wrapped: stdLevelEnabler}
-	}
-	stdCore := withTagFields(zapcore.NewCore(encoder, writer, stdLevelEnabler))
+	// stdout core 的 TrackLevel 路由读取当前 TrackOutput，旧 logger 在 Init 切换模式后也能跟随新配置。
+	stdCore := withTagFields(zapcore.NewCore(encoder, writer, &trackStdoutLevelEnabler{wrapped: newTrackLevelEnabler()}))
 	stdCore = CoreWrapper(tagName, stdCore)
 	if xos.EnvGetCaseInsensitive("logbus_core_dup") != "" {
 		stdCore = NewDupCore(stdCore)
 	}
 	cores = append(cores, stdCore)
 
-	// 文件 core：TrackOutputFile 或 TrackOutputBoth 时添加。
-	// 所有 logger 实例共用全局单例 gTrackFileWriteSyncer，避免多实例并发 append 同一文件导致行交错。
-	if gTrackFileWriteSyncer != nil {
-		trackCore := withTagFields(zapcore.NewCore(encoder, gTrackFileWriteSyncer, trackOnlyLevelEnabler{}))
-		cores = append(cores, trackCore)
-	}
+	// 文件 core 始终挂稳定代理；无文件输出目标时由 trackOnlyLevelEnabler 禁用。
+	// 这样旧 logger 在 stdout↔file 热切换后不会缺失对应 core。
+	trackCore := withTagFields(zapcore.NewCore(encoder, &gTrackFileWriteSyncerProxy, trackOnlyLevelEnabler{}))
+	cores = append(cores, trackCore)
 
 	s := newStdLogger(gBasicZLogger.WithOptions(zap.WrapCore(func(c zapcore.Core) zapcore.Core {
 		return zapcore.NewTee(cores...)
