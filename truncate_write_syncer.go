@@ -31,6 +31,8 @@ const (
 	// OriginalSizeKey 剔除/截断发生后写出日志中记录原始字节数的字段名，
 	// 统一前缀避免与业务字段命名冲突。
 	OriginalSizeKey = "logbus_original_size"
+	// OriginalSizeCompatKey 是旧版截断日志字段名，保留用于兼容既有日志消费链路。
+	OriginalSizeCompatKey = "original_size"
 )
 
 // defaultStripFields 默认在截断前优先剔除的字段路径。
@@ -102,10 +104,11 @@ func (t *TruncateWriteSyncer) Sync() error {
 func (t *TruncateWriteSyncer) buildTruncatedLog(p []byte) []byte {
 	msg, extra := t.extractPartialMsgAndExtra(p)
 	out := map[string]interface{}{
-		LevelKey:        "warn",
-		TruncateFlag:    true,
-		"partial_msg":   msg,
-		OriginalSizeKey: len(p),
+		LevelKey:              "warn",
+		TruncateFlag:          true,
+		"partial_msg":         msg,
+		OriginalSizeCompatKey: len(p),
+		OriginalSizeKey:       len(p),
 	}
 	for k, v := range extra {
 		out[k] = v
@@ -135,6 +138,7 @@ func (t *TruncateWriteSyncer) stripLargeFields(p []byte) ([]byte, bool) {
 		return nil, false
 	}
 	raw[StripFlag] = stripped
+	raw[OriginalSizeCompatKey] = len(p)
 	raw[OriginalSizeKey] = len(p)
 	b, err := jsonLib.Marshal(raw)
 	if err != nil {

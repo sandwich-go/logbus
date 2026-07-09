@@ -12,10 +12,8 @@ var (
 	gMonitorLogger *StdLogger
 	cacheGLogger   []GLoggerCache
 
-	// gTrackFileWriteSyncer 全局单例，TrackOutputFile/Both 模式下所有 core 共用。
-	// 由 initTrackFileWriteSyncer 根据 Conf 创建/重建，避免多实例并发写同一文件导致行交错、
-	// 以及 ScopeLogger 反复创建造成 goroutine/文件句柄泄漏。
-	gTrackFileWriteSyncer      *TrackFileWriteSyncer
+	// gTrackFileWriteSyncerProxy 是所有 logger file core 捕获的稳定代理。
+	// 由 initTrackFileWriteSyncer 根据 Conf 创建/重建目标 writer，避免旧 core 持有已关闭实例。
 	gTrackFileWriteSyncerProxy trackFileWriteSyncerProxy
 )
 
@@ -36,8 +34,7 @@ func initTrackFileWriteSyncer() {
 			KeepaliveMessage: Setting.TrackKeepaliveMessage,
 		})
 	}
-	old := gTrackFileWriteSyncerProxy.setCurrent(next)
-	gTrackFileWriteSyncer = next
+	old := gTrackFileWriteSyncerProxy.setCurrent(next, Setting.TrackOutput)
 	if old != nil {
 		_ = old.Close()
 	}
@@ -137,7 +134,10 @@ func newNLoggerInstance(tagName string, fields ...zap.Field) *StdLogger {
 
 	// 文件 core 始终挂稳定代理；无文件输出目标时由 trackOnlyLevelEnabler 禁用。
 	// 这样旧 logger 在 stdout↔file 热切换后不会缺失对应 core。
-	trackCore := withTagFields(zapcore.NewCore(encoder, &gTrackFileWriteSyncerProxy, trackOnlyLevelEnabler{}))
+	trackEncoderConfig := EncodeConfig
+	trackEncoderConfig.EncodeLevel = trackLevelEncoder
+	trackCore := withTagFields(zapcore.NewCore(newJSONEncoder(trackEncoderConfig), &gTrackFileWriteSyncerProxy, trackOnlyLevelEnabler{}))
+	trackCore = CoreWrapper(tagName, trackCore)
 	cores = append(cores, trackCore)
 
 	s := newStdLogger(gBasicZLogger.WithOptions(zap.WrapCore(func(c zapcore.Core) zapcore.Core {

@@ -10,6 +10,7 @@ import (
 	"time"
 
 	. "github.com/smartystreets/goconvey/convey"
+	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
 
@@ -54,6 +55,21 @@ func syncAndRead(dir, channel string) ([]string, error) {
 		}
 	}
 	return lines, nil
+}
+
+type dropTrackCore struct {
+	zapcore.Core
+}
+
+func (c dropTrackCore) With(fields []zap.Field) zapcore.Core {
+	return dropTrackCore{Core: c.Core.With(fields)}
+}
+
+func (c dropTrackCore) Check(ent zapcore.Entry, ce *zapcore.CheckedEntry) *zapcore.CheckedEntry {
+	if ent.Level == TrackLevel {
+		return ce
+	}
+	return c.Core.Check(ent, ce)
 }
 
 // ── TrackOutputStdout（默认，向后兼容）─────────────────────────────────────
@@ -123,6 +139,26 @@ func TestTrackOutput_FileOnly_TrackInFile(t *testing.T) {
 	})
 }
 
+func TestTrackOutput_FileOnly_DevModeStillWritesTrackFile(t *testing.T) {
+	Convey("TrackOutputFile: Dev console stdout does not affect track file JSON encoding", t, func() {
+		dir := t.TempDir()
+		_, cleanup := initWithBuf(
+			WithDev(true),
+			WithTrackOutput(TrackOutputFile),
+			WithTrackFileDir(dir),
+		)
+		defer cleanup()
+
+		payload := `{"app_id":"gof","event":"dev_mode"}`
+		writeTrackLog(BI, payload)
+
+		lines, err := syncAndRead(dir, BI)
+		So(err, ShouldBeNil)
+		So(lines, ShouldHaveLength, 1)
+		So(lines[0], ShouldEqual, payload)
+	})
+}
+
 func TestTrackOutput_FileOnly_NormalLogStillInStdout(t *testing.T) {
 	Convey("TrackOutputFile: 普通日志仍写 stdout，不受 track 路由影响", t, func() {
 		dir := t.TempDir()
@@ -163,6 +199,30 @@ func TestTrackOutput_FileOnly_MultiChannel(t *testing.T) {
 		So(err, ShouldBeNil)
 		So(biLines, ShouldHaveLength, 1)
 		So(biLines[0], ShouldEqual, `bi_msg`)
+	})
+}
+
+func TestTrackOutput_FileCoreUsesCoreWrapper(t *testing.T) {
+	Convey("TrackOutputFile: 文件 core 也经过 CoreWrapper", t, func() {
+		oldWrapper := CoreWrapper
+		CoreWrapper = func(tagName string, core zapcore.Core) zapcore.Core {
+			return dropTrackCore{Core: core}
+		}
+		defer func() { CoreWrapper = oldWrapper }()
+
+		dir := t.TempDir()
+		_, cleanup := initWithBuf(
+			WithTrackOutput(TrackOutputFile),
+			WithTrackFileDir(dir),
+		)
+		defer cleanup()
+
+		writeTrackLog(BI, "blocked_by_core_wrapper")
+		So(gStdLogger.Sync(), ShouldBeNil)
+
+		fname := expectedTrackFilePath(dir, BI, runtimeHostName(), HourlyRotation, time.Now())
+		_, err := os.Stat(fname)
+		So(os.IsNotExist(err), ShouldBeTrue)
 	})
 }
 
@@ -258,8 +318,8 @@ func TestTrackOutput_PMTEnvOverrideAppliesValues(t *testing.T) {
 	})
 }
 
-func TestTrackOutput_PMTEnvIgnoredWhenCodeStdout(t *testing.T) {
-	Convey("PMT 环境下代码侧保持 stdout 时不启用文件输出", t, func() {
+func TestTrackOutput_PMTEnvOverrideAppliesToDefaultStdout(t *testing.T) {
+	Convey("PMT 环境下 logbus_track_output 覆写默认 stdout", t, func() {
 		dir := t.TempDir()
 		t.Setenv("sys_cd_env", "prod")
 		t.Setenv("logbus_track_output", "file")
@@ -268,8 +328,8 @@ func TestTrackOutput_PMTEnvIgnoredWhenCodeStdout(t *testing.T) {
 		Init(NewConf())
 		defer resetLogBus()
 
-		So(Setting.TrackOutput, ShouldEqual, TrackOutputStdout)
-		So(Setting.TrackFileDir, ShouldEqual, "./tracklogs")
+		So(Setting.TrackOutput, ShouldEqual, TrackOutputFile)
+		So(Setting.TrackFileDir, ShouldEqual, dir)
 	})
 }
 
@@ -415,7 +475,7 @@ func TestTrackOutput_PMTEnvOverrideKeepaliveNegativeInterval(t *testing.T) {
 // TestTrackOutput_ScopeLoggersShareSameWriter: 多个 ScopeLogger 写同一 track channel
 // 时必须落到同一文件，且写入的所有行都必须完整、顺序可被解析（无交错损坏）。
 // 修复前每次 newNLoggerInstance 都会新建一个 TrackFileWriteSyncer，多 worker 并发
-// append 同一文件会出现行交错；修复后通过 gTrackFileWriteSyncer 单例消除此风险。
+// append 同一文件会出现行交错；修复后通过稳定代理指向的单例 writer 消除此风险。
 func TestTrackOutput_ScopeLoggersShareSameWriter(t *testing.T) {
 	Convey("多个 ScopeLogger 共享同一 TrackFileWriteSyncer，写入互不交错", t, func() {
 		dir := t.TempDir()
@@ -426,8 +486,8 @@ func TestTrackOutput_ScopeLoggersShareSameWriter(t *testing.T) {
 		defer cleanup()
 
 		// 所有 scope logger 必须引用同一个全局 writer
-		So(gTrackFileWriteSyncer, ShouldNotBeNil)
-		singleton := gTrackFileWriteSyncer
+		singleton, _ := gTrackFileWriteSyncerProxy.state()
+		So(singleton, ShouldNotBeNil)
 
 		const scopes = 4
 		const perScope = 50
@@ -436,7 +496,8 @@ func TestTrackOutput_ScopeLoggersShareSameWriter(t *testing.T) {
 			loggers = append(loggers, NewScopeLogger(fmt.Sprintf("scope_%d", i)))
 		}
 		// 再次断言：ScopeLogger 创建过程中没有替换掉全局单例
-		So(gTrackFileWriteSyncer, ShouldEqual, singleton)
+		current, _ := gTrackFileWriteSyncerProxy.state()
+		So(current, ShouldEqual, singleton)
 
 		var wg sync.WaitGroup
 		for si, lg := range loggers {
@@ -547,7 +608,7 @@ func TestTrackOutput_InitReleasesOldWriter(t *testing.T) {
 			WithTrackOutput(TrackOutputFile),
 			WithTrackFileDir(dir),
 		)
-		first := gTrackFileWriteSyncer
+		first, _ := gTrackFileWriteSyncerProxy.state()
 		So(first, ShouldNotBeNil)
 
 		writeTrackLog(BI, "first_msg")
@@ -559,7 +620,8 @@ func TestTrackOutput_InitReleasesOldWriter(t *testing.T) {
 		defer cleanup2()
 
 		// TrackOutputStdout 模式下不应再有全局单例
-		So(gTrackFileWriteSyncer, ShouldBeNil)
+		current, _ := gTrackFileWriteSyncerProxy.state()
+		So(current, ShouldBeNil)
 		// 旧 writer 的 Close 幂等且已完成：再次调用应立即返回 nil
 		So(first.Close(), ShouldBeNil)
 		// Close 后再 Write 静默丢弃

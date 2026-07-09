@@ -83,9 +83,9 @@ func init() {
 		if cc.MonitorOutput != Prometheus && cc.MonitorOutput != Logbus && cc.MonitorOutput != Noop {
 			panic("MonitorOutput not match")
 		}
-		// PMT 发布环境（sys_cd_env 非空）下：若代码侧已显式进入非 stdout track 输出模式，
-		// track 文件输出参数必须由环境变量 logbus_track_file_dir 与 logbus_track_output 提供，
-		// 并强制覆写代码侧 Conf。缺失或非法时直接 panic 终止启动，避免静默使用错误的目录或输出模式。
+		// PMT 发布环境（sys_cd_env 非空）下：logbus_track_output 设置时强制覆写代码侧 Conf；
+		// 若代码侧已显式进入非 stdout track 输出模式，则必须由环境变量 logbus_track_output 与
+		// logbus_track_file_dir 提供文件输出参数。缺失或非法时直接 panic，避免静默使用错误目录或输出模式。
 		if os.Getenv(envSysCdEnv) != "" {
 			applyPMTTrackEnvOverrides(cc)
 		}
@@ -117,20 +117,20 @@ func parseTrackOutputFromEnv(s string) (TrackOutput, bool) {
 	return 0, false
 }
 
-// applyPMTTrackEnvOverrides 在 PMT 环境（sys_cd_env 非空）下强制覆写 track 相关配置。
-// 若代码侧 TrackOutput 仍是默认 stdout，表示业务未启用文件输出，此时忽略 PMT track 文件环变。
+// applyPMTTrackEnvOverrides 在 PMT 环境（sys_cd_env 非空）下按环境变量覆写 track 相关配置。
 // 规则：
-//  1. logbus_track_output 必填；非法值 panic
-//  2. 若 logbus_track_output=stdout，仅覆写 TrackOutput 并直接返回，不要求文件目录
-//  3. 若覆写后的 TrackOutput 需要写文件，则 logbus_track_file_dir 必须非空，否则 panic
-//  4. logbus_track_keepalive_interval 若设置，按 time.Duration 解析；负值或解析失败 panic；0 视为禁用
-//  5. logbus_track_keepalive_message 若设置（包括显式空串），整体覆写 TrackKeepaliveMessage
+//  1. logbus_track_output 设置时强制覆写 TrackOutput；非法值 panic
+//  2. 代码侧显式启用文件输出但 logbus_track_output 缺失时 panic
+//  3. 若覆写后的 TrackOutput=stdout，仅覆写 TrackOutput 并直接返回，不要求文件目录
+//  4. 若覆写后的 TrackOutput 需要写文件，则 logbus_track_file_dir 必须非空，否则 panic
+//  5. logbus_track_keepalive_interval 若设置，按 time.Duration 解析；负值或解析失败 panic；0 视为禁用
+//  6. logbus_track_keepalive_message 若设置（包括显式空串），整体覆写 TrackKeepaliveMessage
 func applyPMTTrackEnvOverrides(cc *Conf) {
-	if cc.TrackOutput == TrackOutputStdout {
-		return // 业务明确要求stdout这种情况不开启输出到文件，还是要听从业务逻辑的
+	rawOutput, outputPresent := os.LookupEnv(envLogbusTrackOutput)
+	if !outputPresent || strings.TrimSpace(rawOutput) == "" {
+		xpanic.WhenTrue(cc.TrackOutput == TrackOutputFile || cc.TrackOutput == TrackOutputBoth, envLogbusTrackOutput+" must be set under PMT environment")
+		return
 	}
-	rawOutput := os.Getenv(envLogbusTrackOutput)
-	xpanic.WhenTrue(rawOutput == "", envLogbusTrackOutput+" must be set under PMT environment")
 	output, ok := parseTrackOutputFromEnv(rawOutput)
 	xpanic.WhenFalse(ok, envLogbusTrackOutput+" must be one of stdout/file/both, got: "+rawOutput)
 	cc.TrackOutput = output

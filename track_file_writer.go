@@ -618,14 +618,37 @@ var _ zapcore.WriteSyncer = (*TrackFileWriteSyncer)(nil)
 type trackFileWriteSyncerProxy struct {
 	mu      sync.RWMutex
 	current *TrackFileWriteSyncer
+	output  TrackOutput
 }
 
-func (p *trackFileWriteSyncerProxy) setCurrent(next *TrackFileWriteSyncer) (old *TrackFileWriteSyncer) {
+func (p *trackFileWriteSyncerProxy) setCurrent(next *TrackFileWriteSyncer, output TrackOutput) (old *TrackFileWriteSyncer) {
 	p.mu.Lock()
 	old = p.current
 	p.current = next
+	p.output = output
 	p.mu.Unlock()
 	return old
+}
+
+func (p *trackFileWriteSyncerProxy) state() (*TrackFileWriteSyncer, TrackOutput) {
+	p.mu.RLock()
+	current, output := p.current, p.output
+	p.mu.RUnlock()
+	return current, output
+}
+
+func (p *trackFileWriteSyncerProxy) fileEnabled() bool {
+	p.mu.RLock()
+	enabled := p.current != nil && (p.output == TrackOutputFile || p.output == TrackOutputBoth)
+	p.mu.RUnlock()
+	return enabled
+}
+
+func (p *trackFileWriteSyncerProxy) stdoutTrackEnabled() bool {
+	p.mu.RLock()
+	enabled := p.output != TrackOutputFile
+	p.mu.RUnlock()
+	return enabled
 }
 
 func (p *trackFileWriteSyncerProxy) Write(b []byte) (int, error) {
@@ -653,7 +676,10 @@ func (p *trackFileWriteSyncerProxy) Sync() error {
 }
 
 func (p *trackFileWriteSyncerProxy) Close() error {
-	old := p.setCurrent(nil)
+	p.mu.Lock()
+	old := p.current
+	p.current = nil
+	p.mu.Unlock()
 	if old == nil {
 		return nil
 	}
@@ -669,7 +695,7 @@ func (trackOnlyLevelEnabler) Enabled(level zapcore.Level) bool {
 	if level != TrackLevel || !runtimeEnableTrackLevel.Load() {
 		return false
 	}
-	return gTrackFileWriteSyncer != nil && (Setting.TrackOutput == TrackOutputFile || Setting.TrackOutput == TrackOutputBoth)
+	return gTrackFileWriteSyncerProxy.fileEnabled()
 }
 
 // trackStdoutLevelEnabler 按当前 TrackOutput 控制 stdout core 是否接收 TrackLevel。
@@ -678,7 +704,7 @@ type trackStdoutLevelEnabler struct {
 }
 
 func (e *trackStdoutLevelEnabler) Enabled(level zapcore.Level) bool {
-	if level == TrackLevel && Setting.TrackOutput == TrackOutputFile {
+	if level == TrackLevel && !gTrackFileWriteSyncerProxy.stdoutTrackEnabled() {
 		return false
 	}
 	return e.wrapped.Enabled(level)

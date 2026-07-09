@@ -15,10 +15,7 @@ func Close() {
 	// 关闭全局 track file writer（若启用），等待 worker 排空队列、fsync、释放文件句柄。
 	// Close 之后写入会被静默丢弃（TrackFileWriteSyncer.Write 内部已处理 closed 状态），
 	// 保持与过往 Close 行为一致：进程收尾阶段不再新增写入。
-	if gTrackFileWriteSyncer != nil {
-		_ = gTrackFileWriteSyncerProxy.Close()
-		gTrackFileWriteSyncer = nil
-	}
+	_ = gTrackFileWriteSyncerProxy.Close()
 }
 
 var mutexLogger sync.RWMutex

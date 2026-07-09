@@ -614,29 +614,25 @@ func TestTrackFileWriteSyncer_KeepaliveResetByWrite(t *testing.T) {
 func TestTrackOnlyLevelEnabler(t *testing.T) {
 	Convey("trackOnlyLevelEnabler 只在当前启用文件输出时允许 TrackLevel", t, func() {
 		e := trackOnlyLevelEnabler{}
-		oldOutput := Setting.TrackOutput
-		oldWriter := gTrackFileWriteSyncer
+		oldWriter, oldOutput := gTrackFileWriteSyncerProxy.state()
 		defer func() {
-			Setting.TrackOutput = oldOutput
-			gTrackFileWriteSyncer = oldWriter
+			_ = gTrackFileWriteSyncerProxy.setCurrent(oldWriter, oldOutput)
 			runtimeEnableTrackLevel.Store(true)
 		}()
 
-		Setting.TrackOutput = TrackOutputFile
-		gTrackFileWriteSyncer = &TrackFileWriteSyncer{}
+		_ = gTrackFileWriteSyncerProxy.setCurrent(&TrackFileWriteSyncer{}, TrackOutputFile)
 		runtimeEnableTrackLevel.Store(true)
 		So(e.Enabled(TrackLevel), ShouldBeTrue)
 		So(e.Enabled(0), ShouldBeFalse) // DebugLevel
 		So(e.Enabled(1), ShouldBeFalse) // InfoLevel
 
-		Setting.TrackOutput = TrackOutputStdout
+		_ = gTrackFileWriteSyncerProxy.setCurrent(&TrackFileWriteSyncer{}, TrackOutputStdout)
 		So(e.Enabled(TrackLevel), ShouldBeFalse)
 
-		Setting.TrackOutput = TrackOutputFile
-		gTrackFileWriteSyncer = nil
+		_ = gTrackFileWriteSyncerProxy.setCurrent(nil, TrackOutputFile)
 		So(e.Enabled(TrackLevel), ShouldBeFalse)
 
-		gTrackFileWriteSyncer = &TrackFileWriteSyncer{}
+		_ = gTrackFileWriteSyncerProxy.setCurrent(&TrackFileWriteSyncer{}, TrackOutputFile)
 		runtimeEnableTrackLevel.Store(false)
 		So(e.Enabled(TrackLevel), ShouldBeFalse)
 	})
@@ -646,14 +642,14 @@ func TestTrackStdoutLevelEnabler(t *testing.T) {
 	Convey("trackStdoutLevelEnabler 按当前 TrackOutput 路由 TrackLevel", t, func() {
 		base := newTrackLevelEnabler()
 		e := &trackStdoutLevelEnabler{wrapped: base}
-		oldOutput := Setting.TrackOutput
-		defer func() { Setting.TrackOutput = oldOutput }()
+		oldWriter, oldOutput := gTrackFileWriteSyncerProxy.state()
+		defer func() { _ = gTrackFileWriteSyncerProxy.setCurrent(oldWriter, oldOutput) }()
 
-		Setting.TrackOutput = TrackOutputFile
+		_ = gTrackFileWriteSyncerProxy.setCurrent(&TrackFileWriteSyncer{}, TrackOutputFile)
 		So(e.Enabled(TrackLevel), ShouldBeFalse)
-		Setting.TrackOutput = TrackOutputStdout
+		_ = gTrackFileWriteSyncerProxy.setCurrent(nil, TrackOutputStdout)
 		So(e.Enabled(TrackLevel), ShouldBeTrue)
-		Setting.TrackOutput = TrackOutputBoth
+		_ = gTrackFileWriteSyncerProxy.setCurrent(&TrackFileWriteSyncer{}, TrackOutputBoth)
 		So(e.Enabled(TrackLevel), ShouldBeTrue)
 		So(e.Enabled(0), ShouldBeTrue) // DebugLevel 在 runtimeLogLevel=Debug 下通过
 	})

@@ -46,6 +46,7 @@ func TestTruncateWriteSyncer_ExceedLimit(t *testing.T) {
 		So(json.Unmarshal([]byte(strings.TrimSpace(out)), &parsed), ShouldBeNil)
 		So(parsed["logbus_truncated"], ShouldBeTrue)
 		So(parsed["partial_msg"], ShouldNotBeNil)
+		So(parsed[OriginalSizeCompatKey], ShouldEqual, float64(len(original)))
 		So(parsed[OriginalSizeKey], ShouldEqual, float64(len(original)))
 		partialMsg, _ := parsed["partial_msg"].(string)
 		So(partialMsg, ShouldContainSubstring, "original_size")
@@ -73,6 +74,8 @@ func TestTruncateWriteSyncer_ExceedLimit_WithExtraFields(t *testing.T) {
 		So(parsed["tags"], ShouldEqual, "server")
 		So(parsed["caller"], ShouldEqual, "main.go:42")
 		So(parsed["msg"], ShouldEqual, "long message xxx")
+		So(parsed[OriginalSizeCompatKey], ShouldEqual, float64(len(original)))
+		So(parsed[OriginalSizeKey], ShouldEqual, float64(len(original)))
 		So(parsed["partial_msg"], ShouldNotBeNil)
 	})
 }
@@ -180,6 +183,7 @@ func TestTruncateWriteSyncer_StripFields_ApiCall(t *testing.T) {
 		So(apiCall["request_body"], ShouldBeNil)
 		So(apiCall["response_body"], ShouldBeNil)
 		// OriginalSizeKey 记录原始大小
+		So(parsed[OriginalSizeCompatKey], ShouldEqual, float64(len(original)))
 		So(parsed[OriginalSizeKey], ShouldEqual, float64(len(original)))
 	})
 }
