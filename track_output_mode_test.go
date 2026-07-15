@@ -202,6 +202,55 @@ func TestTrackOutput_FileOnly_MultiChannel(t *testing.T) {
 	})
 }
 
+func TestTrackOutput_FileOnly_ChannelIgnoresDuplicateMetaField(t *testing.T) {
+	Convey("TrackOutputFile: 文件路由使用 Entry.Message，不受同名 dd_meta_channel 字段影响", t, func() {
+		Convey("FetchLogContext 带同名字段", func() {
+			dir := t.TempDir()
+			_, cleanup := initWithBuf(
+				WithFetchLogContext(func() []zap.Field {
+					return []zap.Field{String(Meta, THINKINGDATA)}
+				}),
+				WithTrackOutput(TrackOutputFile),
+				WithTrackFileDir(dir),
+			)
+			defer cleanup()
+
+			payload := `{"app_id":"gof","event":"fetch_meta"}`
+			writeTrackLog(BI, payload)
+
+			lines, err := syncAndRead(dir, BI)
+			So(err, ShouldBeNil)
+			So(lines, ShouldHaveLength, 1)
+			So(lines[0], ShouldEqual, payload)
+
+			wrongPath := expectedTrackFilePath(dir, THINKINGDATA, runtimeHostName(), HourlyRotation, time.Now())
+			_, statErr := os.Stat(wrongPath)
+			So(os.IsNotExist(statErr), ShouldBeTrue)
+		})
+
+		Convey("业务字段带同名字段", func() {
+			dir := t.TempDir()
+			_, cleanup := initWithBuf(
+				WithTrackOutput(TrackOutputFile),
+				WithTrackFileDir(dir),
+			)
+			defer cleanup()
+
+			payload := `{"app_id":"gof","event":"field_meta"}`
+			gStdLogger.TrackWithChannel(BI, String(Meta, THINKINGDATA), String(MsgBody, payload))
+
+			lines, err := syncAndRead(dir, BI)
+			So(err, ShouldBeNil)
+			So(lines, ShouldHaveLength, 1)
+			So(lines[0], ShouldEqual, payload)
+
+			wrongPath := expectedTrackFilePath(dir, THINKINGDATA, runtimeHostName(), HourlyRotation, time.Now())
+			_, statErr := os.Stat(wrongPath)
+			So(os.IsNotExist(statErr), ShouldBeTrue)
+		})
+	})
+}
+
 func TestTrackOutput_FileCoreUsesCoreWrapper(t *testing.T) {
 	Convey("TrackOutputFile: 文件 core 也经过 CoreWrapper", t, func() {
 		oldWrapper := CoreWrapper

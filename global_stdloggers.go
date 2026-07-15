@@ -134,9 +134,7 @@ func newNLoggerInstance(tagName string, fields ...zap.Field) *StdLogger {
 
 	// 文件 core 始终挂稳定代理；无文件输出目标时由 trackOnlyLevelEnabler 禁用。
 	// 这样旧 logger 在 stdout↔file 热切换后不会缺失对应 core。
-	trackEncoderConfig := EncodeConfig
-	trackEncoderConfig.EncodeLevel = trackLevelEncoder
-	trackCore := withTagFields(zapcore.NewCore(newJSONEncoder(trackEncoderConfig), &gTrackFileWriteSyncerProxy, trackOnlyLevelEnabler{}))
+	trackCore := withTagFields(newTrackFileCore(&gTrackFileWriteSyncerProxy, trackOnlyLevelEnabler{}))
 	trackCore = CoreWrapper(tagName, trackCore)
 	cores = append(cores, trackCore)
 

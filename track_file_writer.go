@@ -390,11 +390,13 @@ type TrackFileWriteSyncerConfig struct {
 	KeepaliveMessage string
 }
 
-// TrackFileWriteSyncer 是一个 zapcore.WriteSyncer，它：
-//  1. 从 JSON 字节中提取 dd_meta_channel（channel）和 msg 字段
-//  2. 每个 channel 独享一个 goroutine（trackWorker），通过带缓冲的 Go channel 接收消息
-//  3. worker 串行完成文件切割与写入，彻底消除跨 channel 的锁竞争
-//  4. 写入调用方只做 JSON 解析 + 投递，不阻塞
+// TrackFileWriteSyncer 管理 track 文件 worker：
+//  1. 每个 channel 独享一个 goroutine（trackWorker），通过带缓冲的 Go channel 接收消息
+//  2. worker 串行完成文件切割与写入，彻底消除跨 channel 的锁竞争
+//  3. 写入调用方只做字段提取 + 投递，不阻塞
+//
+// Write 保留 JSON 字节兼容入口；logbus 自身的 track 文件 core 通过 writeTrack 直接传入
+// zap Entry.Message 和 fields，避免从已编码 JSON 反解析 channel。
 type TrackFileWriteSyncer struct {
 	mu               sync.RWMutex
 	baseDir          string
@@ -491,6 +493,18 @@ func (w *TrackFileWriteSyncer) Write(p []byte) (n int, err error) {
 	copy(data, msg)
 	w.send(finalChannel, trackMsg{data: data})
 	return len(p), nil
+}
+
+func (w *TrackFileWriteSyncer) writeTrack(channel string, contextFields, fields []zapcore.Field) {
+	channel, msg, ok := extractTrackChannelAndMsg(channel, contextFields, fields)
+	if !ok {
+		return
+	}
+
+	finalChannel := w.applyAlias(channel)
+	data := make([]byte, len(msg))
+	copy(data, msg)
+	w.send(finalChannel, trackMsg{data: data})
 }
 
 // Sync 向所有 worker 发出 sync 请求，等待它们排空队列并 fsync
@@ -661,6 +675,18 @@ func (p *trackFileWriteSyncerProxy) Write(b []byte) (int, error) {
 	n, err := current.Write(b)
 	p.mu.RUnlock()
 	return n, err
+}
+
+func (p *trackFileWriteSyncerProxy) writeTrack(channel string, contextFields, fields []zapcore.Field) error {
+	p.mu.RLock()
+	current := p.current
+	if current == nil {
+		p.mu.RUnlock()
+		return nil
+	}
+	current.writeTrack(channel, contextFields, fields)
+	p.mu.RUnlock()
+	return nil
 }
 
 func (p *trackFileWriteSyncerProxy) Sync() error {
