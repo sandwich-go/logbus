@@ -101,6 +101,20 @@ func TestTrackOutput_Stdout_NormalLog(t *testing.T) {
 	})
 }
 
+func TestTrackOutput_InitLogsEffectiveOutput(t *testing.T) {
+	Convey("Init logs the effective track output mode", t, func() {
+		dir := t.TempDir()
+		buf, cleanup := initWithBuf(
+			WithTrackOutput(TrackOutputBoth),
+			WithTrackFileDir(dir),
+		)
+		defer cleanup()
+
+		So(buf.String(), ShouldContainSubstring, "logbus track output configured")
+		So(buf.String(), ShouldContainSubstring, `"track_output":"both"`)
+	})
+}
+
 // ── TrackOutputFile（只写文件）────────────────────────────────────────────
 
 func TestTrackOutput_FileOnly_TrackNotInStdout(t *testing.T) {
@@ -379,6 +393,32 @@ func TestTrackOutput_PMTEnvOverrideAppliesToDefaultStdout(t *testing.T) {
 
 		So(Setting.TrackOutput, ShouldEqual, TrackOutputFile)
 		So(Setting.TrackFileDir, ShouldEqual, dir)
+	})
+}
+
+func TestTrackOutput_PMTDeploymentEnvUsesBothWithoutCodeOption(t *testing.T) {
+	Convey("PMT 发布环境变量在未设置 WithTrackOutput 时启用 both 输出", t, func() {
+		t.Setenv("sys_cd_env", "prod")
+		t.Setenv("sys_cd_service", "console")
+		t.Setenv("logbus_track_file_dir", "/tmp")
+		t.Setenv("logbus_track_output", "both")
+		t.Setenv("logbus_track_keepalive_interval", "1m")
+		t.Setenv("logbus_track_keepalive_message", "logbus-keep-alive")
+
+		buf := &bytes.Buffer{}
+		Init(NewConf(WithWriteSyncer(zapcore.AddSync(buf))))
+		defer func() {
+			t.Setenv("sys_cd_env", "")
+			Init(NewConf())
+			resetLogBus()
+		}()
+
+		So(Setting.TrackOutput, ShouldEqual, TrackOutputBoth)
+		So(Setting.TrackFileDir, ShouldEqual, "/tmp")
+		So(Setting.TrackKeepaliveInterval, ShouldEqual, time.Minute)
+		So(Setting.TrackKeepaliveMessage, ShouldEqual, "logbus-keep-alive")
+		So(buf.String(), ShouldContainSubstring, `"track_output":"both"`)
+		So(buf.String(), ShouldContainSubstring, `"track_file_dir":"/tmp"`)
 	})
 }
 

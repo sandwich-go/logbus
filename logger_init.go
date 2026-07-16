@@ -33,6 +33,10 @@ func Init(conf *Conf) {
 
 	// set logger used in glog
 	SetGlobalGLogger(gStdLogger, conf.DefaultChannel, conf.PrintAsError, 0)
+	DebugWithChannel(SERVERLOG, "logbus track output configured",
+		String("track_output", Setting.TrackOutput.String()),
+		String("track_file_dir", Setting.TrackFileDir),
+	)
 
 	// init monitor
 	// 本地启动多个服务时可以方便的屏蔽monitor

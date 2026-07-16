@@ -42,6 +42,19 @@ const (
 	TrackOutputBoth
 )
 
+func (o TrackOutput) String() string {
+	switch o {
+	case TrackOutputStdout:
+		return "stdout"
+	case TrackOutputFile:
+		return "file"
+	case TrackOutputBoth:
+		return "both"
+	default:
+		return fmt.Sprintf("unknown(%d)", o)
+	}
+}
+
 func (r TrackRotation) timeSlot(t time.Time) string {
 	switch r {
 	case MinuteRotation:
