@@ -227,6 +227,15 @@ func TestTrackFileWriteSyncer_TimeSlot(t *testing.T) {
 	})
 }
 
+func TestTrackFileOpenEvent(t *testing.T) {
+	Convey("track 文件生命周期事件区分创建、复用和轮转", t, func() {
+		So(trackFileOpenEvent(false, true), ShouldEqual, "created")
+		So(trackFileOpenEvent(false, false), ShouldEqual, "opened")
+		So(trackFileOpenEvent(true, true), ShouldEqual, "rotated")
+		So(trackFileOpenEvent(true, false), ShouldEqual, "rotated")
+	})
+}
+
 func TestTrackFileWriteSyncer_SyncReturnsWriteError(t *testing.T) {
 	Convey("文件打开失败会在 Sync 返回错误", t, func() {
 		dir := t.TempDir()

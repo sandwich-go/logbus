@@ -329,6 +329,34 @@ func TestTrackOutput_Both_TrackInFile(t *testing.T) {
 	})
 }
 
+func TestTrackOutput_Both_LogsTrackFileLifecycle(t *testing.T) {
+	Convey("TrackOutputBoth: 创建和轮转 track 文件时输出文件生命周期日志", t, func() {
+		dir := t.TempDir()
+		buf, cleanup := initWithBuf(
+			WithTrackOutput(TrackOutputBoth),
+			WithTrackFileDir(dir),
+		)
+		defer cleanup()
+
+		writeTrackLog(BI, `{"app_id":"gof","event":"lifecycle"}`)
+		So(gStdLogger.Sync(), ShouldBeNil)
+
+		path := expectedTrackFilePath(dir, BI, runtimeHostName(), HourlyRotation, time.Now())
+		So(buf.String(), ShouldContainSubstring, "logbus track file ready")
+		So(buf.String(), ShouldContainSubstring, `"track_file_event":"created"`)
+		So(buf.String(), ShouldContainSubstring, `"track_file_path":"`+path+`"`)
+
+		writer, _ := gTrackFileWriteSyncerProxy.state()
+		worker := writer.workers[BI]
+		worker.slot = "previous-slot" // 已 Sync，worker 空闲；模拟跨时间槽后的下一次写入。
+
+		writeTrackLog(BI, `{"app_id":"gof","event":"rotation"}`)
+		So(gStdLogger.Sync(), ShouldBeNil)
+		So(buf.String(), ShouldContainSubstring, `"track_file_event":"rotated"`)
+		So(buf.String(), ShouldContainSubstring, `"previous_track_file_slot":"previous-slot"`)
+	})
+}
+
 func TestTrackOutput_Both_NormalLogInStdout(t *testing.T) {
 	Convey("TrackOutputBoth: 普通日志仍写 stdout", t, func() {
 		dir := t.TempDir()

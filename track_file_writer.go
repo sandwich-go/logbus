@@ -282,20 +282,42 @@ func (w *trackWorker) writeBatch(data []byte) error {
 	now := time.Now()
 	slot := w.rotation.timeSlot(now)
 	if w.file == nil || w.slot != slot {
+		previousSlot := w.slot
+		rotated := w.file != nil
 		if w.file != nil {
 			w.recordErr(w.file.Sync())
 			w.recordErr(w.file.Close())
 		}
-		f, err := openTrackFile(w.baseDir, w.channel, w.hostName, slot, dateFromSlot(now))
+		f, path, created, err := openTrackFile(w.baseDir, w.channel, w.hostName, slot, dateFromSlot(now))
 		if err != nil {
 			w.file = nil
 			return err
 		}
 		w.file = f
 		w.slot = slot
+
+		fields := []Field{
+			String("track_file_event", trackFileOpenEvent(rotated, created)),
+			String("track_channel", w.channel),
+			String("track_file_path", path),
+		}
+		if rotated {
+			fields = append(fields, String("previous_track_file_slot", previousSlot))
+		}
+		InfoWithChannel(SERVERLOG, "logbus track file ready", fields...)
 	}
 	_, err := w.file.Write(data)
 	return err
+}
+
+func trackFileOpenEvent(rotated, created bool) string {
+	if rotated {
+		return "rotated"
+	}
+	if created {
+		return "created"
+	}
+	return "opened"
 }
 
 // dateFromSlot 从当前时间生成日期子目录段（yyyymmdd），与 slot 解耦保证小时/分钟切割模式下日期一致
@@ -342,19 +364,21 @@ func (w *trackWorker) stop() error {
 // 其中 baseDir 已是“该 channel 对应的基础目录”（外层 TrackChannelDirs 覆盖完毕），
 // channel 既作为子目录段也作为文件名前缀；podName 来自配置或 HOSTNAME，
 // 缺省回退 "unknown" 由 sanitizeTrackFileComponent 兜底。
-func openTrackFile(baseDir, channel, podName, slot, date string) (*os.File, error) {
+func openTrackFile(baseDir, channel, podName, slot, date string) (*os.File, string, bool, error) {
 	chSeg := sanitizeTrackFileComponent(channel)
 	podSeg := sanitizeTrackFileComponent(podName)
 	dir := filepath.Join(baseDir, chSeg, date)
-	if err := os.MkdirAll(dir, 0o755); err != nil {
-		return nil, fmt.Errorf("trackFileWriter: mkdir %s: %w", dir, err)
-	}
 	name := filepath.Join(dir, fmt.Sprintf("%s_%s_%s.log", chSeg, podSeg, slot))
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		return nil, name, false, fmt.Errorf("trackFileWriter: mkdir %s: %w", dir, err)
+	}
+	_, statErr := os.Stat(name)
+	created := os.IsNotExist(statErr)
 	f, err := os.OpenFile(name, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0o644)
 	if err != nil {
-		return nil, fmt.Errorf("trackFileWriter: open %s: %w", name, err)
+		return nil, name, false, fmt.Errorf("trackFileWriter: open %s: %w", name, err)
 	}
-	return f, nil
+	return f, name, created, nil
 }
 
 func sanitizeTrackFileComponent(s string) string {
