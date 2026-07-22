@@ -11,10 +11,12 @@ a simple logger dedicated to JSON output
 ### 基础用法
 
 ```go
+import "context"
 import "github.com/sandwich-go/logbus"
 import "gopkg.in/natefinch/lumberjack.v2"
 
 func MustInstallLogger() {
+    ctx := context.Background()
     defer logbus.Close()
 	//初始化
     logbus.Init(logbus.NewConf(
@@ -38,20 +40,20 @@ func MustInstallLogger() {
     })
 	
 	// 基础使用
-    logbus.Error("test log", logbus.String("key", "value"), ErrorField(errors.New("rrrrrr")))
-    logbus.Info("test log", logbus.Int("key1", 123), zap.Bool("key2", true))
+    logbus.Error(ctx, "test log", logbus.String("key", "value"), ErrorField(errors.New("rrrrrr")))
+    logbus.Info(ctx, "test log", logbus.Int("key1", 123), zap.Bool("key2", true))
 
     // scope logger
     playerLogger := logbus.NewScopeLogger("Player", zap.String("playername", "zhangsong"), zap.Int("playerid", 123))
     guildLogger := logbus.NewScopeLogger("Guild", zap.String("guildname", "guild1"))
-    playerLogger.Info("player gold", logbus.Int("money", 648))
-    guildLogger.Info("guild gold", logbus.Int("money", 6480))
+    playerLogger.Info(ctx, "player gold", logbus.Int("money", 648))
+    guildLogger.Info(ctx, "guild gold", logbus.Int("money", 6480))
     
 	// queue
     q := logbus.NewQueue()
     q.Push(zap.Int("i", 1))
     q.Push(zap.Int("j", 2))
-    logbus.Debug("msg", q.Retrieve()...)
+    logbus.Debug(ctx, "msg", q.Retrieve()...)
 }
 
 ```
@@ -115,10 +117,11 @@ func WithWriteSyncer(v zapcore.WriteSyncer) ConfOption
 logbus.Init(logbus.NewConf(
     logbus.WithLogLevel(zap.InfoLevel),
 ))
+ctx := context.Background()
 
-logbus.Debug("before change") // 不输出
+logbus.Debug(ctx, "before change") // 不输出
 
 logbus.SetLogLevel(zap.DebugLevel)
 
-logbus.Debug("after change") // 会输出
+logbus.Debug(ctx, "after change") // 会输出
 ```

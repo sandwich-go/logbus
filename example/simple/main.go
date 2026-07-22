@@ -1,11 +1,15 @@
 package main
 
 import (
+	"context"
+
 	"github.com/sandwich-go/boost/xerror"
 	"github.com/sandwich-go/logbus"
 )
 
 func main() {
+	ctx := context.Background()
+
 	// close logger before exit
 	defer logbus.Close()
 
@@ -19,16 +23,16 @@ func main() {
 	))
 
 	// Print server debug log, dd_meta_channel=setting.DefaultChannel
-	logbus.Debug("", logbus.Int("int", 123))
+	logbus.Debug(ctx, "", logbus.Int("int", 123))
 
 	// Print server info log, dd_meta_channel=setting.DefaultChannel
-	logbus.Info("", logbus.Int("money", 648))
+	logbus.Info(ctx, "", logbus.Int("money", 648))
 
 	// User defined channel, dd_meta_channel=setting.UserDefine
-	logbus.InfoWithChannel("UserDefine", "", logbus.Strings("str1", []string{"hello", "world"}))
+	logbus.InfoWithChannel(ctx, "UserDefine", "", logbus.Strings("str1", []string{"hello", "world"}))
 
 	// 错误（非逻辑）自动升级为error级别日志
-	logbus.Warn("自动升级为error日志", logbus.E(xerror.NewText("some error")))
+	logbus.Warn(ctx, "自动升级为error日志", logbus.E(xerror.NewText("some error")))
 	// 逻辑错误不升级为error级别日志
-	logbus.Warn("逻辑错误不升级为error日志", logbus.E(xerror.NewText("some logical error").SetLogic()))
+	logbus.Warn(ctx, "逻辑错误不升级为error日志", logbus.E(xerror.NewText("some logical error").SetLogic()))
 }

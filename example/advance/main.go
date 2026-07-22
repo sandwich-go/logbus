@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"time"
 
 	"github.com/sandwich-go/boost/xpanic"
@@ -13,6 +14,8 @@ import (
 )
 
 func main() {
+	ctx := context.Background()
+
 	// close logger before exit
 	defer logbus.Close()
 
@@ -26,7 +29,7 @@ func main() {
 	)
 
 	// default channel, default tag
-	logbus.Warn("", logbus.Int("money", 648))
+	logbus.Warn(ctx, "", logbus.Int("money", 648))
 
 	// reason: 打点的推荐方式：使用预定义的tags
 	// Print tga log and big query log. New way
@@ -57,21 +60,21 @@ func main() {
 	// scope logger
 	playerLogger := logbus.NewScopeLogger("Player", zap.String("playername", "zhangsong"), zap.Int("playerid", 123))
 	guildLogger := logbus.NewScopeLogger("Guild", zap.String("guildname", "guild1"))
-	playerLogger.Info("player gold", logbus.Int("money", 648))
-	guildLogger.Info("guild gold", logbus.Int("money", 6480))
+	playerLogger.Info(ctx, "player gold", logbus.Int("money", 648))
+	guildLogger.Info(ctx, "guild gold", logbus.Int("money", 6480))
 
 	// 增加全局域 非线程安全
 	logbus.AppendGlobalFields(logbus.String("playerid", "gtwefasfwad"))
-	logbus.Warn("", logbus.Int("money", 648)) // has extra global field
+	logbus.Warn(ctx, "", logbus.Int("money", 648)) // has extra global field
 
 	q := logbus.NewQueue()
 	q.Push(logbus.Int("i", 1))
 	q.Push(logbus.Int("j", 2))
-	logbus.Debug("queue", q.Retrieve()...)
+	logbus.Debug(ctx, "queue", q.Retrieve()...)
 
 	logbus.ReservedGlobalFields = nil
 	logbus.SetGlobalFields(nil)
-	logbus.Info("clean log")
+	logbus.Info(ctx, "clean log")
 
 	biTracker := logbus.NewTracker(logbus.WithTags(logbus.BI), logbus.WithBiAppID("gof.prod.global"))
 	bislg.MustInitialize(biTracker)

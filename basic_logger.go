@@ -1,6 +1,7 @@
 package logbus
 
 import (
+	"context"
 	"time"
 
 	prometheusClient "github.com/prometheus/client_golang/prometheus"
@@ -85,6 +86,6 @@ func setDefaultMetricsReporter(
 		if err != nil {
 			panic(err)
 		}
-		DebugWithChannel(Monitor, "", String("prometheus [http] listening on", defaultPrometheusListenAddress), String("path", defaultPrometheusPath))
+		DebugWithChannel(context.Background(), Monitor, "", String("prometheus [http] listening on", defaultPrometheusListenAddress), String("path", defaultPrometheusPath))
 	}
 }

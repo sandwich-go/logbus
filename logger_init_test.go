@@ -26,10 +26,10 @@ func TestStdLogger(t *testing.T) {
 	defer resetLogBus()
 	defer Close()
 	Convey("test server log to stdout\n", t, func() {
-		Debug("", Int("int", 111))
-		Info("", Int("int", 111), String("str", "222"))
-		Warn("", Int("int", 111), String("str", "222"), Bool("b", true))
-		Error("", Int("int", 111), String("str", "222"), Bool("b", true), ErrorField(errors.New("this is a test error")))
+		Debug(testContext, "", Int("int", 111))
+		Info(testContext, "", Int("int", 111), String("str", "222"))
+		Warn(testContext, "", Int("int", 111), String("str", "222"), Bool("b", true))
+		Error(testContext, "", Int("int", 111), String("str", "222"), Bool("b", true), ErrorField(errors.New("this is a test error")))
 		// StdLogger().WithOptions(zap.AddCallerSkip(10)).Fatal("fatal", zap.Int("int", 111), zap.String("str", "222"), zap.Bool("b", true), zap.Error(nil))
 		So(gStdLogger.fetch, ShouldEqual, nil)
 	})
@@ -41,7 +41,7 @@ func TestScopeLogger(t *testing.T) {
 	scopLogger2 := NewScopeLoggerWithFetchFunc("test2", func() []Field {
 		return []zap.Field{String("dd_meta_channel", "test2")}
 	})
-	scopLogger1.Debug("", Int("int", 111))
+	scopLogger1.Debug(testContext, "", Int("int", 111))
 	Convey("test scope log\n", t, func() {
 		So(len(cacheGLogger), ShouldEqual, 2)
 		So(refresh, ShouldEqual, true)
@@ -53,10 +53,10 @@ func TestScopeLogger(t *testing.T) {
 	defer resetLogBus()
 	defer Close()
 	Convey("test scope log\n", t, func() {
-		scopLogger1.Debug("", Int("int", 111))                       // should not print
-		scopLogger1.Info("", Int("int", 111), String("str", "222"))  // should print with dd_meta_channel test1
-		scopLogger2.Warn("", Int("int", 111), String("str", "222"))  // should print with dd_meta_channel test2
-		scopLogger3.Error("", Int("int", 111), String("str", "222")) // should print with dd_meta_channel test1
+		scopLogger1.Debug(testContext, "", Int("int", 111))                       // should not print
+		scopLogger1.Info(testContext, "", Int("int", 111), String("str", "222"))  // should print with dd_meta_channel test1
+		scopLogger2.Warn(testContext, "", Int("int", 111), String("str", "222"))  // should print with dd_meta_channel test2
+		scopLogger3.Error(testContext, "", Int("int", 111), String("str", "222")) // should print with dd_meta_channel test1
 		So(cacheGLogger, ShouldEqual, nil)
 		So(refresh, ShouldEqual, false)
 	})
@@ -123,7 +123,7 @@ func TestTagLoggerThinkingData(t *testing.T) {
 			properties := map[string]interface{}{"#ip": "10.0.0.1", "player_name": "zhang san", "level": 7}
 			data, err := thinkingdata.Track("111", "", "login", "", "", properties)
 			So(err, ShouldBeNil)
-			Info("", zap.Object("tga", data))
+			Info(testContext, "", zap.Object("tga", data))
 		})
 	})
 }

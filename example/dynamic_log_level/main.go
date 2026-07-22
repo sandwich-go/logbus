@@ -26,6 +26,8 @@ import (
 
 func main() {
 	defer logbus.Close()
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer stop()
 
 	// Init 末尾会自动调用 enableDynamicLogLevel()：
 	//   - 若未设置 sys_conf_path_env 环境变量，本地运行不会启用 watch（零侵入）
@@ -37,27 +39,24 @@ func main() {
 	))
 
 	if os.Getenv("sys_conf_path_env") == "" {
-		logbus.Warn("sys_conf_path_env not set; dynamic log level is NOT enabled, set it and rerun to see effect")
+		logbus.Warn(ctx, "sys_conf_path_env not set; dynamic log level is NOT enabled, set it and rerun to see effect")
 	}
 
 	// Ctrl+C / SIGTERM 优雅退出，确保 defer logbus.Close() 能跑到
-	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
-	defer stop()
-
 	ticker := time.NewTicker(time.Second)
 	defer ticker.Stop()
 
 	for i := 0; ; i++ {
 		select {
 		case <-ctx.Done():
-			logbus.Info("signal received, exiting")
+			logbus.Info(ctx, "signal received, exiting")
 			return
 		case <-ticker.C:
-			logbus.Debug("debug tick", logbus.Int("i", i), logbus.String("current_level", logbus.GetLogLevel().String()))
-			logbus.Info("info tick", logbus.Int("i", i), logbus.String("current_level", logbus.GetLogLevel().String()))
-			logbus.Warn("warn tick", logbus.Int("i", i), logbus.String("current_level", logbus.GetLogLevel().String()))
+			logbus.Debug(ctx, "debug tick", logbus.Int("i", i), logbus.String("current_level", logbus.GetLogLevel().String()))
+			logbus.Info(ctx, "info tick", logbus.Int("i", i), logbus.String("current_level", logbus.GetLogLevel().String()))
+			logbus.Warn(ctx, "warn tick", logbus.Int("i", i), logbus.String("current_level", logbus.GetLogLevel().String()))
 			if i > 0 && i%10 == 0 {
-				logbus.Info("tip: try editing ops_config.json `log_level` value, changes take effect within ~200ms")
+				logbus.Info(ctx, "tip: try editing ops_config.json `log_level` value, changes take effect within ~200ms")
 			}
 		}
 	}

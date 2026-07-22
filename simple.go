@@ -9,108 +9,80 @@ import (
 // default logger provided
 var newGlobalGLogger NewILogger
 
-func Debug(msg string, v ...Field) {
-	newGlobalGLogger.Debug(msg, v...)
+func Debug(ctx context.Context, msg string, v ...Field) {
+	newGlobalGLogger.Debug(ctx, msg, v...)
 }
 
-func Info(msg string, v ...Field) {
-	newGlobalGLogger.Info(msg, v...)
+func Info(ctx context.Context, msg string, v ...Field) {
+	newGlobalGLogger.Info(ctx, msg, v...)
 }
 
-func Warn(msg string, v ...Field) {
-	newGlobalGLogger.Warn(msg, v...)
+func Warn(ctx context.Context, msg string, v ...Field) {
+	newGlobalGLogger.Warn(ctx, msg, v...)
 }
 
-func Error(msg string, v ...Field) {
-	newGlobalGLogger.Error(msg, v...)
+func Error(ctx context.Context, msg string, v ...Field) {
+	newGlobalGLogger.Error(ctx, msg, v...)
 }
 
-func DPanic(msg string, v ...Field) {
-	newGlobalGLogger.DPanic(msg, v...)
+func DPanic(ctx context.Context, msg string, v ...Field) {
+	newGlobalGLogger.DPanic(ctx, msg, v...)
 }
 
-func Panic(msg string, v ...Field) {
-	newGlobalGLogger.Panic(msg, v...)
+func Panic(ctx context.Context, msg string, v ...Field) {
+	newGlobalGLogger.Panic(ctx, msg, v...)
 }
 
-func Fatal(msg string, v ...Field) {
-	newGlobalGLogger.Fatal(msg, v...)
-}
-
-func DebugWithContext(ctx context.Context, msg string, v ...Field) {
-	newGlobalGLogger.DebugWithContext(ctx, msg, v...)
-}
-
-func InfoWithContext(ctx context.Context, msg string, v ...Field) {
-	newGlobalGLogger.InfoWithContext(ctx, msg, v...)
-}
-
-func WarnWithContext(ctx context.Context, msg string, v ...Field) {
-	newGlobalGLogger.WarnWithContext(ctx, msg, v...)
-}
-
-func ErrorWithContext(ctx context.Context, msg string, v ...Field) {
-	newGlobalGLogger.ErrorWithContext(ctx, msg, v...)
-}
-
-func DPanicWithContext(ctx context.Context, msg string, v ...Field) {
-	newGlobalGLogger.DPanicWithContext(ctx, msg, v...)
-}
-
-func PanicWithContext(ctx context.Context, msg string, v ...Field) {
-	newGlobalGLogger.PanicWithContext(ctx, msg, v...)
-}
-
-func FatalWithContext(ctx context.Context, msg string, v ...Field) {
-	newGlobalGLogger.FatalWithContext(ctx, msg, v...)
+func Fatal(ctx context.Context, msg string, v ...Field) {
+	newGlobalGLogger.Fatal(ctx, msg, v...)
 }
 
 // WithChannel
-func DebugWithChannel(c string, msg string, fields ...Field) {
-	newGlobalGLogger.DebugWithChannel(c, msg, fields...)
+func DebugWithChannel(ctx context.Context, c string, msg string, fields ...Field) {
+	newGlobalGLogger.DebugWithChannel(ctx, c, msg, fields...)
 }
-func InfoWithChannel(c string, msg string, fields ...Field) {
-	newGlobalGLogger.InfoWithChannel(c, msg, fields...)
+func InfoWithChannel(ctx context.Context, c string, msg string, fields ...Field) {
+	newGlobalGLogger.InfoWithChannel(ctx, c, msg, fields...)
 }
-func WarnWithChannel(c string, msg string, fields ...Field) {
-	newGlobalGLogger.WarnWithChannel(c, msg, fields...)
+func WarnWithChannel(ctx context.Context, c string, msg string, fields ...Field) {
+	newGlobalGLogger.WarnWithChannel(ctx, c, msg, fields...)
 }
-func ErrorWithChannel(c string, msg string, fields ...Field) {
-	newGlobalGLogger.ErrorWithChannel(c, msg, fields...)
+func ErrorWithChannel(ctx context.Context, c string, msg string, fields ...Field) {
+	newGlobalGLogger.ErrorWithChannel(ctx, c, msg, fields...)
 }
-func DPanicWithChannel(c string, msg string, fields ...Field) {
-	newGlobalGLogger.DPanicWithChannel(c, msg, fields...)
+func DPanicWithChannel(ctx context.Context, c string, msg string, fields ...Field) {
+	newGlobalGLogger.DPanicWithChannel(ctx, c, msg, fields...)
 }
-func PanicWithChannel(c string, msg string, fields ...Field) {
-	newGlobalGLogger.PanicWithChannel(c, msg, fields...)
+func PanicWithChannel(ctx context.Context, c string, msg string, fields ...Field) {
+	newGlobalGLogger.PanicWithChannel(ctx, c, msg, fields...)
 }
-func FatalWithChannel(c string, msg string, fields ...Field) {
-	newGlobalGLogger.FatalWithChannel(c, msg, fields...)
-}
-
-// DebugDepth 用于glog被再封装
-func DebugDepth(depth int, msg string, v ...Field) {
-	newGlobalGLogger.GDebugDepth(depth, msg, v...)
+func FatalWithChannel(ctx context.Context, c string, msg string, fields ...Field) {
+	newGlobalGLogger.FatalWithChannel(ctx, c, msg, fields...)
 }
 
-// InfoDepth 用于glog被再封装
-func InfoDepth(depth int, msg string, v ...Field) {
-	newGlobalGLogger.GInfoDepth(depth, msg, v...)
+// DebugDepth 用于 glog 被再封装，并从 ctx 提取日志元数据。
+func DebugDepth(ctx context.Context, depth int, msg string, v ...Field) {
+	newGlobalGLogger.GDebugDepth(ctx, depth, msg, v...)
 }
 
-// WarnDepth 用于glog被再封装
-func WarnDepth(depth int, msg string, v ...Field) {
-	newGlobalGLogger.GWarnDepth(depth, msg, v...)
+// InfoDepth 用于 glog 被再封装，并从 ctx 提取日志元数据。
+func InfoDepth(ctx context.Context, depth int, msg string, v ...Field) {
+	newGlobalGLogger.GInfoDepth(ctx, depth, msg, v...)
 }
 
-// ErrorDepth 用于glog被再封装
-func ErrorDepth(depth int, msg string, v ...Field) {
-	newGlobalGLogger.GErrorDepth(depth, msg, v...)
+// WarnDepth 用于 glog 被再封装，并从 ctx 提取日志元数据。
+func WarnDepth(ctx context.Context, depth int, msg string, v ...Field) {
+	newGlobalGLogger.GWarnDepth(ctx, depth, msg, v...)
 }
 
-// FatalDepth 用于glog被再封装
-func FatalDepth(depth int, msg string, v ...Field) {
-	newGlobalGLogger.GFatalDepth(depth, msg, v...)
+// ErrorDepth 用于 glog 被再封装，并从 ctx 提取日志元数据。
+func ErrorDepth(ctx context.Context, depth int, msg string, v ...Field) {
+	newGlobalGLogger.GErrorDepth(ctx, depth, msg, v...)
+}
+
+// FatalDepth 用于 glog 被再封装，并从 ctx 提取日志元数据。
+func FatalDepth(ctx context.Context, depth int, msg string, v ...Field) {
+	newGlobalGLogger.GFatalDepth(ctx, depth, msg, v...)
 }
 
 func DefaultLogger() NewILogger {

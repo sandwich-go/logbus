@@ -23,13 +23,13 @@ func TestSetLogLevel(t *testing.T) {
 
 	scopeLogger := NewScopeLogger("scope")
 
-	Debug("global debug before change")
-	scopeLogger.Debug("scope debug before change")
+	Debug(testContext, "global debug before change")
+	scopeLogger.Debug(testContext, "scope debug before change")
 
 	SetLogLevel(zap.DebugLevel)
 
-	Debug("global debug after change")
-	scopeLogger.Debug("scope debug after change")
+	Debug(testContext, "global debug after change")
+	scopeLogger.Debug(testContext, "scope debug after change")
 
 	output := buf.String()
 	if strings.Contains(output, "before change") {
@@ -76,10 +76,10 @@ func TestSetLogLevelConcurrent(t *testing.T) {
 			for j := 0; j < 200; j++ {
 				level := levels[(worker+j)%len(levels)]
 				SetLogLevel(level)
-				Debug("global concurrent debug")
-				scopeLogger.Debug("scope concurrent debug")
-				Info("global concurrent info")
-				scopeLogger.Info("scope concurrent info")
+				Debug(testContext, "global concurrent debug")
+				scopeLogger.Debug(testContext, "scope concurrent debug")
+				Info(testContext, "global concurrent info")
+				scopeLogger.Info(testContext, "scope concurrent info")
 			}
 		}(i)
 	}
@@ -88,8 +88,8 @@ func TestSetLogLevelConcurrent(t *testing.T) {
 	wg.Wait()
 
 	SetLogLevel(zap.DebugLevel)
-	Debug("global debug after concurrent change")
-	scopeLogger.Debug("scope debug after concurrent change")
+	Debug(testContext, "global debug after concurrent change")
+	scopeLogger.Debug(testContext, "scope debug after concurrent change")
 
 	output := buf.String()
 	if !strings.Contains(output, "global debug after concurrent change") {

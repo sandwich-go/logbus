@@ -56,6 +56,7 @@ var (
 func enableDynamicLogLevel() {
 	dynamicLogLevelMu.Lock()
 	defer dynamicLogLevelMu.Unlock()
+	ctx := context.Background()
 
 	confDir := strings.TrimSpace(os.Getenv(envKeyConfPathEnv))
 	if confDir == "" {
@@ -65,7 +66,7 @@ func enableDynamicLogLevel() {
 	confPath := filepath.Join(confDir, bizopsConfFile)
 	serviceName := strings.TrimSpace(os.Getenv(envKeyCDService))
 	if dynamicLogLevelStarted {
-		applyLogConfFromLoader(context.Background(), dynamicLogLevelLoader, confPath, serviceName)
+		applyLogConfFromLoader(ctx, dynamicLogLevelLoader, confPath, serviceName)
 		return
 	}
 
@@ -76,16 +77,15 @@ func enableDynamicLogLevel() {
 	//      写事件在部分 K8s 版本上并不可靠；polling 按 mtime+size 对比稳定可靠。
 	loader, err := xfile.New(
 		xfile.WithPollingMode(true),
-		xfile.WithLogDebug(func(s string) { DebugWithChannel(SERVERLOG, "logbus dynamic loglevel: "+s) }),
-		xfile.WithLogWarning(func(s string) { WarnWithChannel(SERVERLOG, "logbus dynamic loglevel: "+s) }),
+		xfile.WithLogDebug(func(s string) { DebugWithChannel(ctx, SERVERLOG, "logbus dynamic loglevel: "+s) }),
+		xfile.WithLogWarning(func(s string) { WarnWithChannel(ctx, SERVERLOG, "logbus dynamic loglevel: "+s) }),
 	)
 	if err != nil {
-		WarnWithChannel(SERVERLOG, "logbus dynamic loglevel: new xfile loader failed",
+		WarnWithChannel(ctx, SERVERLOG, "logbus dynamic loglevel: new xfile loader failed",
 			String("err", err.Error()))
 		return
 	}
 
-	ctx := context.Background()
 	applyLogConfFromLoader(ctx, loader, confPath, serviceName)
 
 	loader.Watch(ctx, confPath, func(_ string, path string, content []byte) error {
@@ -96,7 +96,7 @@ func enableDynamicLogLevel() {
 	dynamicLogLevelLoader = loader
 	dynamicLogLevelStarted = true
 
-	InfoWithChannel(SERVERLOG, "logbus dynamic loglevel enabled",
+	InfoWithChannel(ctx, SERVERLOG, "logbus dynamic loglevel enabled",
 		String("path", confPath), String("service", serviceName))
 }
 
@@ -107,7 +107,7 @@ func applyLogConfFromLoader(ctx context.Context, loader kv.Loader, confPath, ser
 	// 初始读取：PollingMode 下读取失败会吞掉 err（见 xfile.GetImplement），
 	// 此时文件可能尚未下发，跳过即可；待文件出现后由 Watch 回调应用。
 	if data, gErr := loader.Get(ctx, confPath); gErr != nil {
-		WarnWithChannel(SERVERLOG, "logbus dynamic loglevel: read initial conf failed",
+		WarnWithChannel(ctx, SERVERLOG, "logbus dynamic loglevel: read initial conf failed",
 			String("path", confPath), String("err", gErr.Error()))
 	} else if len(data) > 0 {
 		applyLogConfContent(confPath, data, serviceName)
@@ -131,14 +131,15 @@ func closeDynamicLogLevel() {
 	loader := dynamicLogLevelLoader
 	dynamicLogLevelLoader = nil
 	dynamicLogLevelStarted = false
+	ctx := context.Background()
 	func() {
 		defer func() {
 			if r := recover(); r != nil {
-				DebugWithChannel(SERVERLOG, "logbus dynamic loglevel: loader.Close panicked (recovered, defensive)",
+				DebugWithChannel(ctx, SERVERLOG, "logbus dynamic loglevel: loader.Close panicked (recovered, defensive)",
 					String("reason", fmt.Sprintf("%v", r)))
 			}
 		}()
-		_ = loader.Close(context.Background())
+		_ = loader.Close(ctx)
 	}()
 }
 
@@ -155,9 +156,10 @@ func applyLogConfContent(path string, content []byte, serviceName string) {
 	if len(content) == 0 {
 		return
 	}
+	ctx := context.Background()
 	var cfg bizOpsConf
 	if err := json.Unmarshal(content, &cfg); err != nil {
-		WarnWithChannel(SERVERLOG, "logbus dynamic loglevel: unmarshal json failed",
+		WarnWithChannel(ctx, SERVERLOG, "logbus dynamic loglevel: unmarshal json failed",
 			String("path", path), String("err", err.Error()))
 		return
 	}
@@ -182,7 +184,7 @@ func applyLogConfContent(path string, content []byte, serviceName string) {
 	for _, c := range candidates {
 		var level zapcore.Level
 		if err := level.UnmarshalText([]byte(strings.ToLower(strings.TrimSpace(c.value)))); err != nil {
-			WarnWithChannel(SERVERLOG, "logbus dynamic loglevel: invalid log_level, try next candidate",
+			WarnWithChannel(ctx, SERVERLOG, "logbus dynamic loglevel: invalid log_level, try next candidate",
 				String("path", path), String("from", c.from), String("level", c.value), String("err", err.Error()))
 			continue
 		}
@@ -190,11 +192,11 @@ func applyLogConfContent(path string, content []byte, serviceName string) {
 			return
 		}
 		SetLogLevel(level)
-		InfoWithChannel(SERVERLOG, "logbus dynamic loglevel updated",
+		InfoWithChannel(ctx, SERVERLOG, "logbus dynamic loglevel updated",
 			String("path", path), String("from", c.from), String("service", serviceName), String("level", level.String()))
 		return
 	}
 	// 所有候选项均非法
-	WarnWithChannel(SERVERLOG, "logbus dynamic loglevel: all candidates invalid, keep current level",
+	WarnWithChannel(ctx, SERVERLOG, "logbus dynamic loglevel: all candidates invalid, keep current level",
 		String("path", path), String("service", serviceName), String("current_level", GetLogLevel().String()))
 }

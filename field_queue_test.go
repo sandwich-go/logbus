@@ -23,6 +23,6 @@ func TestFieldQueue(t *testing.T) {
 		data = q.Retrieve()
 		So(len(data), ShouldEqual, 1)
 		So(data[0].Integer, ShouldEqual, 11)
-		Debug("test fieldQueue ", q.Retrieve()...)
+		Debug(testContext, "test fieldQueue ", q.Retrieve()...)
 	})
 }
