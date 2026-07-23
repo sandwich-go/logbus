@@ -113,7 +113,7 @@ func (s *GLogger) getDepthLogger(depth int) *StdLogger {
 	if lg, ok := s.depthLogger.Load(depth); ok {
 		return lg.(*StdLogger)
 	}
-	cloneLogger := newStdLogger(s.stdLogger.WithOptions(zap.AddCallerSkip(depth)), s.stdLogger.fetch)
+	cloneLogger := newStdLogger(s.stdLogger.WithOptions(zap.AddCallerSkip(depth)), s.stdLogger.config(), s.stdLogger.fetch)
 	s.depthLogger.Store(depth, cloneLogger)
 	return cloneLogger
 }
@@ -164,7 +164,7 @@ func (s *GLogger) GFatalDepth(ctx context.Context, depth int, msg string, fields
 // WithChannel
 func (s *GLogger) DebugWithChannel(ctx context.Context, c string, msg string, fields ...Field) {
 	fields = append(fields, FromContext(ctx), String(MsgBody, msg))
-	gStdLogger.DebugWithChannel(c, fields...)
+	s.stdLogger.DebugWithChannel(c, fields...)
 }
 
 func (s *GLogger) InfoWithChannel(ctx context.Context, c string, msg string, fields ...Field) {

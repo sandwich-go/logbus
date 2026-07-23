@@ -36,7 +36,8 @@ type trackLogger struct {
 }
 
 func (t *trackLogger) Track(fields ...Field) error {
-	if ce := gStdLogger.z.Check(TrackLevel, ""); ce == nil {
+	logger := gStdLogger.Load()
+	if ce := logger.z.Check(TrackLevel, ""); ce == nil {
 		// 检查逻辑前置，不做无用功
 		return nil
 	}
@@ -51,13 +52,13 @@ func (t *trackLogger) Track(fields ...Field) error {
 			if err != nil {
 				return err
 			}
-			gStdLogger.PrintThingkingData(data)
+			logger.PrintThingkingData(data)
 		case BIGQUERY:
 			tableName, bigFields, err := bigquery.ExtractEncoder(fields)
 			if err != nil {
 				return err
 			}
-			gStdLogger.PrintBigQuery(tableName, bigFields...)
+			logger.PrintBigQuery(tableName, bigFields...)
 		case BI:
 			memoryEncoder := zapcore.NewMapObjectEncoder()
 			for _, v := range fields {
@@ -76,16 +77,18 @@ func (t *trackLogger) Track(fields ...Field) error {
 }
 
 func (t *trackLogger) TrackWithTGAData(d thinkingdata.Data) error {
-	if ce := gStdLogger.z.Check(TrackLevel, ""); ce == nil {
+	logger := gStdLogger.Load()
+	if ce := logger.z.Check(TrackLevel, ""); ce == nil {
 		// 检查逻辑前置，不做无用功
 		return nil
 	}
-	gStdLogger.PrintThingkingData(d)
+	logger.PrintThingkingData(d)
 	return nil
 }
 
 func (t *trackLogger) TrackWithBIData(d bi.Data) error {
-	if ce := gStdLogger.z.Check(TrackLevel, ""); ce == nil {
+	logger := gStdLogger.Load()
+	if ce := logger.z.Check(TrackLevel, ""); ce == nil {
 		return nil
 	}
 	if d.AppID == "" {
@@ -94,6 +97,6 @@ func (t *trackLogger) TrackWithBIData(d bi.Data) error {
 	if d.AppID == "" {
 		return ErrBiAppIDEmpty
 	}
-	gStdLogger.PrintBIData(d)
+	logger.PrintBIData(d)
 	return nil
 }

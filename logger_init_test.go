@@ -31,7 +31,7 @@ func TestStdLogger(t *testing.T) {
 		Warn(testContext, "", Int("int", 111), String("str", "222"), Bool("b", true))
 		Error(testContext, "", Int("int", 111), String("str", "222"), Bool("b", true), ErrorField(errors.New("this is a test error")))
 		// StdLogger().WithOptions(zap.AddCallerSkip(10)).Fatal("fatal", zap.Int("int", 111), zap.String("str", "222"), zap.Bool("b", true), zap.Error(nil))
-		So(gStdLogger.fetch, ShouldEqual, nil)
+		So(gStdLogger.Load().fetch, ShouldNotBeNil)
 	})
 }
 

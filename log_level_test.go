@@ -41,8 +41,8 @@ func TestSetLogLevel(t *testing.T) {
 	if !strings.Contains(output, "scope debug after change") {
 		t.Fatalf("scope debug log should be emitted after SetLogLevel, output=%s", output)
 	}
-	if Setting.LogLevel != zap.DebugLevel {
-		t.Fatalf("Setting.LogLevel should be updated to debug, got %s", Setting.LogLevel.String())
+	if got := GetLogLevel(); got != zap.DebugLevel {
+		t.Fatalf("runtime log level should be updated to debug, got %s", got.String())
 	}
 }
 
@@ -101,7 +101,7 @@ func TestSetLogLevelConcurrent(t *testing.T) {
 	if got := runtimeLogLevel.Level(); got != zap.DebugLevel {
 		t.Fatalf("runtime log level should end at debug, got %s", got.String())
 	}
-	if Setting.LogLevel != zap.DebugLevel {
-		t.Fatalf("Setting.LogLevel should end at debug, got %s", Setting.LogLevel.String())
+	if got := GetLogLevel(); got != zap.DebugLevel {
+		t.Fatalf("runtime log level should end at debug, got %s", got.String())
 	}
 }

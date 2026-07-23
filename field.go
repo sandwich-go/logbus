@@ -3,6 +3,7 @@ package logbus
 import (
 	"fmt"
 	"strings"
+	"sync/atomic"
 	"time"
 
 	"github.com/sandwich-go/boost/xerror"
@@ -167,11 +168,13 @@ func ErrorField(err error) Field {
 	if err == nil {
 		return zap.Skip()
 	}
-	if Setting.IgnoreLogicalError && xerror.Logic(err) {
+	if ignoreLogicalError.Load() && xerror.Logic(err) {
 		return zap.String("error", err.Error()) // 逻辑错误不作为error输出
 	}
 	return zap.Error(err)
 }
+
+var ignoreLogicalError atomic.Bool
 
 var E = ErrorField
 

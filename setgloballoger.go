@@ -10,11 +10,12 @@ import (
 // printAsError true 检测到field里有errorType，则把日志级别提升到error
 func SetGlobalGLogger(logger *StdLogger, channelKey string, printAsError bool, addCallerSkip int) {
 	if logger == nil {
-		logger = gStdLogger
+		logger = gStdLogger.Load()
 	}
+	config := logger.config()
 	if channelKey == "" {
-		channelKey = Setting.DefaultChannel
+		channelKey = config.DefaultChannel
 	}
 
-	newGlobalGLogger = NewGLogger(newStdLogger(logger.WithOptions(zap.AddCallerSkip(addCallerSkip)), nil), channelKey, printAsError)
+	globalGLogger.Store(NewGLogger(newStdLogger(logger.WithOptions(zap.AddCallerSkip(addCallerSkip)), config, logger.fetch), channelKey, printAsError))
 }

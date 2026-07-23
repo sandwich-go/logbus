@@ -18,29 +18,39 @@ func init() {
 // 读取 $sys_conf_path_env/ops_config.json 并 watch，json 中的 log_level 会覆盖 conf.LogLevel。
 // 即在 PMT 环境下，业务代码里 WithLogLevel(...) 传入的值会被 yaml 覆盖。本地开发环境
 // （未设置 sys_conf_path_env）不受影响，行为不变。
+//
+// Init 应在启动阶段调用，不支持与 Init 或 NewScopeLogger 并发执行。
+// LogLevel 和 EnableTraceLevel 是进程级运行时开关，不随单个 Logger 隔离。
 func Init(conf *Conf) {
+	config := snapshotConf(conf)
+
 	// 环境变量控制 EnableTraceLevel
 	if v := xos.EnvGetCaseInsensitive("logbus_enable_trace_level"); v != "" {
-		conf.EnableTraceLevel = v == "1" || v == "true"
+		config.EnableTraceLevel = v == "1" || v == "true"
 	}
-	initBasics(conf)
+	// 本地启动多个服务时可以方便地屏蔽 monitor。
+	if xos.EnvGetCaseInsensitive("logbus_disable_monitor") != "" {
+		config.MonitorOutput = Noop
+	}
+	ignoreLogicalError.Store(config.IgnoreLogicalError)
+	config.prepareWriter()
+	initBasics(config)
+	activeConfig.Store(config)
+	Setting = config.detached()
 
-	initGlobalStdLoggers()
+	initGlobalStdLoggers(config)
 
 	// set logger used in glog
-	SetGlobalGLogger(gStdLogger, conf.DefaultChannel, conf.PrintAsError, 0)
+	SetGlobalGLogger(gStdLogger.Load(), config.DefaultChannel, config.PrintAsError, 0)
 
 	// init monitor
-	// 本地启动多个服务时可以方便的屏蔽monitor
-	if xos.EnvGetCaseInsensitive("logbus_disable_monitor") != "" {
-		conf.MonitorOutput = Noop
-	}
-	setDefaultMetricsReporter(conf.MonitorOutput,
-		conf.DefaultPrometheusListenAddress,
-		conf.DefaultPrometheusPath,
-		conf.DefaultPercentiles,
-		conf.DefaultLabel,
-		conf.MonitorTimingMaxAge)
+	monitorConfig := cloneConf(&config.Conf)
+	setDefaultMetricsReporter(monitorConfig.MonitorOutput,
+		monitorConfig.DefaultPrometheusListenAddress,
+		monitorConfig.DefaultPrometheusPath,
+		monitorConfig.DefaultPercentiles,
+		monitorConfig.DefaultLabel,
+		monitorConfig.MonitorTimingMaxAge)
 
 	if refresh {
 		refresh = false

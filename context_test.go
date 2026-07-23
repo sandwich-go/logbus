@@ -134,7 +134,7 @@ func TestGLoggerInfo(t *testing.T) {
 
 	core, logs := observer.New(zapcore.DebugLevel)
 	logger := &GLogger{
-		stdLogger: newStdLogger(zap.New(core), nil),
+		stdLogger: newStdLogger(zap.New(core), currentConfig(), nil),
 	}
 
 	logger.Info(ContextWithTraceID(context.Background(), traceID), "info", String("k", "v"))
@@ -167,7 +167,7 @@ func TestGLoggerInfoWithChannel(t *testing.T) {
 
 	core, logs := observer.New(zapcore.DebugLevel)
 	logger := &GLogger{
-		stdLogger: newStdLogger(zap.New(core), nil),
+		stdLogger: newStdLogger(zap.New(core), currentConfig(), nil),
 	}
 
 	ctx := ContextWithTraceID(context.Background(), traceID)

@@ -12,7 +12,6 @@ var runtimeLogLevelMu sync.Mutex
 func SetLogLevel(level zapcore.Level) {
 	runtimeLogLevelMu.Lock()
 	defer runtimeLogLevelMu.Unlock()
-	Setting.LogLevel = level
 	runtimeLogLevel.SetLevel(level)
 }
 

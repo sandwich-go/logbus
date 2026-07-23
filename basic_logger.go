@@ -14,15 +14,18 @@ import (
 )
 
 var (
-	gBasicZLogger *zap.Logger        // 用来产生新stdLogger, 更多用在自定义tag的时候
-	Setting       = newDefaultConf() // logBus的全局配置
+	gBasicZLogger *zap.Logger // 用来产生新stdLogger, 更多用在自定义tag的时候
+
+	// Setting 保留用于源码兼容，仅表示最近一次 Init 的配置副本。
+	// 替换它的字段不会影响已经创建或之后创建的 Logger；函数闭包和 Writer 等依赖仍保持其对象身份。
+	//
+	// Deprecated: 使用 NewConf 和 Init 配置 logbus；运行时日志级别使用 SetLogLevel/GetLogLevel。
+	Setting = newDefaultConf()
 )
 
-func initBasics(c *Conf) {
+func initBasics(c *configSnapshot) {
 	initZapSetting()
 	resetLogBus()
-	// init logBus global setting
-	Setting = c
 	runtimeLogLevel.SetLevel(c.LogLevel)
 	runtimeEnableTrackLevel.Store(c.EnableTraceLevel)
 
@@ -44,28 +47,31 @@ func initBasics(c *Conf) {
 	if c.EncodeCaller != nil {
 		EncodeConfig.EncodeCaller = c.EncodeCaller
 	}
+	c.encoder = EncodeConfig
 
 	// init gBasicZLogger
 	var err error
-	ZapConf.Level = runtimeLogLevel
-	ZapConf.EncoderConfig = EncodeConfig
+	zapConf := ZapConf
+	zapConf.Level = runtimeLogLevel
+	zapConf.EncoderConfig = c.encoder
 	if c.Dev {
-		ZapConf.Development = true
+		zapConf.Development = true
 	}
 	var clock zapcore.Clock
 	clock = localClock{}
 	if c.UseSystemClock {
 		clock = zapcore.DefaultClock
 	}
-	gBasicZLogger, err = ZapConf.Build(
+	gBasicZLogger, err = zapConf.Build(
 		zap.AddCallerSkip(c.CallerSkip),
 		zap.AddStacktrace(c.StackLogLevel),
 		zap.WithClock(clock),
-		zap.WithCaller(ZapConf.EncoderConfig.CallerKey != ""),
+		zap.WithCaller(zapConf.EncoderConfig.CallerKey != ""),
 	)
 	if err != nil {
 		panic(err)
 	}
+	ZapConf = zapConf
 }
 
 func setDefaultMetricsReporter(

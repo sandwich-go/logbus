@@ -20,20 +20,21 @@ func toFields(msg string, uid uint64, fields []zap.Field) []zap.Field {
 // Msg 用于输出到不支持flattend类型的elasticserch(例如aws) https://upsource.diandian.info:3003/document/module/log/logbus_faq#tip8
 func (s *StdLogger) Msg(level zapcore.Level, msg string, uid uint64, fields ...zap.Field) {
 	fields = toFields(msg, uid, fields)
+	channel := s.config().DefaultChannel
 	switch level {
 	case zapcore.DebugLevel:
-		s.z.Debug(Setting.DefaultChannel, fields...)
+		s.z.Debug(channel, fields...)
 	case zapcore.InfoLevel:
-		s.z.Info(Setting.DefaultChannel, fields...)
+		s.z.Info(channel, fields...)
 	case zapcore.WarnLevel:
-		s.z.Warn(Setting.DefaultChannel, fields...)
+		s.z.Warn(channel, fields...)
 	case zapcore.ErrorLevel:
-		s.z.Error(Setting.DefaultChannel, fields...)
+		s.z.Error(channel, fields...)
 	case zapcore.DPanicLevel:
-		s.z.DPanic(Setting.DefaultChannel, fields...)
+		s.z.DPanic(channel, fields...)
 	case zapcore.PanicLevel:
-		s.z.Panic(Setting.DefaultChannel, fields...)
+		s.z.Panic(channel, fields...)
 	case zapcore.FatalLevel:
-		s.z.Fatal(Setting.DefaultChannel, fields...)
+		s.z.Fatal(channel, fields...)
 	}
 }

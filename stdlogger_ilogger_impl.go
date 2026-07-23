@@ -3,9 +3,6 @@ package logbus
 func (s *StdLogger) fields(fields []Field) []Field {
 	f := s.fetch
 	if f == nil {
-		f = Setting.FetchLogContext
-	}
-	if f == nil {
 		return fields
 	}
 	fRet := f()
