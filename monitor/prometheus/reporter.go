@@ -65,9 +65,9 @@ func New(
 	go func() {
 		mux := http.NewServeMux()
 		mux.Handle(defaultPrometheusPath, promhttp.HandlerFor(DefaultPrometheusRegistry, promhttp.HandlerOpts{ErrorHandling: promhttp.ContinueOnError}))
-		err := http.ListenAndServe(defaultPrometheusListenAddress, mux)
-		if err != nil && err != http.ErrServerClosed {
-			panic(err)
+		// 附属监控端点启动失败（如端口冲突）时记录并降级，绝不 panic 拖垮宿主进程。
+		if err := http.ListenAndServe(defaultPrometheusListenAddress, mux); err != nil && err != http.ErrServerClosed {
+			boost.LogErrorAndEatError(err)
 		}
 	}()
 
