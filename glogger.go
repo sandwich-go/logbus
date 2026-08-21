@@ -63,6 +63,11 @@ func (s *GLogger) syncDepthLogger() {
 }
 
 func (s *GLogger) Debug(msg string, fields ...Field) {
+	// 级别关闭且不会被 printAsError 改道时直接返回：下面的 append 会让调用方传入的
+	// 切片扩容重分配，且该代价在级别关闭时同样要付（zap 的级别判定在更下层）。
+	if !s.printAsError && !s.stdLogger.Enabled(zap.DebugLevel) {
+		return
+	}
 	fields = append(fields, String(MsgBody, msg))
 	if s.printAsError && s.printAsErr(fields...) {
 		s.stdLogger.ErrorWithChannel(s.channelKey, fields...)
@@ -72,11 +77,21 @@ func (s *GLogger) Debug(msg string, fields ...Field) {
 }
 
 func (s *GLogger) DebugWithContext(ctx context.Context, msg string, fields ...Field) {
+	// 级别关闭且不会被 printAsError 改道时直接返回：下面的 append 会让调用方传入的
+	// 切片扩容重分配，且该代价在级别关闭时同样要付（zap 的级别判定在更下层）。
+	if !s.printAsError && !s.stdLogger.Enabled(zap.DebugLevel) {
+		return
+	}
 	fields = append(fields, FromContext(ctx))
 	s.Debug(msg, fields...)
 }
 
 func (s *GLogger) Info(msg string, fields ...Field) {
+	// 级别关闭且不会被 printAsError 改道时直接返回：下面的 append 会让调用方传入的
+	// 切片扩容重分配，且该代价在级别关闭时同样要付（zap 的级别判定在更下层）。
+	if !s.printAsError && !s.stdLogger.Enabled(zap.InfoLevel) {
+		return
+	}
 	fields = append(fields, String(MsgBody, msg))
 	if s.printAsError && s.printAsErr(fields...) {
 		s.stdLogger.ErrorWithChannel(s.channelKey, fields...)
@@ -86,11 +101,21 @@ func (s *GLogger) Info(msg string, fields ...Field) {
 }
 
 func (s *GLogger) InfoWithContext(ctx context.Context, msg string, fields ...Field) {
+	// 级别关闭且不会被 printAsError 改道时直接返回：下面的 append 会让调用方传入的
+	// 切片扩容重分配，且该代价在级别关闭时同样要付（zap 的级别判定在更下层）。
+	if !s.printAsError && !s.stdLogger.Enabled(zap.InfoLevel) {
+		return
+	}
 	fields = append(fields, FromContext(ctx))
 	s.Info(msg, fields...)
 }
 
 func (s *GLogger) Warn(msg string, fields ...Field) {
+	// 级别关闭且不会被 printAsError 改道时直接返回：下面的 append 会让调用方传入的
+	// 切片扩容重分配，且该代价在级别关闭时同样要付（zap 的级别判定在更下层）。
+	if !s.printAsError && !s.stdLogger.Enabled(zap.WarnLevel) {
+		return
+	}
 	fields = append(fields, String(MsgBody, msg))
 	if s.printAsError && s.printAsErr(fields...) {
 		s.stdLogger.ErrorWithChannel(s.channelKey, fields...)
@@ -100,6 +125,11 @@ func (s *GLogger) Warn(msg string, fields ...Field) {
 }
 
 func (s *GLogger) WarnWithContext(ctx context.Context, msg string, fields ...Field) {
+	// 级别关闭且不会被 printAsError 改道时直接返回：下面的 append 会让调用方传入的
+	// 切片扩容重分配，且该代价在级别关闭时同样要付（zap 的级别判定在更下层）。
+	if !s.printAsError && !s.stdLogger.Enabled(zap.WarnLevel) {
+		return
+	}
 	fields = append(fields, FromContext(ctx))
 	s.Warn(msg, fields...)
 }
@@ -198,16 +228,28 @@ func (s *GLogger) GFatalDepth(depth int, msg string, fields ...Field) {
 
 // WithChannel
 func (s *GLogger) DebugWithChannel(c string, msg string, fields ...Field) {
+	// 级别关闭时直接返回，避免下面的 append 触发扩容重分配。
+	if !gStdLogger.Enabled(zap.DebugLevel) {
+		return
+	}
 	fields = append(fields, String(MsgBody, msg))
 	gStdLogger.DebugWithChannel(c, fields...)
 }
 
 func (s *GLogger) InfoWithChannel(c string, msg string, fields ...Field) {
+	// 级别关闭时直接返回，避免下面的 append 触发扩容重分配。
+	if !s.stdLogger.Enabled(zap.InfoLevel) {
+		return
+	}
 	fields = append(fields, String(MsgBody, msg))
 	s.stdLogger.InfoWithChannel(c, fields...)
 }
 
 func (s *GLogger) WarnWithChannel(c string, msg string, fields ...Field) {
+	// 级别关闭时直接返回，避免下面的 append 触发扩容重分配。
+	if !s.stdLogger.Enabled(zap.WarnLevel) {
+		return
+	}
 	fields = append(fields, String(MsgBody, msg))
 	s.stdLogger.WarnWithChannel(c, fields...)
 }
