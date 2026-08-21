@@ -184,6 +184,12 @@ func (s *GLogger) getDepthLogger(depth int) *StdLogger {
 }
 
 func (s *GLogger) GDebugDepth(depth int, msg string, fields ...Field) {
+	// 级别关闭且不会被 printAsError 改道时直接返回：下面的 append 会触发扩容重分配，
+	// getDepthLogger 未命中时还会 WithOptions 克隆一个 zap logger。
+	// depth logger 由 s.stdLogger 派生，core 相同，故按 s.stdLogger 判级别即可。
+	if !s.printAsError && !s.stdLogger.Enabled(zap.DebugLevel) {
+		return
+	}
 	fields = append(fields, String(MsgBody, msg))
 	lg := s.getDepthLogger(depth)
 	if s.printAsError && s.printAsErr(fields...) {
@@ -194,6 +200,12 @@ func (s *GLogger) GDebugDepth(depth int, msg string, fields ...Field) {
 }
 
 func (s *GLogger) GInfoDepth(depth int, msg string, fields ...Field) {
+	// 级别关闭且不会被 printAsError 改道时直接返回：下面的 append 会触发扩容重分配，
+	// getDepthLogger 未命中时还会 WithOptions 克隆一个 zap logger。
+	// depth logger 由 s.stdLogger 派生，core 相同，故按 s.stdLogger 判级别即可。
+	if !s.printAsError && !s.stdLogger.Enabled(zap.InfoLevel) {
+		return
+	}
 	fields = append(fields, String(MsgBody, msg))
 	lg := s.getDepthLogger(depth)
 	if s.printAsError && s.printAsErr(fields...) {
@@ -203,6 +215,12 @@ func (s *GLogger) GInfoDepth(depth int, msg string, fields ...Field) {
 	lg.InfoWithChannel(s.channelKey, fields...)
 }
 func (s *GLogger) GWarnDepth(depth int, msg string, fields ...Field) {
+	// 级别关闭且不会被 printAsError 改道时直接返回：下面的 append 会触发扩容重分配，
+	// getDepthLogger 未命中时还会 WithOptions 克隆一个 zap logger。
+	// depth logger 由 s.stdLogger 派生，core 相同，故按 s.stdLogger 判级别即可。
+	if !s.printAsError && !s.stdLogger.Enabled(zap.WarnLevel) {
+		return
+	}
 	fields = append(fields, String(MsgBody, msg))
 	lg := s.getDepthLogger(depth)
 	if s.printAsError && s.printAsErr(fields...) {
@@ -228,12 +246,15 @@ func (s *GLogger) GFatalDepth(depth int, msg string, fields ...Field) {
 
 // WithChannel
 func (s *GLogger) DebugWithChannel(c string, msg string, fields ...Field) {
-	// 级别关闭时直接返回，避免下面的 append 触发扩容重分配。
-	if !gStdLogger.Enabled(zap.DebugLevel) {
+	// 级别判定与写入都必须落在本实例的 stdLogger 上：SetGlobalGLogger 可以注入一个级别与
+	// 全局默认 logger 不同的自定义 StdLogger，用 gStdLogger 判定会在两个方向上都出错——
+	// 实例开启而全局关闭时丢掉本该输出的日志，实例关闭而全局开启时既绕过短路又写错目标。
+	// 同级的 InfoWithChannel / WarnWithChannel / ErrorWithChannel 用的都是 s.stdLogger。
+	if !s.stdLogger.Enabled(zap.DebugLevel) {
 		return
 	}
 	fields = append(fields, String(MsgBody, msg))
-	gStdLogger.DebugWithChannel(c, fields...)
+	s.stdLogger.DebugWithChannel(c, fields...)
 }
 
 func (s *GLogger) InfoWithChannel(c string, msg string, fields ...Field) {
