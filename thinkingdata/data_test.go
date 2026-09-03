@@ -20,6 +20,14 @@ func TestMarshalAsJsonV2_AllFieldsNonEmpty(t *testing.T) {
 	require.JSONEq(t, string(jsonV1), string(jsonV2))
 	require.Contains(t, string(jsonV2), `"#app_id":"appid789"`)
 	require.Contains(t, string(jsonV2), `"properties"`)
+
+	callbackCalls := 0
+	err = data.WithJSONV2(func(jsonV2Borrowed []byte) {
+		callbackCalls++
+		require.JSONEq(t, string(jsonV2), string(jsonV2Borrowed))
+	})
+	require.NoError(t, err)
+	require.Equal(t, 1, callbackCalls)
 }
 
 func BenchmarkMarshalAsJsonSmallData(b *testing.B) {

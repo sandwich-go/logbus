@@ -2,17 +2,18 @@ package logbus
 
 import (
 	"github.com/sandwich-go/logbus/bi"
-	"github.com/sandwich-go/logbus/utils"
 	"github.com/sandwich-go/logbus/thinkingdata"
+	"github.com/sandwich-go/logbus/utils"
 	"go.uber.org/zap"
 )
 
 func (s *StdLogger) PrintThingkingData(data thinkingdata.Data) {
-	bytes, err := data.MarshalAsJsonV2()
+	err := data.WithJSONV2(func(bytes []byte) {
+		s.TrackWithChannel(THINKINGDATA, zap.ByteString(MsgBody, bytes))
+	})
 	if err != nil {
 		s.ErrorWithChannel(Setting.DefaultChannel, zap.String("PrintThingkingData", err.Error()))
 	}
-	s.TrackWithChannel(THINKINGDATA, zap.ByteString(MsgBody, bytes))
 }
 
 func (s *StdLogger) PrintBIData(data bi.Data) {
