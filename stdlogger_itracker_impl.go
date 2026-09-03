@@ -8,11 +8,13 @@ import (
 )
 
 func (s *StdLogger) PrintThingkingData(data thinkingdata.Data) {
-	bytes, err := data.MarshalAsJsonV2()
+	err := data.WithJSONV2(func(bytes []byte) {
+		s.TrackWithChannel(THINKINGDATA, zap.ByteString(MsgBody, bytes))
+	})
 	if err != nil {
 		s.ErrorWithChannel(s.config().DefaultChannel, zap.String("PrintThingkingData", err.Error()))
+		s.TrackWithChannel(THINKINGDATA, zap.ByteString(MsgBody, nil))
 	}
-	s.TrackWithChannel(THINKINGDATA, zap.ByteString(MsgBody, bytes))
 }
 
 func (s *StdLogger) PrintBIData(data bi.Data) {

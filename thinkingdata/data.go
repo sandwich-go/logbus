@@ -88,9 +88,18 @@ func (d Data) MarshalAsJson() ([]byte, error) {
 }
 
 func (d Data) MarshalAsJsonV2() ([]byte, error) {
-	var fields [11]zap.Field
-	index := 0
+	fields, index := d.fieldsV2()
+	return utils.Zap2Json(fields[:index])
+}
 
+// WithJSONV2 calls consume with JSON that is valid only for the duration of
+// consume. It avoids copying the encoded bytes before a synchronous write.
+func (d Data) WithJSONV2(consume func([]byte)) error {
+	fields, index := d.fieldsV2()
+	return utils.WithZapJSON(fields[:index], consume)
+}
+
+func (d Data) fieldsV2() (fields [11]zap.Field, index int) {
 	if d.AccountId != "" {
 		fields[index] = zap.String(ACCOUNT, d.AccountId)
 		index++
@@ -129,7 +138,7 @@ func (d Data) MarshalAsJsonV2() ([]byte, error) {
 	}
 	fields[index] = zap.Object("properties", zapencoder.StringInterfaceMap(d.Properties))
 	index++
-	return utils.Zap2Json(fields[:index])
+	return fields, index
 }
 
 // var json = jsoniter.ConfigCompatibleWithStandardLibrary
