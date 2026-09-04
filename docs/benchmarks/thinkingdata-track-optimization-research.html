@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ThinkingData 通用 Track 优化调研</title>
+  <style>
+    :root { --ink:#1c2733; --muted:#627080; --line:#dce3ea; --paper:#fff; --canvas:#f4f7fa; --blue:#1668c9; --blue-soft:#eaf3ff; --green:#087443; --red:#a43a35; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:var(--canvas); color:var(--ink); font:15px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif; }
+    main { max-width:1120px; margin:0 auto; padding:38px 28px 64px; }
+    article { background:var(--paper); border:1px solid var(--line); border-radius:16px; overflow:hidden; box-shadow:0 10px 28px rgba(28,39,51,.06); }
+    header { padding:42px 46px 34px; color:white; background:linear-gradient(120deg,#123863,#1668c9); }
+    h1 { margin:0 0 8px; font-size:32px; line-height:1.25; letter-spacing:.01em; }
+    h2 { margin:0 0 15px; font-size:21px; line-height:1.35; }
+    h3 { margin:24px 0 8px; font-size:16px; }
+    p { margin:0 0 12px; }
+    .meta { margin:0; opacity:.88; }
+    .content { padding:36px 46px 48px; }
+    section { margin:0 0 36px; }
+    .lead { font-size:17px; max-width:880px; }
+    .notice { border-left:4px solid var(--blue); padding:13px 16px; border-radius:6px; background:var(--blue-soft); }
+    .notice strong { color:#0c4f9c; }
+    .cards { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; margin-top:18px; }
+    .card { border:1px solid var(--line); border-radius:10px; padding:14px; background:#fff; }
+    .card .label { display:block; color:var(--muted); font-size:13px; }
+    .card strong { display:block; margin-top:3px; font-size:22px; line-height:1.25; color:#123863; }
+    .card small { color:var(--muted); }
+    .flow { overflow:auto; margin-top:14px; padding:15px; border-radius:9px; background:#10263b; color:#e8f1fb; font:13px/1.65 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; white-space:pre; }
+    details { margin:12px 0; border:1px solid var(--line); border-radius:10px; background:#fff; overflow:hidden; }
+    summary { cursor:pointer; padding:13px 15px; font-weight:700; background:#f7f9fc; }
+    details[open] summary { border-bottom:1px solid var(--line); }
+    .issue { padding:15px; }
+    .issue h3 { margin:0 0 8px; color:#123863; }
+    .issue h4 { margin:16px 0 5px; font-size:14px; }
+    pre { overflow:auto; padding:12px; border-radius:7px; background:#10263b; color:#e8f1fb; font:12px/1.6 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; }
+    pre code { padding:0; background:transparent; color:inherit; }
+    table { width:100%; border-collapse:collapse; margin-top:12px; font-size:14px; }
+    th,td { padding:11px 10px; text-align:left; vertical-align:top; border-bottom:1px solid var(--line); }
+    th { color:#405063; background:#f6f8fb; font-weight:650; }
+    .priority { display:inline-block; min-width:31px; padding:1px 6px; border-radius:999px; text-align:center; font-size:12px; font-weight:700; }
+    .p0 { color:#fff; background:var(--red); } .p1 { color:#fff; background:#aa6b09; } .p2 { color:#fff; background:#48637d; } .p3,.p4,.p5 { color:#36516b; background:#e7edf4; }
+    .good { color:var(--green); font-weight:650; }
+    ul,ol { padding-left:22px; margin:9px 0; }
+    li { margin:5px 0; }
+    code { padding:1px 4px; border-radius:4px; background:#eef2f6; font:12px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; }
+    .source { color:var(--muted); font-size:13px; }
+    .footer { padding-top:20px; border-top:1px solid var(--line); color:var(--muted); font-size:13px; }
+    a { color:var(--blue); }
+    @media (max-width:760px) { main { padding:0; } article { border-radius:0; border-left:0; border-right:0; } header,.content { padding:28px 20px; } h1 { font-size:27px; } .cards { grid-template-columns:repeat(2,minmax(0,1fr)); } table { min-width:760px; } .table-wrap { overflow:auto; } }
+  </style>
+</head>
+<body>
+  <main>
+    <article>
+      <header>
+        <h1>ThinkingData 通用 Track 优化调研</h1>
+        <p class="meta">调研日期：2026-09-03 · 基线版本：89224ab · P0 修复：cc47e5b · P1：本次提交 · 适用路径：<code>Tracker(THINKINGDATA).Track(fields...)</code></p>
+      </header>
+
+      <div class="content">
+        <section>
+          <h2>结论</h2>
+          <p class="lead">当前成本来自字段转换、ThinkingData 内层 JSON、Logbus 外层 JSON 与未缓冲写出的串行链路。P0 已回收内层 JSON 的临时内存；P1 已让通用 Track 的标量字段跳过完整中间 map，复杂字段保留原路径。</p>
+          <div class="notice"><strong>P0 已完成：</strong><code>cc47e5b</code> 让 ThinkingData 在当前日志写完后立即归还内部临时内存。BI、BigQuery、Elasticsearch 等其他模块拿到的是独立副本，可继续保存和使用。</div>
+        </section>
+
+        <section>
+          <h2>基线摘要</h2>
+          <div class="cards">
+            <div class="card"><span class="label">常规属性</span><strong>6.11 µs</strong><small>3,816 B · 32 次分配</small></div>
+            <div class="card"><span class="label">属性较多</span><strong>85.96 µs</strong><small>53,942 B · 140 次分配</small></div>
+            <div class="card"><span class="label">长文本属性</span><strong>40.15 µs</strong><small>20,252 B · 40 次分配</small></div>
+            <div class="card"><span class="label">创建 Tracker</span><strong>63.67 ns</strong><small>104 B · 4 次分配</small></div>
+          </div>
+          <p style="margin-top:15px">“属性较多”相对常规属性，耗时和分配字节均约为 <strong>14.1 倍</strong>。8 路并发总吞吐仅提升约 1.4 倍（常规属性）和 2.5 倍（属性较多），单纯提高并发不是主方案。</p>
+          <p class="source">完整原始数据、5 次采样与复现命令：<a href="thinkingdata-generic-track-baseline.md">ThinkingData 通用 Track 基线</a>。</p>
+          <h3>P0 修复后对比</h3>
+          <p>在两个干净工作目录分别检出 <code>89224ab</code> 与 <code>cc47e5b</code>，以相同输入、Pipe 输出路径执行 <code>go test . -run '^$' -bench '^BenchmarkThinkingDataBaselineGenericTrack(Conventional|AttributeRich|LongText)$' -benchmem -benchtime=1s -count=5 -cpu=1</code>。环境为 Apple M4 Pro、Go 1.25.3。</p>
+          <div class="table-wrap"><table>
+            <thead><tr><th>输入</th><th>修复前中位数</th><th>修复后中位数</th><th>耗时变化</th><th>分配字节变化</th><th>分配次数变化</th></tr></thead>
+            <tbody>
+              <tr><td>常规属性</td><td>6.036 µs · 3,816 B · 32 次</td><td>5.840 µs · 2,760 B · 30 次</td><td class="good">-3.2%</td><td>-27.7%</td><td>-6.3%</td></tr>
+              <tr><td>属性较多</td><td>89.565 µs · 53,942 B · 140 次</td><td>82.087 µs · 7,824 B · 130 次</td><td class="good">-8.3%</td><td>-85.5%</td><td>-7.1%</td></tr>
+              <tr><td>长文本属性</td><td>41.381 µs · 20,252 B · 40 次</td><td>39.042 µs · 2,809 B · 33 次</td><td class="good">-5.7%</td><td>-86.1%</td><td>-17.5%</td></tr>
+            </tbody>
+          </table></div>
+          <p>常规属性的 5 次修复后结果均低于修复前；属性较多与长文本各有一次 Pipe 写出抖动，因此以中位数比较。三组中位耗时均下降，但结果仅代表本机 Pipe 路径，不代表 GM15 线上收益。</p>
+          <details>
+            <summary>展开查看 P0 的 5 次原始耗时（ns/op）</summary>
+            <div class="table-wrap"><table>
+              <thead><tr><th>输入</th><th>修复前 5 次</th><th>修复后 5 次</th></tr></thead>
+              <tbody>
+                <tr><td>常规属性</td><td>5,951 · 5,999 · 6,036 · 6,441 · 6,497</td><td>5,839 · 5,892 · 5,840 · 5,841 · 5,828</td></tr>
+                <tr><td>属性较多</td><td>89,379 · 89,565 · 89,257 · 89,755 · 89,586</td><td>82,007 · 82,279 · 81,323 · 91,142 · 82,087</td></tr>
+                <tr><td>长文本</td><td>41,058 · 42,511 · 41,090 · 41,381 · 41,526</td><td>39,042 · 39,051 · 39,039 · 42,703 · 38,920</td></tr>
+              </tbody>
+            </table></div>
+          </details>
+          <h3>P1 修复后对比（已完成）</h3>
+          <p>以 <code>cc47e5b</code> 为基线，同一台 Apple M4 Pro、Go 1.25.3、5 次运行中取中位数。耗时变化低于 1% 的项目不作为性能收益宣称。</p>
+          <div class="table-wrap"><table>
+            <thead><tr><th>输入</th><th>P0</th><th>P1</th><th>耗时</th><th>分配字节</th><th>分配次数</th></tr></thead>
+            <tbody>
+              <tr><td>常规属性，单线程</td><td>7,016 ns · 2,768 B · 30 次</td><td>6,702 ns · 2,383 B · 23 次</td><td>-4.5%</td><td>-13.9%</td><td>-23.3%</td></tr>
+              <tr><td>属性较多，单线程</td><td>84,369 ns · 7,898 B · 130 次</td><td>84,905 ns · 5,704 B · 119 次</td><td>+0.6%</td><td>-27.8%</td><td>-8.5%</td></tr>
+              <tr><td>长文本属性，单线程</td><td>40,229 ns · 2,823 B · 33 次</td><td>40,482 ns · 2,437 B · 26 次</td><td>+0.6%</td><td>-13.7%</td><td>-21.2%</td></tr>
+              <tr><td>常规属性，并发</td><td>4,795 ns · 2,773 B · 30 次</td><td>4,675 ns · 2,387 B · 23 次</td><td>-2.5%</td><td>-13.9%</td><td>-23.3%</td></tr>
+              <tr><td>属性较多，并发</td><td>19,721 ns · 8,198 B · 130 次</td><td>17,596 ns · 5,873 B · 119 次</td><td>-10.8%</td><td>-28.4%</td><td>-8.5%</td></tr>
+            </tbody>
+          </table></div>
+          <p>P1 的确定收益是减少通用适配层分配；属性较多、单线程耗时持平，内外两层 JSON 编码和写出仍是主要耗时。</p>
+          <p>串行耗时受外层编码和 Pipe 写出影响，未出现稳定下降；收益明确体现在短生命周期内存和 GC 压力。8 路并发下，常规属性从 4.31 µs 降至 4.09 µs，属性较多从 33.98 µs 降至 17.49 µs。</p>
+        </section>
+
+        <section>
+          <h2>成本链路</h2>
+          <div class="flow">业务 fields
+  ↓
+trackLogger.Track
+  ├─ ExtractFields
+  │  ├─ 标量 / Reflect：直接拆分协议字段和 Properties
+  │  └─ Object、Array、Namespace、Error、非法字段等：回退 MapObjectEncoder + ExtractEncoder
+  ├─ Data.WithJSONV2：ThinkingData 内层 JSON
+  └─ PrintThingkingData
+       └─ TrackWithChannel（同步外层 JSON）
+          └─ WithZapJSON 归还内层 buffer</div>
+          <p>分配采样中，Zap buffer 约占 27.4%，内层 JSON 约占 19.6%，<code>MapObjectEncoder.AddInt64</code> 约占 16.1%，<code>AddString</code> 约占 10.7%，<code>glsEncoder.EncodeEntry</code> 直接占 10.7%（外层临时切片 + 每条 <code>log_xid</code> 构造，累计约 <strong>38.7%</strong>）。<code>NewMapObjectEncoder</code> 自身仅约 1.8%，所以对象池不是优先项。</p>
+          <p><strong>为什么 AddInt64 / AddString 合计约 26.8%：</strong><code>MapObjectEncoder</code> 会把基础类型值存进 <code>map[string]interface{}</code>；编译器逃逸分析确认字符串和整数值会逃逸。属性较多的额外成本还包括 map 扩容、字段转换和两层 JSON 编码，不能把 4.4 倍分配次数完全归因为装箱。</p>
+          <p>默认未缓冲 Pipe 的 CPU 采样中，系统写入调用占 95.4%。这说明写出是独立热点；但本地 Pipe 不能替代 GM15 的 stdout、Fluent Bit 和 Logserver 实测。</p>
+        </section>
+
+        <section>
+          <h2>问题、代码与解决方案</h2>
+          <p>以下百分比来自“分配字节”采样，不是 CPU 时间比例。常规属性事件总分配为 3,816 B；例如 Zap buffer 的 27.4% 大约是 1 KiB 临时内存。</p>
+
+          <details open>
+            <summary><span class="priority p0">P0</span> 问题 1：内层 JSON 的 Zap buffer 未归还对象池（已完成）</summary>
+            <div class="issue">
+              <h3>修复前：生成 JSON 的临时内存没有归还</h3>
+              <p>Zap 的 <code>EncodeEntry</code> 返回来自对象池的 buffer。旧代码取出其中的字节切片后直接返回，但没有调用 <code>buffer.Free()</code>。</p>
+              <h4>修复前代码：utils/zap2json.go（89224ab）</h4>
+              <pre><code>func Zap2Json(data []zap.Field) (bytes []byte, err error) {
+    buffer, err := jsonEncoder.EncodeEntry(entry, data)
+    if err != nil {
+        return
+    }
+    bytes = buffer.Bytes()
+    bytes = bytes[:len(bytes)-len(zapcore.DefaultLineEnding)]
+    return
+}</code></pre>
+              <h4>修复前的 ThinkingData 调用方式</h4>
+              <pre><code>func (s *StdLogger) PrintThingkingData(data thinkingdata.Data) {
+    bytes, err := data.MarshalAsJsonV2()
+    if err != nil { /* 记录错误 */ }
+    s.TrackWithChannel(THINKINGDATA, zap.ByteString(MsgBody, bytes))
+}</code></pre>
+              <div class="flow">ThinkingData 字段
+  ↓  EncodeEntry
+Zap buffer
+  ↓  返回 buffer.Bytes() 切片
+MarshalAsJsonV2 / PrintThingkingData 消费字节
+  ↓
+没有 buffer.Free()，buffer 无法回到 Zap 对象池</div>
+              <p>旧函数末尾不能直接补 <code>buffer.Free()</code>：函数已经把这块临时内存交给调用方了。若立即归还，下一条日志可能覆盖其中内容，调用方会读到错误数据。</p>
+
+              <h3>修复后：当前日志写完就归还临时内存</h3>
+              <p><code>utils.WithZapJSON</code> 将刚生成的 JSON 交给 ThinkingData。当前日志的外层 JSON 写完后，立即归还这块临时内存；之后不会再继续使用它。</p>
+              <h4>修复后代码：utils/zap2json.go:27-40</h4>
+              <pre><code>func WithZapJSON(data []zap.Field, consume func(encoded []byte)) error {
+    buffer, err := jsonEncoder.EncodeEntry(entry, data)
+    if err != nil {
+        if buffer != nil { buffer.Free() }
+        return err
+    }
+    defer buffer.Free()
+    encoded := buffer.Bytes()
+    encoded = encoded[:len(encoded)-len(zapcore.DefaultLineEnding)]
+    consume(encoded)
+    return nil
+}</code></pre>
+              <h4>修复后的 ThinkingData 调用方式</h4>
+              <pre><code>func (s *StdLogger) PrintThingkingData(data thinkingdata.Data) {
+    err := data.WithJSONV2(func(bytes []byte) {
+        s.TrackWithChannel(THINKINGDATA, zap.ByteString(MsgBody, bytes))
+    })
+    if err != nil { /* 记录错误并写空 msg */ }
+}</code></pre>
+              <div class="flow">ThinkingData 字段
+  ↓  WithZapJSON
+Zap 临时内存
+  ↓  当前日志写入完成
+外层 JSON 已写出
+  ↓
+buffer.Free() 归还对象池</div>
+              <p>BI、BigQuery、Elasticsearch 等模块通过 <code>Zap2Json</code> 取得 JSON 时，会先拿到一份独立副本。函数返回后这些模块仍可继续保存和使用该内容；原来的临时内存可以立即回收。ThinkingData 的当前写日志过程不需要这次复制。</p>
+              <p>编码器会在 JSON 末尾添加换行。代码按照当前换行配置的实际长度去除它；日后调整换行配置时，需要重新运行对应测试确认结果。</p>
+              <h4>验证</h4>
+              <p>三组基准结果见上表。<code>TestZap2JsonReturnedBytesRemainValid</code> 验证其他模块拿到的 JSON 在后续 128 次编码后仍保持正确；<code>TestThinkingDataOutputSurvivesInnerBufferReuse</code> 连续写出 128 条事件并逐条校验 <code>sequence</code>。相关单测与 <code>-race</code> 已通过。</p>
+            </div>
+          </details>
+
+          <details open>
+            <summary><span class="priority p1">P1</span> 问题 2：通用 Track 为每条日志构造中间 map（已完成）</summary>
+            <div class="issue">
+              <h3>优化前：全部字段先进入中间 map</h3>
+              <p>旧路径不区分字段用途。账号、事件、类型等 6 个协议字段与业务属性一样，都会先写入 <code>MapObjectEncoder</code>。</p>
+              <h4>优化前代码：track_logger.go（P1 前）</h4>
+              <pre><code>memoryEncoder := zapcore.NewMapObjectEncoder()
+for _, field := range fields {
+    field.AddTo(memoryEncoder)
+}
+data, err := thinkingdata.ExtractEncoder(memoryEncoder)
+logger.PrintThingkingData(data)</code></pre>
+              <div class="flow">[]zap.Field
+  ↓  每个字段按 zap.Field.Type 写入 MapObjectEncoder
+map[字段名]值（包含协议字段和业务属性）
+  ↓  ExtractEncoder
+过滤非法字段 → 读取协议字段 → 删除协议字段
+  ↓
+剩余 map 作为 Data.Properties</div>
+              <p>因此协议字段会经历“写入 map，再从 map 删除”。基础类型也会在写入 <code>map[string]interface{}</code> 时产生适配和分配成本。</p>
+
+              <h3>优化后：协议字段直接拆分</h3>
+              <p><code>trackLogger.Track</code> 现在调用 <code>thinkingdata.ExtractFields(fields)</code>。标量、作为属性的 <code>Reflect</code> 和 <code>Skip</code> 字段先进入轻量路径。</p>
+              <h4>优化后代码：track_logger.go:46 · thinkingdata/extract.go:15、88</h4>
+              <pre><code>data, err := thinkingdata.ExtractFields(fields)
+logger.PrintThingkingData(data)</code></pre>
+              <div class="flow">[]zap.Field
+  ↓  ExtractFields
+协议字段（账号、类型、事件等）→ 局部变量
+业务属性                         → Data.Properties
+  ↓
+复用原有 TrackWithType / User 校验和 JSON 编码</div>
+              <p>这样避免先将协议字段放入 map 再删除；但最终的业务属性仍需保留在 <code>Properties</code>，以维持现有 ThinkingData 数据结构。</p>
+              <h4>兼容边界</h4>
+              <p><code>Object</code>、<code>Array</code>、<code>Inline</code>、<code>Namespace</code>、<code>Error</code>、<code>Stringer</code>、未知类型和非法字段自动回退原有 <code>MapObjectEncoder → ExtractEncoder</code> 路径，避免改变延迟 marshaler、附加错误字段和嵌套结构。重复 key、<code>#time</code>、<code>#ip</code>、<code>#uuid</code>、<code>#first_check_id</code> 与 <code>USER_ADD</code> 保持原有处理。</p>
+              <h4>验证与收益边界</h4>
+              <p>字段级对照覆盖标量、Reflect、复杂字段回退和错误场景；端到端 JSON 与 <code>-race</code> 通过。常规属性少 7 次分配，属性较多少 11 次。<code>Data.Properties</code> 仍是 <code>map[string]interface{}</code>，业务属性仍须装箱；高频固定事件可继续评估 <code>TrackWithTGAData</code>。</p>
+            </div>
+          </details>
+
+          <details>
+            <summary><span class="priority p2">P2</span> 问题 3：属性名可能被正则校验两次</summary>
+            <div class="issue">
+              <p>标量快速路径在 <code>thinkingdata/extract.go:97-99</code> 校验字段名；复杂字段的回退路径在 <code>thinkingdata/extract.go:28-32</code> 校验。两条路径保留下来的属性都会在 <code>thinkingdata/utils.go:74-79</code> 由 <code>formatProperties</code> 再校验一次。属性较多时，32 个属性会重复扫描。</p>
+              <p><strong>方案：</strong>保留第一次“静默过滤”的行为，仅为通用路径增加跳过第二次 key 正则校验的内部函数；时间格式化与 <code>USER_ADD</code> 数值校验不能跳过。Go 允许在遍历 map 时删除键；这里没有可依赖的遍历顺序或并发语义。回归用例须覆盖非法 key 与保留字段冲突、事件 ID、时间、UUID、复杂 Field 和重复 key。</p>
+            </div>
+          </details>
+
+          <details>
+            <summary><span class="priority p4">P4</span> 问题 4：内层 ThinkingData JSON 又被包成外层 JSON 字符串</summary>
+            <div class="issue">
+              <p><code>stdlogger_itracker_impl.go:10-13</code> 在 <code>WithJSONV2</code> 回调内把内层 JSON 以 <code>zap.ByteString("msg", bytes)</code> 写入外层 Logbus JSON。常规属性从 269 B 内层变为 595 B 外层；引号还会发生转义。</p>
+              <p><strong>方案：</strong>只有 Logserver、Fluent Bit、查询脚本和所有消费者确认 <code>msg</code> 可以从 JSON 字符串改为嵌套对象时，才能改变格式。它是协议变更，未确认前不实施。</p>
+            </div>
+          </details>
+
+          <details>
+            <summary><span class="priority p2">P2</span>/<span class="priority p3">P3</span> 问题 5：外层字段构造与未缓冲写出</summary>
+            <div class="issue">
+              <p><code>baisc_encoder.go:14-28</code> 每条日志都会生成 XID、创建临时字段切片并合并全局字段；其直接分配占比约 10.7%。这是所有日志的公共路径，必须先独立基准和兼容性验证。</p>
+              <p><code>export_setting.go:47-51</code> 定义了 256 KiB、30 秒刷出的 <code>BufferedWriteSyncer</code>，但默认未启用。GM15 可先以单实例开启 <code>WithBufferedStdout(true)</code>；它只减少写系统调用，不减少 JSON 编码或消息大小。必须验证检索延迟、Fluent Bit 丢弃、SIGTERM 与 <code>Close()</code> 刷出。</p>
+            </div>
+          </details>
+
+          <details>
+            <summary><span class="priority p5">P5</span> 低优先级：Tracker 缓存；不建议 MapObjectEncoder 对象池</summary>
+            <div class="issue">
+              <p>创建 Tracker 约 64 ns、104 B、4 次分配，只占常规 Track 耗时约 1%；可随业务改动缓存。不要单独池化 MapObjectEncoder：<code>ExtractEncoder</code> 会把它的 map 交给 <code>Data.Properties</code>，过早归还会造成数据串写，复制/清空又会抵消收益。</p>
+            </div>
+          </details>
+        </section>
+
+        <section>
+          <h2>优化优先级</h2>
+          <div class="table-wrap"><table>
+            <thead><tr><th>优先级</th><th>建议</th><th>收益依据</th><th>风险与决策</th></tr></thead>
+            <tbody>
+              <tr><td><span class="priority p0">P0</span></td><td><strong>归还内层 JSON 的 Zap buffer（已完成）</strong></td><td>三组事件分配字节降低 27.7%、85.5%、86.1%。<code>Zap2Json</code> 的 6 个生产调用点都会归还临时内存；ThinkingData 当前写日志时还少一次复制。</td><td><strong>已完成：</strong>ThinkingData 写完一条日志后立即归还内部临时内存。其他模块通过 <code>Zap2Json</code> 取得内容时，会拿到独立副本。BigQuery 处理带业务属性的日志时会生成两段 JSON，两次临时内存都会归还。去除 JSON 末尾换行时按当前换行配置的实际长度计算；日后调整配置需重新运行测试。</td></tr>
+              <tr><td><span class="priority p0">P0</span></td><td><strong>治理事件量和属性量</strong></td><td>属性较多单条成本约为常规属性 14 倍；少一条日志会同时减少编码、分配和写出。</td><td><strong>下一步：</strong>由 BI/运营确认字段白名单、采样规则与统计口径，先完成事件与属性盘点。</td></tr>
+              <tr><td><span class="priority p1">P1</span></td><td><strong>通用 Track 标量字段快速路径（已完成）</strong></td><td>常规属性少 7 次分配；属性较多少 11 次；并发属性较多吞吐提升约 12%。</td><td><strong>注意：</strong>复杂或非法 <code>zap.Field</code> 回退旧路径；<code>Properties</code> 仍是 <code>map[string]interface{}</code>，不能消除全部属性装箱。</td></tr>
+              <tr><td><span class="priority p1">P1</span></td><td><strong>高频事件使用类型化 ThinkingData 入口</strong></td><td>现有 <code>TrackWithTGAData</code> 可进一步跳过通用协议适配。</td><td><strong>注意：</strong>需处理非法键、UUID、时间、重复 key 和复杂 Field 的语义差异。先迁移 1～2 个字段固定的高频事件并做 JSON 对照。</td></tr>
+              <tr><td><span class="priority p2">P2</span></td><td><strong>通用路径去重字段名校验</strong></td><td><code>ExtractEncoder</code> 和 <code>formatProperties</code> 会对保留属性重复做正则校验。遍历 map 时删除非法字段是 Go 允许的写法。</td><td>不能改变“非法字段静默删除”、保留字段拆分和重复 key 最终值；不依赖遍历顺序或并发语义。回归用例须覆盖<strong>非法字段与保留字段（<code>#account_id</code>/<code>#event_id</code>/<code>#time</code>/<code>#uuid</code>/<code>USER_ADD</code>）冲突的组合场景</strong>，以及重复 key。</td></tr>
+              <tr><td><span class="priority p3">P3</span></td><td><strong>GM15 实测 BufferedStdout</strong></td><td>系统写入在本地采样中占主导，现有配置支持缓冲。</td><td><strong>注意：</strong>缓冲降低 syscall，不降低每条编码成本；须验证 p99 可见性、异常退出丢失和 SIGTERM flush。</td></tr>
+              <tr><td><span class="priority p4">P4</span></td><td><strong>评估去除双 JSON / 外层字段优化</strong></td><td>常规属性内层 269 B、外层 595 B；外层 <code>glsEncoder</code> 还生成 XID 和临时字段切片，累计约占分配 38.7%。</td><td><strong>注意：</strong>改变 <code>msg</code> 类型会影响 Logserver、Fluent Bit 和查询链路。日志追踪字段是平台约束，对象池需先证明 Encoder 不保留切片。下游协议未确认前不改。</td></tr>
+              <tr><td><span class="priority p5">P5</span></td><td><strong>缓存 Tracker</strong></td><td>可省 64 ns、104 B、4 次分配；耗时上仅约占常规路径 1%，但<strong>能减少约 12.5% 的分配次数</strong>（4/32）。</td><td>安全且简单；<code>trackLogger</code> 配置创建后只读，可随业务改动一并处理。</td></tr>
+            </tbody>
+          </table></div>
+        </section>
+
+        <section>
+          <h2>不建议优先做的事</h2>
+          <h3>MapObjectEncoder / map 对象池</h3>
+          <p><code>ExtractEncoder</code> 会将同一个 map 作为 <code>Data.Properties</code> 继续编码。过早回收到池中会带来字段串写或并发问题；复制 map 后再复用也可能抵消收益。</p>
+          <h3>只靠提高并发</h3>
+          <p>并发未线性提升，且不会减少每条日志的内存、编码和下游字节数。</p>
+          <h3>删除 TruncateWriteSyncer</h3>
+          <p>常规长度下仅有一次长度判断，不是热点；删除会失去超大日志保护。</p>
+        </section>
+
+        <section>
+          <h2>推荐验证顺序</h2>
+          <ol>
+            <li><strong>临时内存回收（已完成）：</strong>ThinkingData 写完当前日志后归还临时内存；其他模块通过 <code>Zap2Json</code> 拿到独立副本。后续若引入异步 CoreWrapper，再补充其生命周期验证。</li>
+            <li><strong>GM15 写出缓冲试验：</strong>单实例对照采集 CPU、GC、stdout 字节、Fluent Bit 丢弃、检索延迟与优雅退出尾部完整性。</li>
+            <li><strong>事件/属性治理与类型化迁移：</strong>统计每个事件的 QPS、属性数、消息字节、消费方；先处理无消费方字段，再迁移少量高频固定字段事件。</li>
+            <li><strong>通用路径细节优化：</strong>在非法键、保留字段、时间、UUID、USER_ADD、复杂 Field 和重复 key 都有回归用例后，再处理重复校验和外层临时字段。</li>
+          </ol>
+        </section>
+
+        <section>
+          <h2>验收标准与证据边界</h2>
+          <ul>
+            <li>同一输入、同一命令运行 5 次，以中位数比较 <code>ns/op</code>、<code>B/op</code>、<code>allocs/op</code>。</li>
+            <li>通过 <code>TestThinkingDataBaselineOutput</code> 与连续写出用例，外层 Logbus JSON、内层 ThinkingData JSON 和多条事件内容都必须有效。</li>
+            <li>压测环境确认没有新增日志丢弃，关键事件可检索，改善不以不可接受的日志延迟换取。</li>
+            <li>8 路常规属性和属性较多路径已通过 <code>-race</code>；race 模式数字不纳入性能基线。</li>
+          </ul>
+          <p class="source">本报告覆盖 logbus 进程内通用路径与本地 Pipe 写出；GM15 实际 QPS、属性分布、stdout 背压、Fluent Bit、Logserver 与下游消费规则仍需在压测环境验证。</p>
+        </section>
+
+        <div class="footer">Markdown 版本：<a href="thinkingdata-track-optimization-research.md">thinkingdata-track-optimization-research.md</a> · 代码证据：<code>track_logger.go</code>、<code>thinkingdata/extract.go</code>、<code>thinkingdata/data.go</code>、<code>utils/zap2json.go</code>、<code>stdlogger_itracker_impl.go</code>。</div>
+      </div>
+    </article>
+  </main>
+</body>
+</html>

@@ -44,11 +44,7 @@ func (t *trackLogger) Track(fields ...Field) error {
 	for _, tag := range t.cc.tags {
 		switch tag {
 		case THINKINGDATA:
-			memoryEncoder := zapcore.NewMapObjectEncoder()
-			for _, v := range fields {
-				v.AddTo(memoryEncoder)
-			}
-			data, err := thinkingdata.ExtractEncoder(memoryEncoder)
+			data, err := thinkingdata.ExtractFields(fields)
 			if err != nil {
 				return err
 			}
