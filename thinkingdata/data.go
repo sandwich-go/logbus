@@ -92,8 +92,8 @@ func (d Data) MarshalAsJsonV2() ([]byte, error) {
 	return utils.Zap2Json(fields[:index])
 }
 
-// WithJSONV2 calls consume with JSON that is valid only for the duration of
-// consume. It avoids copying the encoded bytes before a synchronous write.
+// WithJSONV2 在 consume 执行期间提供有效的 JSON 字节。
+// 它用于同步写入前避免一次复制；回调结束后底层 Zap buffer 会立刻归还，不能持有该字节切片。
 func (d Data) WithJSONV2(consume func([]byte)) error {
 	fields, index := d.fieldsV2()
 	return utils.WithZapJSON(fields[:index], consume)

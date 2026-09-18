@@ -17,13 +17,15 @@ var jsonEncoder = zapcore.NewJSONEncoder(zapcore.EncoderConfig{
 
 func Zap2Json(data []zap.Field) (bytes []byte, err error) {
 	err = WithZapJSON(data, func(encoded []byte) {
+		// encoded 引用 Zap 对象池中的 buffer，回调结束后会被 WithZapJSON 归还。
+		// Zap2Json 返回的字节需要在函数返回后仍可使用，因此这里必须复制。
 		bytes = append(bytes, encoded...)
 	})
 	return
 }
 
-// WithZapJSON calls consume with JSON backed by a Zap buffer. encoded is valid
-// only for the duration of consume.
+// WithZapJSON 使用 Zap 对象池中的 buffer 调用 consume。encoded 仅在回调执行期间有效；
+// consume 必须同步编码或复制，不能持有该切片，也不能交给异步消费者。
 func WithZapJSON(data []zap.Field, consume func(encoded []byte)) error {
 	buffer, err := jsonEncoder.EncodeEntry(entry, data)
 	if err != nil {

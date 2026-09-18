@@ -44,6 +44,8 @@ func (t *trackLogger) Track(fields ...Field) error {
 	for _, tag := range t.cc.tags {
 		switch tag {
 		case THINKINGDATA:
+			// 标量字段跳过 MapObjectEncoder；复杂字段会在 ExtractFields 中回退，
+			// 保持原有 ThinkingData 日志内容不变。
 			data, err := thinkingdata.ExtractFields(fields)
 			if err != nil {
 				return err

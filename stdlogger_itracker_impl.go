@@ -9,6 +9,8 @@ import (
 
 func (s *StdLogger) PrintThingkingData(data thinkingdata.Data) {
 	err := data.WithJSONV2(func(bytes []byte) {
+		// TrackWithChannel 返回前会完成 ByteString 编码；不能把这段借用的切片
+		// 交给 goroutine 或其他异步消费者。
 		s.TrackWithChannel(THINKINGDATA, zap.ByteString(MsgBody, bytes))
 	})
 	if err != nil {

@@ -9,15 +9,17 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-// ExtractFields converts ordinary scalar zap fields without allocating an
-// intermediate MapObjectEncoder. Fields that need zap's marshaling behavior
-// continue through ExtractEncoder so their existing semantics are preserved.
+// ExtractFields 只直接处理能等价还原的字段类型，以避免创建中间 MapObjectEncoder。
+// 对象、错误及未支持的字段必须走 ExtractEncoder，保持 Zap 原有序列化语义；
+// 输出兼容性优先于少一次分配。
 func ExtractFields(fields []zapcore.Field) (Data, error) {
 	data, err, ok := extractScalarFields(fields)
 	if ok {
 		return data, err
 	}
 
+	// 复杂字段保留原有 AddTo 路径，不在此处近似转换它们的值。
+	// 这是快速路径的兼容性边界。
 	memoryEncoder := zapcore.NewMapObjectEncoder()
 	for _, field := range fields {
 		field.AddTo(memoryEncoder)
@@ -192,6 +194,8 @@ func stringFieldValue(field zapcore.Field, allowNil bool) (string, bool) {
 	}
 }
 
+// fieldValue 只处理字段内部值稳定、且能直接放入 Properties 的 Zap 编码类型。
+// 返回 ok=false 会让整个事件在 ExtractFields 中回退至 Field.AddTo。
 func fieldValue(field zapcore.Field) (value interface{}, skip, ok bool) {
 	switch field.Type {
 	case zapcore.BinaryType:
