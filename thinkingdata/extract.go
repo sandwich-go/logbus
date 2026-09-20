@@ -26,6 +26,8 @@ func ExtractFields(fields []zapcore.Field) (Data, error) {
 }
 
 func ExtractEncoder(memoryEncoder *zapcore.MapObjectEncoder) (Data, error) {
+	// 保留原有语义：只静默删除非法顶层 key，不因此丢弃整条事件，也不递归过滤嵌套对象。
+	// 必须在 Field.AddTo 编码完成后过滤，才能覆盖 Inline 等复杂字段生成的 key。
 	for k := range memoryEncoder.Fields {
 		if !KeyPattern.MatchString(k) {
 			delete(memoryEncoder.Fields, k)
@@ -70,17 +72,18 @@ func ExtractEncoder(memoryEncoder *zapcore.MapObjectEncoder) (Data, error) {
 	delete(memoryEncoder.Fields, EVENT)
 	delete(memoryEncoder.Fields, EVENT_ID)
 	delete(memoryEncoder.Fields, APPID)
+	// 留下的属性名已通过检查；下面两条内部路径用 false 省去第二次 key 正则校验。
 	if hasEvent {
 		if !ok1 {
 			dataType = TRACK // 没传TYPE默认TRACK
 		}
-		return TrackWithType(dataType.(string), accountId.(string), distinctId.(string), eventName.(string), strEventID, appid.(string), memoryEncoder.Fields)
+		return trackWithType(dataType.(string), accountId.(string), distinctId.(string), eventName.(string), strEventID, appid.(string), memoryEncoder.Fields, false)
 	}
 	if ok1 {
 		if dataType.(string) == TRACK {
 			return emptyData, errors.New("the event name must be provided")
 		}
-		return User(accountId.(string), distinctId.(string), dataType.(string), appid.(string), memoryEncoder.Fields)
+		return user(accountId.(string), distinctId.(string), dataType.(string), appid.(string), memoryEncoder.Fields, false)
 	}
 	return emptyData, errors.New("no #type or #event_name")
 }
@@ -95,6 +98,7 @@ func extractScalarFields(fields []zapcore.Field) (Data, error, bool) {
 			continue
 		}
 		if !KeyPattern.MatchString(field.Key) {
+			// 回退到完整编码后再过滤，保持复杂字段、保留字段冲突和重复 key 的原有处理。
 			return emptyData, nil, false
 		}
 
@@ -158,18 +162,19 @@ func extractScalarFields(fields []zapcore.Field) (Data, error, bool) {
 		}
 	}
 
+	// 能走到这里的 properties 均已通过上面的 MatchString；只跳过后续重复的属性名检查。
 	if hasEventName {
 		if !hasDataType {
 			dataType = TRACK
 		}
-		data, err := TrackWithType(dataType, accountID, distinctID, eventName, eventID, appid, properties)
+		data, err := trackWithType(dataType, accountID, distinctID, eventName, eventID, appid, properties, false)
 		return data, err, true
 	}
 	if hasDataType {
 		if dataType == TRACK {
 			return emptyData, errors.New("the event name must be provided"), true
 		}
-		data, err := User(accountID, distinctID, dataType, appid, properties)
+		data, err := user(accountID, distinctID, dataType, appid, properties, false)
 		return data, err, true
 	}
 	return emptyData, errors.New("no #type or #event_name"), true
