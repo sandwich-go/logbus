@@ -1,4 +1,28 @@
-### v1.1.60 🌈 (2026-06-04 15:11:26)
+### v1.1.63 🌈 (2026-09-04 14:51:12)
+
+#### 🐛  Bug Fixed
+  * **thinkingdata**: release zap JSON buffers ([90a76be](https://github.com/sandwich-go/logbus/commit/90a76be2f7c3d4e9de953bdb137c9855e3393d64)) (<small>[ruisheng.wang](ruisheng.wang@ddhd.cn)@2026-09-03 19:22:17 &#43;0800 &#43;0800</small>)
+
+#### 🚀  New Feature
+  * **thinkingdata**: bypass intermediate map for scalar fields ([993615d](https://github.com/sandwich-go/logbus/commit/993615d9af7d004deb6ed9c3aae4c5ee14599752)) (<small>[ruisheng.wang](ruisheng.wang@ddhd.cn)@2026-09-04 14:51:12 &#43;0800 &#43;0800</small>)
+
+### v1.1.62 (2026-08-27 17:39:31)
+
+#### ⚡️  Performance Improves
+  * **loglevel**: GetLogLevel 去掉多余的互斥锁 ([29a57d3](https://github.com/sandwich-go/logbus/commit/29a57d340830858008c3e544ccb9abd67624e4af)) (<small>[huangqing.zhu](huangqing.zhu@centurygame.com)@2026-08-27 17:39:31 &#43;0800 &#43;0800</small>)
+
+### v1.1.61 (2026-08-21 15:16:17)
+
+#### 🐛  Bug Fixed
+  * **loglevel**: DebugWithChannel 统一用实例 stdLogger，并补 Depth 系短路 ([1b60a21](https://github.com/sandwich-go/logbus/commit/1b60a215acb136865037a6676a718de2dcaea7db)) (<small>[huangqing.zhu](huangqing.zhu@centurygame.com)@2026-08-21 15:16:17 &#43;0800 &#43;0800</small>)
+
+#### ⚡️  Performance Improves
+  * **loglevel**: 级别关闭时不再构造日志字段 ([e63aaeb](https://github.com/sandwich-go/logbus/commit/e63aaeb7a0afb95df827f497805f82f75bf2d629)) (<small>[huangqing.zhu](huangqing.zhu@centurygame.com)@2026-08-21 15:06:14 &#43;0800 &#43;0800</small>)
+
+#### 🤖  Tools
+  * **sem**: make changelog ([88a12c5](https://github.com/sandwich-go/logbus/commit/88a12c5e3349f47e02cb13ee7a2d2014d666637e)) (<small>[ruisheng.wang](ruisheng.wang@ddhd.cn)@2026-06-04 15:13:52 &#43;0800 &#43;0800</small>)
+
+### v1.1.60 (2026-06-04 15:11:26)
 
 #### 🚀  New Feature
   * 补全上下文日志方法 ([ee505ed](https://github.com/sandwich-go/logbus/commit/ee505edac0e1d243bd337f9e82f5f5efa66b7bab)) (<small>[ruisheng.wang](ruisheng.wang@ddhd.cn)@2026-06-04 15:11:26 &#43;0800 &#43;0800</small>)
