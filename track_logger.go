@@ -36,8 +36,9 @@ type trackLogger struct {
 }
 
 func (t *trackLogger) Track(fields ...Field) error {
-	if ce := gStdLogger.z.Check(TrackLevel, ""); ce == nil {
-		// 检查逻辑前置，不做无用功
+	// 前置只判断级别，避免创建后丢弃 CheckedEntry；实际输出时仍由 zap 执行 Check。
+	// 检查逻辑前置，不做无用功
+	if !gStdLogger.Enabled(TrackLevel) {
 		return nil
 	}
 	for _, tag := range t.cc.tags {
@@ -72,8 +73,8 @@ func (t *trackLogger) Track(fields ...Field) error {
 }
 
 func (t *trackLogger) TrackWithTGAData(d thinkingdata.Data) error {
-	if ce := gStdLogger.z.Check(TrackLevel, ""); ce == nil {
-		// 检查逻辑前置，不做无用功
+	// 序列化前只判断级别，避免创建后丢弃 CheckedEntry；实际输出时仍由 zap 执行 Check。
+	if !gStdLogger.Enabled(TrackLevel) {
 		return nil
 	}
 	gStdLogger.PrintThingkingData(d)
@@ -81,7 +82,8 @@ func (t *trackLogger) TrackWithTGAData(d thinkingdata.Data) error {
 }
 
 func (t *trackLogger) TrackWithBIData(d bi.Data) error {
-	if ce := gStdLogger.z.Check(TrackLevel, ""); ce == nil {
+	// 校验和序列化前只判断级别，避免创建后丢弃 CheckedEntry；实际输出时仍由 zap 执行 Check。
+	if !gStdLogger.Enabled(TrackLevel) {
 		return nil
 	}
 	if d.AppID == "" {
