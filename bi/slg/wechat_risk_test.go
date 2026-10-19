@@ -11,58 +11,66 @@ import (
 
 func TestTrackWechatRiskRank(t *testing.T) {
 	cases := []struct {
-		name              string
-		scene             int32
-		unionID           string
-		riskRank          int32
-		cumulativeCNYPaid string
-		opts              *WechatRiskRankOpts
-		wantFpID          string
-		wantProperties    map[string]interface{}
+		name           string
+		scene          int32
+		requestID      string
+		riskRank       int32
+		opts           *WechatRiskRankOpts
+		wantFpID       string
+		wantProperties map[string]interface{}
 	}{
 		{
-			name:  "注册场景保留零风险和零金额",
-			scene: 0, unionID: "request-register", riskRank: 0, cumulativeCNYPaid: "0",
+			name:  "不传可选参数时金额留空",
+			scene: 0, requestID: "request-no-opts", riskRank: 0,
 			wantProperties: map[string]interface{}{
 				"scene": "0", "is_test": "false", "errcode": "", "errmsg": "",
-				"union_id": "request-register", "risk_rank": "0", "cumulative_cnypayed": "0",
+				"request_id": "request-no-opts", "risk_rank": "0", "cumulative_usdpayed": "",
+			},
+		},
+		{
+			name:  "注册场景保留零风险和零金额",
+			scene: 0, requestID: "request-register", riskRank: 0,
+			opts: &WechatRiskRankOpts{CumulativeUSDPaid: "0"},
+			wantProperties: map[string]interface{}{
+				"scene": "0", "is_test": "false", "errcode": "0", "errmsg": "",
+				"request_id": "request-register", "risk_rank": "0", "cumulative_usdpayed": "0",
 			},
 		},
 		{
 			name:  "营销作弊场景透传测试标记和金额",
-			scene: 1, unionID: "request-marketing", riskRank: 4, cumulativeCNYPaid: "1234567890123456.78",
-			opts:     &WechatRiskRankOpts{FpID: "fp-123", IsTest: true, ErrCode: 0, ErrMsg: "ok"},
+			scene: 1, requestID: "request-marketing", riskRank: 4,
+			opts:     &WechatRiskRankOpts{FpID: "fp-123", IsTest: true, ErrCode: 0, ErrMsg: "ok", CumulativeUSDPaid: "1234567890123456.78"},
 			wantFpID: "fp-123",
 			wantProperties: map[string]interface{}{
 				"scene": "1", "is_test": "true", "errcode": "0", "errmsg": "ok",
-				"union_id": "request-marketing", "risk_rank": "4", "cumulative_cnypayed": "1234567890123456.78",
+				"request_id": "request-marketing", "risk_rank": "4", "cumulative_usdpayed": "1234567890123456.78",
 			},
 		},
 		{
 			name:  "用户内容场景默认正式调用",
-			scene: 2, unionID: "request-ugc", riskRank: 2, cumulativeCNYPaid: "10.50",
-			opts: &WechatRiskRankOpts{},
+			scene: 2, requestID: "request-ugc", riskRank: 2,
+			opts: &WechatRiskRankOpts{CumulativeUSDPaid: "10.50"},
 			wantProperties: map[string]interface{}{
 				"scene": "2", "is_test": "false", "errcode": "0", "errmsg": "",
-				"union_id": "request-ugc", "risk_rank": "2", "cumulative_cnypayed": "10.50",
+				"request_id": "request-ugc", "risk_rank": "2", "cumulative_usdpayed": "10.50",
 			},
 		},
 		{
 			name:  "查询失败透传负数错误码",
-			scene: 0, unionID: "request-failed",
+			scene: 0, requestID: "request-failed",
 			opts: &WechatRiskRankOpts{ErrCode: -1, ErrMsg: "系统繁忙"},
 			wantProperties: map[string]interface{}{
 				"scene": "0", "is_test": "false", "errcode": "-1", "errmsg": "系统繁忙",
-				"union_id": "request-failed", "risk_rank": "0", "cumulative_cnypayed": "",
+				"request_id": "request-failed", "risk_rank": "0", "cumulative_usdpayed": "",
 			},
 		},
 		{
 			name:  "完整保留六十四位整数错误码",
-			scene: 0, unionID: "request-large-error",
+			scene: 0, requestID: "request-large-error",
 			opts: &WechatRiskRankOpts{ErrCode: 9223372036854775807, ErrMsg: "大错误码"},
 			wantProperties: map[string]interface{}{
 				"scene": "0", "is_test": "false", "errcode": "9223372036854775807", "errmsg": "大错误码",
-				"union_id": "request-large-error", "risk_rank": "0", "cumulative_cnypayed": "",
+				"request_id": "request-large-error", "risk_rank": "0", "cumulative_usdpayed": "",
 			},
 		},
 	}
@@ -73,7 +81,7 @@ func TestTrackWechatRiskRank(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			ct := &captureTracker{}
 			MustInitialize(ct)
-			if err := TrackWechatRiskRank(123, tc.scene, tc.unionID, tc.riskRank, tc.cumulativeCNYPaid, tc.opts); err != nil {
+			if err := TrackWechatRiskRank(123, tc.scene, tc.requestID, tc.riskRank, tc.opts); err != nil {
 				t.Fatalf("上报微信风控点位失败：%v", err)
 			}
 			data := ct.getData()
@@ -115,7 +123,7 @@ func TestTrackWechatRiskRankReturnsTrackerError(t *testing.T) {
 	t.Cleanup(func() { tracker = previousTracker })
 	wantErr := errors.New("上报失败")
 	MustInitialize(&failingWechatRiskTracker{err: wantErr})
-	if err := TrackWechatRiskRank(123, 0, "request-error", 0, "0", nil); !errors.Is(err, wantErr) {
+	if err := TrackWechatRiskRank(123, 0, "request-error", 0, nil); !errors.Is(err, wantErr) {
 		t.Fatalf("上报错误未透传：实际 %v，预期 %v", err, wantErr)
 	}
 }
