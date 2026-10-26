@@ -369,8 +369,22 @@ func openTrackFile(baseDir, channel, podName, slot, date string) (*os.File, stri
 	podSeg := sanitizeTrackFileComponent(podName)
 	dir := filepath.Join(baseDir, chSeg, date)
 	name := filepath.Join(dir, fmt.Sprintf("%s_%s_%s.log", chSeg, podSeg, slot))
-	if err := os.MkdirAll(dir, 0o755); err != nil {
-		return nil, name, false, fmt.Errorf("trackFileWriter: mkdir %s: %w", dir, err)
+	// Pods with different UIDs share these directories. Chmod explicitly because
+	// MkdirAll applies umask and leaves existing directory permissions unchanged.
+	for _, sharedDir := range []string{baseDir, filepath.Join(baseDir, chSeg), dir} {
+		if err := os.MkdirAll(sharedDir, 0o777); err != nil {
+			return nil, name, false, fmt.Errorf("trackFileWriter: mkdir %s: %w", sharedDir, err)
+		}
+		info, err := os.Stat(sharedDir)
+		if err != nil {
+			return nil, name, false, fmt.Errorf("trackFileWriter: stat %s: %w", sharedDir, err)
+		}
+		// Skip chmod when already correct: another UID may own this directory.
+		if info.Mode().Perm() != 0o777 {
+			if err := os.Chmod(sharedDir, 0o777); err != nil {
+				return nil, name, false, fmt.Errorf("trackFileWriter: chmod %s: %w", sharedDir, err)
+			}
+		}
 	}
 	_, statErr := os.Stat(name)
 	created := os.IsNotExist(statErr)
