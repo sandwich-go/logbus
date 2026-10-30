@@ -25,10 +25,18 @@ func Init(conf *Conf) {
 	}
 	initBasics(conf)
 
+	// 必须先管理 track file writer 生命周期，再创建 logger 实例，
+	// 这样 newNLoggerInstance 才能引用到最新的稳定代理状态。
+	initTrackFileWriteSyncer()
+
 	initGlobalStdLoggers()
 
 	// set logger used in glog
 	SetGlobalGLogger(gStdLogger, conf.DefaultChannel, conf.PrintAsError, 0)
+	DebugWithChannel(SERVERLOG, "logbus track output configured",
+		String("track_output", Setting.TrackOutput.String()),
+		String("track_file_dir", Setting.TrackFileDir),
+	)
 
 	// init monitor
 	// 本地启动多个服务时可以方便的屏蔽monitor

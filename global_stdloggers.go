@@ -11,7 +11,34 @@ var (
 	gStdLogger     *StdLogger
 	gMonitorLogger *StdLogger
 	cacheGLogger   []GLoggerCache
+
+	// gTrackFileWriteSyncerProxy 是所有 logger file core 捕获的稳定代理。
+	// 由 initTrackFileWriteSyncer 根据 Conf 创建/重建目标 writer，避免旧 core 持有已关闭实例。
+	gTrackFileWriteSyncerProxy trackFileWriteSyncerProxy
 )
+
+// initTrackFileWriteSyncer 在每次 Init 时调用：
+//  1. 按当前 Conf 创建新 writer（如果启用了文件模式）
+//  2. 切换稳定代理目标，让旧 logger/core 后续写入也路由到最新 writer
+//  3. 关闭上一次创建的 writer（goroutine + file handle 释放）
+//
+// 必须在 initGlobalStdLoggers 之前调用，保证 newNLoggerInstance 能判断当前是否启用了文件 core。
+func initTrackFileWriteSyncer() {
+	var next *TrackFileWriteSyncer
+	if Setting.TrackOutput == TrackOutputFile || Setting.TrackOutput == TrackOutputBoth {
+		next = NewTrackFileWriteSyncerFromConfig(TrackFileWriteSyncerConfig{
+			BaseDir:          Setting.TrackFileDir,
+			ChannelAlias:     Setting.TrackChannelAlias,
+			Rotation:         Setting.TrackFileRotation,
+			KeepaliveEvery:   Setting.TrackKeepaliveInterval,
+			KeepaliveMessage: Setting.TrackKeepaliveMessage,
+		})
+	}
+	old := gTrackFileWriteSyncerProxy.setCurrent(next, Setting.TrackOutput)
+	if old != nil {
+		_ = old.Close()
+	}
+}
 
 type GLoggerCache struct {
 	tagName string
@@ -83,9 +110,6 @@ func newNLoggerInstance(tagName string, fields ...zap.Field) *StdLogger {
 		encoder = newConsoleEncoder(EncodeConfig)
 	}
 
-	// stdout 只能输出到stdout
-	//var writer zapcore.WriteSyncer
-	//writer = os.Stdout
 	var writer = Setting.WriteSyncer
 	if Setting.BufferedStdout {
 		BufferedWriteSyncer.WS = Setting.WriteSyncer
@@ -96,12 +120,23 @@ func newNLoggerInstance(tagName string, fields ...zap.Field) *StdLogger {
 		writer = NewTruncateWriteSyncer(writer, Setting.TruncateWriteSyncerOption)
 	}
 
-	stdCore := zapcore.NewCore(encoder, writer, newTrackLevelEnabler()).With(append([]zap.Field{zap.String(Tags, tagName)}, fields...))
+	withTagFields := func(core zapcore.Core) zapcore.Core {
+		return core.With(append([]zap.Field{zap.String(Tags, tagName)}, fields...))
+	}
+
+	// stdout core 的 TrackLevel 路由读取当前 TrackOutput，旧 logger 在 Init 切换模式后也能跟随新配置。
+	stdCore := withTagFields(zapcore.NewCore(encoder, writer, &trackStdoutLevelEnabler{wrapped: newTrackLevelEnabler()}))
 	stdCore = CoreWrapper(tagName, stdCore)
 	if xos.EnvGetCaseInsensitive("logbus_core_dup") != "" {
 		stdCore = NewDupCore(stdCore)
 	}
 	cores = append(cores, stdCore)
+
+	// 文件 core 始终挂稳定代理；无文件输出目标时由 trackOnlyLevelEnabler 禁用。
+	// 这样旧 logger 在 stdout↔file 热切换后不会缺失对应 core。
+	trackCore := withTagFields(newTrackFileCore(&gTrackFileWriteSyncerProxy, trackOnlyLevelEnabler{}))
+	trackCore = CoreWrapper(tagName, trackCore)
+	cores = append(cores, trackCore)
 
 	s := newStdLogger(gBasicZLogger.WithOptions(zap.WrapCore(func(c zapcore.Core) zapcore.Core {
 		return zapcore.NewTee(cores...)
