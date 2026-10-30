@@ -30,7 +30,7 @@ func TestOpenTrackFileDirectoryPermissions(t *testing.T) {
 		}
 		t.Run(name, func(t *testing.T) {
 			parent := t.TempDir()
-			base := filepath.Join(parent, "tracklogs")
+			base := filepath.Join(parent, "logs", "tracklogs")
 			channelDir := filepath.Join(base, "tga")
 			dateDir := filepath.Join(channelDir, "20261015")
 			if existing {
@@ -48,13 +48,17 @@ func TestOpenTrackFileDirectoryPermissions(t *testing.T) {
 						t.Fatal(err)
 					}
 				}
-				for _, dir := range []string{base, channelDir, filepath.Join(channelDir, date)} {
+				for _, dir := range []string{filepath.Dir(base), base, channelDir, filepath.Join(channelDir, date)} {
 					info, err := os.Stat(dir)
 					if err != nil {
 						t.Fatal(err)
 					}
-					if got := info.Mode().Perm(); got != 0o777 {
-						t.Errorf("%s permissions = %04o, want 0777", dir, got)
+					want := os.FileMode(0o777)
+					if existing && dir != filepath.Join(channelDir, "20261016") {
+						want = 0o700
+					}
+					if got := info.Mode().Perm(); got != want {
+						t.Errorf("%s permissions = %04o, want %04o", dir, got, want)
 					}
 				}
 			}

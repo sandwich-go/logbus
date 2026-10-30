@@ -96,6 +96,8 @@ type trackWorker struct {
 	file *os.File
 	slot string
 
+	nextDirDate string // Last successfully prepared next-day directory, worker-owned.
+
 	batch      []byte
 	batchCount int
 	lastErr    error
@@ -118,6 +120,20 @@ func newTrackWorker(channel, baseDir, hostName string, rotation TrackRotation, b
 }
 
 func (w *trackWorker) run() {
+	// Prepare tomorrow before midnight so Pods with different UIDs do not race
+	// through Mkdir (subject to umask) and Chmod while writing the first batch.
+	// Run at startup and then at 23:55 local time, leaving five minutes for retries.
+	// The timer is independent of traffic and keepalive, including idle channels.
+	// Retry each minute only on failure, without opening tomorrow's log file or
+	// dropping today's batch because preparation failed.
+	prepareNextDay := func() time.Duration {
+		err := w.prepareNextDayDir(time.Now())
+		w.recordErr(err)
+		return nextTrackDirPreparationDelay(time.Now(), err != nil)
+	}
+	dirTimer := time.NewTimer(prepareNextDay())
+	defer dirTimer.Stop()
+
 	// flushTimer 控制 batch 攒到一定时间未满就 flush；按需启动
 	flushTimer := time.NewTimer(defaultTrackBatchFlushInterval)
 	if !flushTimer.Stop() {
@@ -173,6 +189,9 @@ func (w *trackWorker) run() {
 
 	for {
 		select {
+		case <-dirTimer.C:
+			dirTimer.Reset(prepareNextDay())
+
 		case msg, ok := <-w.queue:
 			if !ok {
 				// queue 已关闭，退出
@@ -230,6 +249,34 @@ func (w *trackWorker) run() {
 			}
 		}
 	}
+}
+
+func nextTrackDirPreparationDelay(now time.Time, retry bool) time.Duration {
+	if retry {
+		return time.Minute
+	}
+	next := time.Date(now.Year(), now.Month(), now.Day(), 23, 55, 0, 0, now.Location())
+	if !next.After(now) {
+		next = next.AddDate(0, 0, 1)
+	}
+	return next.Sub(now)
+}
+
+func (w *trackWorker) prepareNextDayDir(now time.Time) error {
+	// Calendar arithmetic preserves the next local date across DST transitions;
+	// adding 24 hours could select today or the day after tomorrow instead.
+	date := dateFromSlot(now.AddDate(0, 0, 1))
+	if date == w.nextDirDate {
+		return nil
+	}
+	dir := filepath.Join(w.baseDir, sanitizeTrackFileComponent(w.channel), date)
+	if err := mkdirTrackDirs(dir); err != nil {
+		// Leave the cache unchanged so the next tick retries. Existing directory
+		// permissions remain untouched; this does not repair a failed creator's chmod.
+		return fmt.Errorf("trackFileWriter: prepare next-day directory %s: %w", dir, err)
+	}
+	w.nextDirDate = date
+	return nil
 }
 
 func (w *trackWorker) recordErr(err error) {
@@ -369,22 +416,8 @@ func openTrackFile(baseDir, channel, podName, slot, date string) (*os.File, stri
 	podSeg := sanitizeTrackFileComponent(podName)
 	dir := filepath.Join(baseDir, chSeg, date)
 	name := filepath.Join(dir, fmt.Sprintf("%s_%s_%s.log", chSeg, podSeg, slot))
-	// Pods with different UIDs share these directories. Chmod explicitly because
-	// MkdirAll applies umask and leaves existing directory permissions unchanged.
-	for _, sharedDir := range []string{baseDir, filepath.Join(baseDir, chSeg), dir} {
-		if err := os.MkdirAll(sharedDir, 0o777); err != nil {
-			return nil, name, false, fmt.Errorf("trackFileWriter: mkdir %s: %w", sharedDir, err)
-		}
-		info, err := os.Stat(sharedDir)
-		if err != nil {
-			return nil, name, false, fmt.Errorf("trackFileWriter: stat %s: %w", sharedDir, err)
-		}
-		// Skip chmod when already correct: another UID may own this directory.
-		if info.Mode().Perm() != 0o777 {
-			if err := os.Chmod(sharedDir, 0o777); err != nil {
-				return nil, name, false, fmt.Errorf("trackFileWriter: chmod %s: %w", sharedDir, err)
-			}
-		}
+	if err := mkdirTrackDirs(dir); err != nil {
+		return nil, name, false, fmt.Errorf("trackFileWriter: mkdir %s: %w", dir, err)
 	}
 	_, statErr := os.Stat(name)
 	created := os.IsNotExist(statErr)
@@ -393,6 +426,34 @@ func openTrackFile(baseDir, channel, podName, slot, date string) (*os.File, stri
 		return nil, name, false, fmt.Errorf("trackFileWriter: open %s: %w", name, err)
 	}
 	return f, name, created, nil
+}
+
+// mkdirTrackDirs sets 0777 only on directories created by this call, overriding
+// umask without changing permissions on existing directories owned by other Pods.
+func mkdirTrackDirs(dir string) error {
+	info, err := os.Stat(dir)
+	if err == nil {
+		if info.IsDir() {
+			return nil
+		}
+		return fmt.Errorf("%s is not a directory", dir)
+	}
+	if !os.IsNotExist(err) {
+		return err
+	}
+	if err := mkdirTrackDirs(filepath.Dir(dir)); err != nil {
+		return err
+	}
+	if err := os.Mkdir(dir, 0o777); err != nil {
+		// Another Pod may have created the directory concurrently.
+		if os.IsExist(err) {
+			if info, statErr := os.Stat(dir); statErr == nil && info.IsDir() {
+				return nil
+			}
+		}
+		return err
+	}
+	return os.Chmod(dir, 0o777)
 }
 
 func sanitizeTrackFileComponent(s string) string {
